@@ -37,7 +37,7 @@ if utils_path not in sys.path:
 
 # Настройка страницы
 st.set_page_config(
-    page_title="ИУ Аудиты - Аналитика",
+    page_title="ИУ Аудиты - Аналитика Продуктив",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -989,6 +989,7 @@ with tab2:
         
         with tab2:
             st.info("Другие отчеты в разработке")
+
 
 
 
