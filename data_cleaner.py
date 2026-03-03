@@ -1,13 +1,12 @@
 # utils/data_cleaner.py
-# draft 4.0 - simplified
+# draft 4.1 - simplified
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
-import re
 import streamlit as st
 import io
 
-# Встроенный справочник {АСС: ЗОД} - точно как раньше создавался из Excel
+# Встроенный справочник {АСС: ЗОД}
 ZOD_MAPPING = {
     'Аблязимова Екатерина': 'Авсейкова Елена',
     'Герасимова Светлана': 'Герасименко Лика',
@@ -706,7 +705,7 @@ class DataCleaner:
                 result.append({
                     'Название проекта': project_name,
                     'Волна': wave,
-                    'Код проекта': code if not code_empty else '',  # ← ДОБАВЛЕНО
+                    'Код проекта': code if not code_empty else '',
                     'Код проекта пусто': code_empty,
                     'Проект неполевой, есть в гугл': project_non_field_in_google,
                     'Проект есть в гугл, нет в массиве': project_in_google_not_in_field
@@ -742,7 +741,7 @@ class DataCleaner:
                         result.append({
                             'Название проекта': field_project,
                             'Волна': field_wave,
-                            'Код проекта': field_code,  # ← ДОБАВЛЕНО
+                            'Код проекта': field_code,
                             'Код проекта пусто': False,
                             'Проект неполевой, есть в гугл': False,
                             'Проект есть в гугл, нет в массиве': False,
@@ -935,6 +934,136 @@ class DataCleaner:
         
         return result
     
+    def clean_easymerch(self, df, google_df):
+        """
+        Очистка файла Easymerch и приведение к структуре полевых проектов
+        """
+        if df is None or df.empty:
+            return pd.DataFrame()
+        
+        df_clean = df.copy()
+        
+        # Маппинг колонок Easymerch → стандартные названия
+        column_mapping = {
+            'Код анкеты': ['код проекта'],
+            'Имя клиента': ['Имя клиента'],
+            'Название проекта': ['Название волны'],
+            'АСС': ['АСМ'],
+            'ЭМ': ['ЭМ'],
+            'Регион short': ['Регион'],
+            'Статус': ['Статус'],
+            'Дата визита': ['Дата визита']
+        }
+        
+        result = pd.DataFrame()
+        
+        for std_col, possible_names in column_mapping.items():
+            source_col = self._find_column(df_clean, possible_names)
+            if source_col:
+                result[std_col] = df_clean[source_col].astype(str).fillna('')
+            else:
+                result[std_col] = ''
+        
+        # Обработка региона (берем первые 2 символа)
+        if 'Регион short' in result.columns:
+            result['Регион short'] = result['Регион short'].str[:2]
+        
+        # Все записи Easymerch - полевые
+        result['Полевой'] = 1
+        
+        # Добавление ПО из гугл таблицы по коду проекта
+        result['ПО'] = 'не определено'  # значение по умолчанию
+        
+        if google_df is not None and 'Код анкеты' in result.columns:
+            # Находим колонки в гугл таблице
+            google_code_col = self._find_column(google_df, ['Код проекта RU00.000.00.01SVZ24', 'Код проекта'])
+            google_portal_col = self._find_column(google_df, ['Портал на котором идет проект (для работы полевой команды)', 'ПО'])
+            
+            if google_code_col and google_portal_col:
+                # Создаем словарь {код проекта: ПО}
+                portal_mapping = {}
+                for _, row in google_df.iterrows():
+                    code = str(row.get(google_code_col, '')).strip()
+                    portal = str(row.get(google_portal_col, '')).strip()
+                    if code and code.lower() not in ['nan', 'none', 'null', '']:
+                        portal_mapping[code] = portal
+                
+                # Применяем маппинг
+                def get_portal(code_value):
+                    if pd.isna(code_value) or str(code_value).strip() == '':
+                        return 'Easymerch'
+                    clean_code = str(code_value).strip()
+                    return portal_mapping.get(clean_code, 'Easymerch')
+                
+                result['ПО'] = result['Код анкеты'].apply(get_portal)
+        
+        # Добавление полного региона (из справочника)
+        region_mapping = {
+            'AD': 'Республика Адыгея', 'AL': 'Алтайский край', 'AM': 'Амурская область',
+            'AR': 'Архангельская область', 'AS': 'Астраханская область', 'BK': 'Республика Башкортостан',
+            'BL': 'Белгородская область', 'BR': 'Брянская область', 'BU': 'Республика Бурятия',
+            'CL': 'Челябинская область', 'CN': 'Чеченская Республика', 'CV': 'Чувашская Республика',
+            'DA': 'Республика Дагестан', 'IN': 'Республика Ингушетия', 'IR': 'Иркутская область',
+            'IV': 'Ивановская область', 'KA': 'Камчатский край', 'KB': 'Кабардино-Балкарская Республика',
+            'KC': 'Карачаево-Черкесская Республика', 'KD': 'Краснодарский край', 'KE': 'Кемеровская область',
+            'KG': 'Калужская область', 'KH': 'Хабаровский край', 'KI': 'Республика Карелия',
+            'KK': 'Республика Хакасия', 'KL': 'Республика Калмыкия', 'KM': 'Ханты-Мансийский автономный округ',
+            'KN': 'Калининградская область', 'KO': 'Республика Коми', 'KS': 'Курская область',
+            'KT': 'Костромская область', 'KU': 'Курганская область', 'KV': 'Кировская область',
+            'KY': 'Красноярский край', 'LN': 'Ленинградская область', 'LP': 'Липецкая область',
+            'ME': 'Республика Марий Эл', 'MG': 'Магаданская область', 'MM': 'Мурманская область',
+            'MR': 'Республика Мордовия', 'MS': 'Московская область', 'NG': 'Новгородская область',
+            'NN': 'Ненецкий автономный округ', 'NO': 'Республика Северная Осетия',
+            'NS': 'Новосибирская область', 'NZ': 'Нижегородская область', 'OB': 'Оренбургская область',
+            'OL': 'Орловская область', 'OM': 'Омская область', 'PE': 'Пермский край',
+            'PR': 'Приморский край', 'PS': 'Псковская область', 'PZ': 'Пензенская область',
+            'RK': 'Республика Крым', 'RO': 'Ростовская область', 'RZ': 'Рязанская область',
+            'SA': 'Самарская область', 'SK': 'Республика Саха (Якутия)', 'SL': 'Сахалинская область',
+            'SM': 'Смоленская область', 'SR': 'Саратовская область', 'ST': 'Ставропольский край',
+            'SV': 'Свердловская область', 'TB': 'Тамбовская область', 'TL': 'Тульская область',
+            'TO': 'Томская область', 'TT': 'Республика Татарстан', 'TU': 'Республика Тыва',
+            'TV': 'Тверская область', 'TY': 'Тюменская область', 'UD': 'Удмуртская Республика',
+            'UL': 'Ульяновская область', 'VG': 'Волгоградская область', 'VL': 'Владимирская область',
+            'VO': 'Вологодская область', 'VR': 'Воронежская область', 'YN': 'Ямало-Ненецкий автономный округ',
+            'YS': 'Ярославская область', 'YV': 'Еврейская автономная область', 'ZK': 'Забайкальский край'
+        }
+        
+        if 'Регион short' in result.columns:
+            def get_full_region(short):
+                if pd.isna(short) or str(short).strip() == '':
+                    return 'не определен'
+                short_clean = str(short).strip().upper()
+                return region_mapping.get(short_clean, 'не определен')
+            
+            result['Регион'] = result['Регион short'].apply(get_full_region)
+        else:
+            result['Регион'] = 'не определен'
+        
+        
+        # Добавление ЗОД из встроенного справочника (по АСС) с учетом новых сотрудников
+        if 'АСС' in result.columns:
+            # Расширяем словарь для поиска (можно вынести в начало файла)
+            extended_zod_mapping = ZOD_MAPPING.copy()
+            extended_zod_mapping.update({
+                'Воронин Евгений': 'Устинов Игорь',
+                'Яцевич Максим': 'Устинов Игорь'
+            })
+            
+            def get_zod(acc_value):
+                if pd.isna(acc_value) or str(acc_value).strip() == '':
+                    return ''
+                clean_acc = str(acc_value).strip()
+                return extended_zod_mapping.get(clean_acc, '')
+            
+            result['ЗОД'] = result['АСС'].apply(get_zod)
+        else:
+            result['ЗОД'] = ''
+        
+        # Добавляем источник
+        result['Источник'] = 'Easymerch'
+        
+        return result
+            
     def _is_field_project(self, code):
         """Логика определения полевого проекта"""
         try:
@@ -993,4 +1122,5 @@ class DataCleaner:
 
 # Глобальный экземпляр
 data_cleaner = DataCleaner()
+
 
