@@ -1,5 +1,5 @@
 # utils/visit_calculator.py
-# draft 3.0 
+# draft 4.1 - simplified
 import pandas as pd
 import numpy as np
 import streamlit as st
@@ -71,11 +71,11 @@ class VisitCalculator:
                 'DSM': visits_df['ЗОД'].fillna('Не указано'),
                 'ASM': visits_df['АСС'].fillna('Не указано'),
                 'RS': visits_df['ЭМ'].fillna('Не указано'),
-                'ПО': visits_df['ПО'].fillna('не определено'),           # ✅ Берем ПО из массива
-                'Полевой': visits_df['Полевой']                          # Для фильтрации
+                'ПО': visits_df['ПО'].fillna('не определено'),
+                'Полевой': visits_df['Полевой']
             })
             
-            # 🔴 ТОЛЬКО ПОЛЕВЫЕ ПРОЕКТЫ
+            # ТОЛЬКО ПОЛЕВЫЕ ПРОЕКТЫ
             hierarchy = hierarchy[hierarchy['Полевой'] == 1]
             hierarchy = hierarchy.drop('Полевой', axis=1)
             
@@ -86,17 +86,16 @@ class VisitCalculator:
             hierarchy['Дата старта'] = pd.NaT
             hierarchy['Дата финиша'] = pd.NaT
             
-            # 3. Обогащаем ТОЛЬКО датами из google_df
+            # Обогащаем датами из google_df
             if google_df is not None and not google_df.empty:
                 try:
-                    # Маппинги ТОЛЬКО для дат
+                    # Маппинги для дат
                     start_mapping = {}
                     finish_mapping = {}
                     
                     for idx, row in google_df.iterrows():
                         code = str(row.get('Код проекта RU00.000.00.01SVZ24', '')).strip()
                         if code and code not in ['nan', '']:
-                            # Даты
                             start_date = row.get('Дата старта')
                             finish_date = row.get('Дата финиша с продлением')
                             
@@ -105,14 +104,13 @@ class VisitCalculator:
                             if pd.notna(finish_date):
                                 finish_mapping[code] = finish_date
                     
-                    # Применяем маппинги ТОЛЬКО для дат
                     hierarchy['Дата старта'] = hierarchy['Проект'].map(start_mapping)
                     hierarchy['Дата финиша'] = hierarchy['Проект'].map(finish_mapping)
                     
                 except Exception as e:
-                    st.warning(f"⚠️ Не удалось обогатить датами из гугл таблицы: {str(e)[:100]}")
+                    pass
             
-            # 4. Рассчитываем длительность
+            # Рассчитываем длительность
             hierarchy['Длительность'] = 0
             mask_valid_dates = hierarchy['Дата старта'].notna() & hierarchy['Дата финиша'].notna()
             
@@ -122,25 +120,21 @@ class VisitCalculator:
                     hierarchy.loc[mask_valid_dates, 'Дата старта']
                 ).dt.days + 1
             
-            # 5. Сортируем
+            # Сортируем
             hierarchy = hierarchy.sort_values(['Проект', 'Клиент', 'Волна', 'Регион', 'DSM', 'ASM', 'RS'])
             hierarchy = hierarchy[hierarchy['RS'] != 'Итого']
             
             return hierarchy
             
         except KeyError as e:
-            missing_col = str(e).replace("'", "")
-            st.error(f"❌ В массиве отсутствует колонка: '{missing_col}'")
             return pd.DataFrame()
             
         except Exception as e:
-            st.error(f"❌ Ошибка создания иерархии: {str(e)[:200]}")
             return pd.DataFrame()
     
-    def calculate_hierarchical_plan_on_date(self, hierarchy_df, visits_df, calc_params):
+    def calculate_hierarchical_plan_on_date(self, hierarchy_df, visits_df, calc_params, google_df=None):
         """
         РАССЧИТЫВАЕТ ПЛАН ТОЛЬКО ДЛЯ УРОВНЯ RS
-        Ключевое исправление: распределение ДНЕВНОГО плана по долям RS
         """
         try:
             if hierarchy_df.empty or visits_df.empty:
@@ -150,7 +144,28 @@ class VisitCalculator:
             end_period = calc_params['end_date']
             coefficients = calc_params['coefficients']
             
-            # Планы проектов+волн+регионов
+            # 🔴 КВОТЫ МУЛТОН - ПРЯМО ИЗ ГУГЛ-ТАБЛИЦЫ
+            multon_quotas = {}
+            if google_df is not None and not google_df.empty:
+                # Фильтруем проекты Мултон по точному названию колонки
+                project_col = 'Проекты в  https://ru.checker-soft.com'
+                code_col = 'Код проекта RU00.000.00.01SVZ24'
+                kvota_col = 'Квота'
+                
+                if all(col in google_df.columns for col in [project_col, code_col, kvota_col]):
+                    multon_mask = google_df[project_col].astype(str).str.strip() == 'Мултон'
+                    multon_projects = google_df[multon_mask]
+                    
+                    for _, row in multon_projects.iterrows():
+                        code = str(row.get(code_col, '')).strip()
+                        kvota = row.get(kvota_col, 0)
+                        if code and code not in ['', 'nan', 'None', 'null']:
+                            try:
+                                multon_quotas[code] = float(kvota)
+                            except:
+                                multon_quotas[code] = 0
+            
+            # Планы проектов+волн+регионов (для обычных проектов)
             project_wave_region_plans = visits_df.groupby([
                 'Код анкеты', 
                 'Название проекта',
@@ -163,12 +178,31 @@ class VisitCalculator:
                 region = row['Регион']
                 project_code = row['Проект']
                 wave_name = row['Волна']
+                po = row['ПО']
+                client = row['Клиент']
+                rs_name = row['RS']
                 
-                # План проекта+волны+регион
-                plan_key = (project_code, wave_name, region)
-                if plan_key not in project_wave_region_plans.index:
-                    continue
-                total_plan = project_wave_region_plans.loc[plan_key]
+                # ОПРЕДЕЛЯЕМ total_plan
+                if po == 'ПО клиента' and client == 'Мултон':
+                    total_plan = multon_quotas.get(project_code, 0)
+                    if total_plan <= 0:
+                        continue
+                    # равномерное распределение по регионам
+                    project_regions = hierarchy_df[
+                        (hierarchy_df['Проект'] == project_code) & 
+                        (hierarchy_df['Клиент'] == 'Мултон')
+                    ]['Регион'].unique()
+                    
+                    num_regions = len(project_regions)
+                    if num_regions > 0:
+                        total_plan = total_plan / num_regions  # делим квоту на число регионов
+                    # 👆 КОНЕЦ НОВОГО КОДА
+    
+                else:
+                    plan_key = (project_code, wave_name, region)
+                    if plan_key not in project_wave_region_plans.index:
+                        continue
+                    total_plan = project_wave_region_plans.loc[plan_key]
                 
                 # Проверка дат
                 start_date = row['Дата старта']
@@ -178,7 +212,6 @@ class VisitCalculator:
                 if pd.isna(start_date) or pd.isna(finish_date) or duration <= 0:
                     continue
                 
-                # Проверка пересечения с периодом
                 if end_period < start_date.date() or start_period > finish_date.date():
                     continue
                 
@@ -189,29 +222,26 @@ class VisitCalculator:
                     check_date = current_date + timedelta(days=day)
                     if start_period <= check_date.date() <= end_period:
                         days_in_period += 1
-            
-    
+                
                 if days_in_period == 0:
                     continue
                 
-                # ДНЕВНОЙ ПЛАН ВОЛНЫ (равномерное распределение)
-                daily_plan_wave = total_plan / duration
-                
-                # ДОЛИ RS
-                rs_weights = self._calculate_rs_weights(visits_df, project_code, wave_name, region)
-                rs_name = row['RS']
-        
-                if rs_name not in rs_weights or rs_weights[rs_name] <= 0:
-                    continue
-                
-                
-                rs_weight = rs_weights[rs_name]
-                
-                # ✅ ПРАВИЛЬНО: дневной план RS = дневной план волны × доля RS
-                rs_daily_plan = daily_plan_wave * rs_weight
-                
-                # ✅ ПРАВИЛЬНО: план RS на дату = дневной план × дни в периоде
-                rs_plan_on_date = rs_daily_plan * days_in_period
+                # РАСЧЕТ ПЛАНА НА ДАТУ
+                if po == 'ПО клиента' and client == 'Мултон':
+                    # Мултон: план = вся квота сразу
+                    rs_plan_on_date = total_plan
+                    rs_daily_plan = total_plan  # для отчета
+                else:
+                    # Обычный проект: равномерное распределение с весами RS
+                    daily_plan_wave = total_plan / duration
+                    rs_weights = self._calculate_rs_weights(visits_df, project_code, wave_name, region)
+                    
+                    if rs_name not in rs_weights or rs_weights[rs_name] <= 0:
+                        continue
+                    
+                    rs_weight = rs_weights[rs_name]
+                    rs_daily_plan = daily_plan_wave * rs_weight
+                    rs_plan_on_date = rs_daily_plan * days_in_period
                 
                 # Запись результата
                 results.append({
@@ -222,7 +252,7 @@ class VisitCalculator:
                     'DSM': row['DSM'],
                     'ASM': row['ASM'],
                     'RS': rs_name,
-                    'ПО': row.get('ПО', 'не определено'),
+                    'ПО': po,
                     'Уровень': 'RS',
                     'План проекта, шт.': total_plan,
                     'План на дату, шт.': round(rs_plan_on_date, 1),
@@ -232,17 +262,14 @@ class VisitCalculator:
                     'Дней в периоде': days_in_period,
                     'Дневной план RS, шт.': round(rs_daily_plan, 2)
                 })
-
-                            
+                                
             if not results:
                 return pd.DataFrame()
             return pd.DataFrame(results)
             
         except Exception as e:
-            print(f"❌ Ошибка: {e}")
-            import traceback
-            print(traceback.format_exc())
             return pd.DataFrame()
+        
         
     def calculate_hierarchical_fact_on_date(self, plan_df, visits_df, calc_params):
         try:
@@ -292,7 +319,7 @@ class VisitCalculator:
                 visits_df['Дата визита'] = visits_df['Дата визита'].dt.normalize()
             
             # ФИЛЬТРЫ
-            completed_mask = visits_df[status_col] == 'Выполнено'
+            completed_mask = visits_df[status_col].isin(['Выполнено', 'выполнен'])
             start_date = pd.Timestamp(calc_params['start_date'])
             end_date = pd.Timestamp(calc_params['end_date'])
             period_mask = (
@@ -332,13 +359,8 @@ class VisitCalculator:
                 key = (project, wave, region, rs)
                 result_df.at[idx, 'Факт проекта, шт.'] = rs_facts_total.get(key, 0)
                 result_df.at[idx, 'Факт на дату, шт.'] = rs_facts_period.get(key, 0)
-            
-            # ПРОВЕРКА что колонка создалась
-            if 'Факт на дату, шт.' not in result_df.columns:
-                st.error("❌ Колонка 'Факт на дату, шт.' НЕ СОЗДАЛАСЬ!")
-                result_df['Факт на дату, шт.'] = 0
     
-            return result_df  # ← КЛЮЧЕВОЕ: возвращаем df с колонками!
+            return result_df
             
         except Exception as e:
             st.error(f"❌ Ошибка: {e}")
@@ -433,6 +455,14 @@ class VisitCalculator:
 
 # Глобальный экземпляр
 visit_calculator = VisitCalculator()
+
+
+
+
+
+
+
+
 
 
 
