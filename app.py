@@ -1,5 +1,5 @@
 # app.py
-# draft 4.0 - simplified
+# draft 4.1 - simplified
 import streamlit as st
 import pandas as pd
 import sys
@@ -129,20 +129,43 @@ def process_all_data():
             field_df = data_cleaner.add_zod_from_hierarchy(field_df)
             st.session_state.cleaned_data['полевые_проекты'] = field_df
         
+        
+        # Обработка Easymerch (если есть)
+        easymerch_processed = None
+        easymerch_raw = st.session_state.uploaded_files.get('easymerch')
+        if easymerch_raw is not None:
+            easymerch_processed = data_cleaner.clean_easymerch(
+                easymerch_raw, 
+                google_with_field
+            )
+            if easymerch_processed is not None and not easymerch_processed.empty:
+                st.session_state.cleaned_data['easymerch_processed'] = easymerch_processed
+        
         # Обработка CXWAY (если есть)
+        cxway_processed = None
         if cxway_raw is not None:
-            # Иерархия больше не нужна, передаем None
             cxway_processed = data_cleaner.clean_cxway(cxway_raw, None, google_with_field)
-            
-            if cxway_processed is not None and not cxway_processed.empty:
-                if field_df is not None and not field_df.empty:
-                    combined_field_projects = data_cleaner.merge_field_projects(
-                        field_df, 
-                        cxway_processed
-                    )
-                    st.session_state.cleaned_data['полевые_проекты'] = combined_field_projects
-                else:
-                    st.session_state.cleaned_data['полевые_проекты'] = cxway_processed
+        
+        # ФИНАЛЬНОЕ ОБЪЕДИНЕНИЕ всех источников
+        sources_for_merge = []
+        
+        if field_df is not None and not field_df.empty:
+            sources_for_merge.append(field_df)
+        
+        if cxway_processed is not None and not cxway_processed.empty:
+            sources_for_merge.append(cxway_processed)
+        
+        if easymerch_processed is not None and not easymerch_processed.empty:
+            sources_for_merge.append(easymerch_processed)
+        
+        if sources_for_merge:
+            all_field_projects = pd.concat(sources_for_merge, ignore_index=True)
+            st.session_state.cleaned_data['полевые_проекты'] = all_field_projects
+        else:
+            st.session_state.cleaned_data['полевые_проекты'] = pd.DataFrame()
+
+        
+                    
         
         # Создание иерархии
         base_data = visit_calculator.extract_hierarchical_data(
@@ -159,7 +182,7 @@ def process_all_data():
             source_df = st.session_state.cleaned_data['полевые_проекты']
             
             plan_result = visit_calculator.calculate_hierarchical_plan_on_date(
-                base_data, source_df, params
+                base_data, source_df, params, st.session_state.cleaned_data['сервизория']
             )
             
             if plan_result is not None and not plan_result.empty:
@@ -285,7 +308,7 @@ with tab1:
                 st.success("✅ Проекты загружены")
                 display_file_preview(projects_df, "Просмотр проектов")
     
-    # Отдельная строка для CXWAY (как было в старом коде)
+    # Отдельная строка для CXWAY 
     st.markdown("---")
     st.subheader("3. 📡 CXWAY (дополнительно)")
     cxway_file = st.file_uploader(
@@ -299,6 +322,21 @@ with tab1:
             st.session_state.uploaded_files['cxway'] = cxway_df
             st.success("✅ CXWAY загружен")
             display_file_preview(cxway_df, "Просмотр данных CXWAY")
+            
+    # Отдельная строка для Easymerch 
+    st.markdown("---")
+    st.subheader("4. 📱 Easymerch (дополнительно)")
+    easymerch_file = st.file_uploader(
+        "Загрузите файл Easymerch.xlsx",
+        type=['xlsx', 'xls'],
+        key="easymerch"
+    )
+    if easymerch_file:
+        easymerch_df = validate_file_upload(easymerch_file, "Easymerch.xlsx")
+        if easymerch_df is not None:
+            st.session_state.uploaded_files['easymerch'] = easymerch_df
+            st.success("✅ Easymerch загружен")
+            display_file_preview(easymerch_df, "Просмотр данных Easymerch")
     
     st.markdown("---")
     
@@ -381,3 +419,7 @@ with tab2:
         with tab_dsm:
             data = st.session_state.visit_report['calculated_data']
             dataviz.create_dsm_tab(data, None)
+
+
+
+
