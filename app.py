@@ -141,6 +141,21 @@ def process_all_data():
             if easymerch_processed is not None and not easymerch_processed.empty:
                 st.session_state.cleaned_data['easymerch_processed'] = easymerch_processed
         
+        # Обработка Optima (если есть)
+        optima_processed = None
+        optima_raw = st.session_state.uploaded_files.get('optima')
+        if optima_raw is not None:
+            try:
+                optima_processed = data_cleaner.clean_optima(
+                    optima_raw, 
+                    google_with_field
+                )
+                if optima_processed is not None and not optima_processed.empty:
+                    st.session_state.cleaned_data['optima_processed'] = optima_processed
+            except Exception as e:
+                st.warning(f"⚠️ Ошибка при обработке Optima: {e}")
+        
+        
         # Обработка CXWAY (если есть)
         cxway_processed = None
         if cxway_raw is not None:
@@ -157,6 +172,9 @@ def process_all_data():
         
         if easymerch_processed is not None and not easymerch_processed.empty:
             sources_for_merge.append(easymerch_processed)
+            
+        if optima_processed is not None and not optima_processed.empty:
+            sources_for_merge.append(optima_processed)
         
         if sources_for_merge:
             all_field_projects = pd.concat(sources_for_merge, ignore_index=True)
@@ -278,7 +296,7 @@ with tab1:
     st.markdown("Загрузите необходимые Excel файлы")
     
     # Загрузка файлов
-    col1, col2 = st.columns(2)
+    col1, col2,col3,col4,col5  = st.columns(5)
     
     with col1:
         st.subheader("1. 📋 Портал (Массив.xlsx)")
@@ -308,35 +326,48 @@ with tab1:
                 st.success("✅ Проекты загружены")
                 display_file_preview(projects_df, "Просмотр проектов")
     
-    # Отдельная строка для CXWAY 
-    st.markdown("---")
-    st.subheader("3. 📡 CXWAY (дополнительно)")
-    cxway_file = st.file_uploader(
-        "Загрузите файл CXWAY.xlsx",
-        type=['xlsx', 'xls'],
-        key="cxway"
-    )
-    if cxway_file:
-        cxway_df = validate_file_upload(cxway_file, "CXWAY.xlsx")
-        if cxway_df is not None:
-            st.session_state.uploaded_files['cxway'] = cxway_df
-            st.success("✅ CXWAY загружен")
-            display_file_preview(cxway_df, "Просмотр данных CXWAY")
+    with col3:
+        st.subheader("3. 📡 CXWAY (дополнительно)")
+        cxway_file = st.file_uploader(
+            "Загрузите файл CXWAY.xlsx",
+            type=['xlsx', 'xls'],
+            key="cxway"
+        )
+        if cxway_file:
+            cxway_df = validate_file_upload(cxway_file, "CXWAY.xlsx")
+            if cxway_df is not None:
+                st.session_state.uploaded_files['cxway'] = cxway_df
+                st.success("✅ CXWAY загружен")
+                display_file_preview(cxway_df, "Просмотр данных CXWAY")
             
-    # Отдельная строка для Easymerch 
-    st.markdown("---")
-    st.subheader("4. 📱 Easymerch (дополнительно)")
-    easymerch_file = st.file_uploader(
-        "Загрузите файл Easymerch.xlsx",
-        type=['xlsx', 'xls'],
-        key="easymerch"
-    )
-    if easymerch_file:
-        easymerch_df = validate_file_upload(easymerch_file, "Easymerch.xlsx")
-        if easymerch_df is not None:
-            st.session_state.uploaded_files['easymerch'] = easymerch_df
-            st.success("✅ Easymerch загружен")
-            display_file_preview(easymerch_df, "Просмотр данных Easymerch")
+    with col4:
+        st.subheader("4. 📱 Easymerch (дополнительно)")
+        easymerch_file = st.file_uploader(
+            "Загрузите файл Easymerch.xlsx",
+            type=['xlsx', 'xls'],
+            key="easymerch"
+        )
+        if easymerch_file:
+            easymerch_df = validate_file_upload(easymerch_file, "Easymerch.xlsx")
+            if easymerch_df is not None:
+                st.session_state.uploaded_files['easymerch'] = easymerch_df
+                st.success("✅ Easymerch загружен")
+                display_file_preview(easymerch_df, "Просмотр данных Easymerch")
+
+    with col5:
+        st.subheader("5. 📱 Optima (дополнительно)")
+        optima_file = st.file_uploader(
+            "Загрузите файл Optima.xlsx",
+            type=['xlsx', 'xls'],
+            key="optima"
+        )
+        if optima_file:
+            optima_df = validate_file_upload(optima_file, "Optima.xlsx")
+            if optima_df is not None:
+                st.session_state.uploaded_files['optima'] = optima_df
+                st.success("✅ Optima загружен")
+                display_file_preview(optima_df, "Просмотр данных Optima")
+        
     
     st.markdown("---")
     
@@ -419,6 +450,9 @@ with tab2:
         with tab_dsm:
             data = st.session_state.visit_report['calculated_data']
             dataviz.create_dsm_tab(data, None)
+
+
+
 
 
 
