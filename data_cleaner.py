@@ -139,6 +139,24 @@ class DataCleaner:
         
         df_clean = df.copy()
         
+        # Удалить строки где Статус == "Удалено"
+        status_col = self._find_column(df_clean, ['Статус', ' Статус', 'Статус '])
+        if status_col:
+            df_clean = df_clean[df_clean[status_col].astype(str).str.strip() != 'Удалено']
+        
+        # Удалить строки где Дата визита < первый день месяца
+        date_col = self._find_column(df_clean, ['Дата визита', 'Date of Visit'])
+        if date_col:
+            if 'plan_calc_params' in st.session_state:
+                first_day = pd.Timestamp(st.session_state['plan_calc_params']['start_date'])
+            else:
+                today = datetime.now()
+                first_day = pd.Timestamp(year=today.year, month=today.month, day=1)
+            
+            df_clean[date_col] = pd.to_datetime(df_clean[date_col], errors='coerce')
+            df_clean = df_clean[pd.isna(df_clean[date_col]) | (df_clean[date_col] >= first_day)]
+        
+        
         # === Удалить нули в датах ===
         DATE_COLUMNS = [
             'Дата визита',
@@ -198,7 +216,7 @@ class DataCleaner:
             array_clean = array_df.copy()
             
             # Находим колонку АСС в массиве
-            array_acc_col = self._find_column(array_clean, ['АСС', 'acc', 'ACC'])
+            array_acc_col = self._find_column(array_clean, ['АСС', 'ACC', 'АСМ'])
             
             if not array_acc_col:
                 return array_df
@@ -376,7 +394,7 @@ class DataCleaner:
                     code_str = str(code).strip()
                     lower_code = code_str.lower()
                     
-                    if any(word in lower_code for word in ['мультикод', 'пилот', 'семпл']):
+                    if any(word in lower_code for word in ['мультикод','мультикол', 'пилот', 'семпл']):
                         return 1
                     
                     parts = code_str.split('.')
@@ -503,9 +521,9 @@ class DataCleaner:
             column_mapping = {
                 'Код анкеты': ['Код анкеты'],
                 'Имя клиента': ['Имя клиента'],
-                'Название проекта': ['Название проекта'],
+                'Название проекта': ['Название проекта',' Название проекта'],
                 'ЗОД': ['ЗОД', 'ZOD', 'Зод', 'zod'],
-                'АСС': ['АСС', 'ASS', 'Асс', 'ass'],
+                'АСС': ['АСС', 'ACC'],
                 'ЭМ': ['ЭМ рег'],
                 'Регион short': ['Регион'],
                 'Регион': ['Регион '],
@@ -822,7 +840,7 @@ class DataCleaner:
             'Код анкеты': ['Project Code', 'Код', 'Code'],
             'Имя клиента': ['Client', 'Имя клиента', 'Клиент имя'],
             'Название проекта': ['Wave Name'],
-            'АСС': ['ACC', 'АСС'],
+            'АСС': ['АСС', 'ACC'],
             'ЭМ': ['ЭМ рег', 'Эксперт', 'Эксперт менеджер'],
             'Регион short': ['Region short'],
             'Статус': ['Status'],
@@ -879,9 +897,6 @@ class DataCleaner:
         # Определение "Полевой"
         if 'Код анкеты' in result.columns and not result.empty:
             result['Полевой'] = result['Код анкеты'].apply(self._is_field_project)
-            result = result[result['Полевой'] == 1]
-        else:
-            result['Полевой'] = 1
         
         # Добавление ЗОД из встроенного справочника (по АСС)
         if 'АСС' in result.columns:
@@ -919,6 +934,18 @@ class DataCleaner:
                 result['ПО'] = 'не определено'
         else:
             result['ПО'] = 'не определено'
+        
+        # Удаляем проекты, которые в Google отмечены как Чеккер
+        if google_df is not None and not google_df.empty:
+            google_code_col = self._find_column(google_df, ['Код проекта RU00.000.00.01SVZ24', 'Код проекта'])
+            google_portal_col = self._find_column(google_df, ['Портал на котором идет проект (для работы полевой команды)', 'ПО'])
+            
+            if google_code_col and google_portal_col:
+                checker_mask = google_df[google_portal_col].astype(str).str.strip().str.upper() == 'ЧЕККЕР'
+                checker_codes = google_df.loc[checker_mask, google_code_col].astype(str).str.strip().tolist()
+                
+                if checker_codes:
+                    result = result[~result['Код анкеты'].astype(str).str.strip().isin(checker_codes)]
         
         # Добавление полного региона
         region_mapping = {
@@ -1249,6 +1276,231 @@ class DataCleaner:
         
         return result
     
+    def clean_prodata(self, df, google_df):
+        """
+        Очистка файла ПроДата (Мониторинги) и приведение к структуре полевых проектов
+        """
+        if df is None or df.empty:
+            return pd.DataFrame()
+        
+        df_clean = df.copy()
+        
+        # Маппинг колонок ПроДата → стандартные названия
+        column_mapping = {
+            'Код анкеты': ['Код проекта'],
+            'Имя клиента': ['Имя клиента'],
+            'Название проекта': ['Направление'],
+            'Тип мониторинга': ['Тип мониторинга'],
+            'АСС': ['АСС'],
+            'Регион short': ['Кластер'],
+            'Статус': ['Статус'],
+            'Дата визита': ['Дата визита']
+        }
+        
+        result = pd.DataFrame()
+        
+        for std_col, possible_names in column_mapping.items():
+            source_col = self._find_column(df_clean, possible_names)
+            if source_col:
+                result[std_col] = df_clean[source_col].astype(str).fillna('')
+            else:
+                result[std_col] = ''
+                
+        # ЗАМЕНЯЕМ ВСЕ ЗНАЧЕНИЯ ВОЛНЫ НА "Все волны"
+        if 'Название проекта' in result.columns:
+            result['Название проекта'] = 'Все волны'
+        
+        # ЭМ всегда пусто (нет в исходных данных)
+        result['ЭМ'] = ''
+        
+        # --- КОНВЕРТАЦИЯ ДАТЫ (важно!) ---
+        if 'Дата визита' in result.columns:
+            result['Дата визита'] = pd.to_datetime(
+                result['Дата визита'], 
+                errors='coerce',
+                dayfirst=True
+            )
+        
+        # --- СПЕЦИАЛЬНАЯ ОБРАБОТКА РЕГИОНА ---
+        # Словарь для поиска региона по ключевым словам
+        # (перенесен из DataVisualizer для использования в DataCleaner)
+        region_keywords = {
+            'AD': ['адыг'], 'AL': ['алтай'], 'AM': ['амур'], 
+            'AR': ['архангельск'], 'AS': ['астрахан'], 'BK': ['башкортостан', 'башкир'],
+            'BL': ['белгород'], 'BR': ['брянск'], 'BU': ['бурят'],
+            'CL': ['челябин'], 'CN': ['чечен'], 'CV': ['чуваш'],
+            'DA': ['дагестан'], 'IN': ['ингуш'], 'IR': ['иркут'],
+            'IV': ['иван'], 'KA': ['камчат'], 'KB': ['кабард'],
+            'KC': ['карача'], 'KD': ['краснодар'], 'KE': ['кемер'],
+            'KG': ['калуж'], 'KH': ['хабаров'], 'KI': ['карел'],
+            'KK': ['хакас'], 'KL': ['калмы'], 'KM': ['хант', 'манс'],
+            'KN': ['калинин'], 'KO': ['коми'], 'KS': ['курск'],
+            'KT': ['костр'], 'KU': ['курган'], 'KV': ['киров'],
+            'KY': ['краснояр'], 'LN': ['ленинград', 'питер'], 'LP': ['липец'],
+            'ME': ['марий'], 'MG': ['магадан'], 'MM': ['мурман'],
+            'MR': ['мордов'], 'MS': ['моск'], 'NG': ['новгород'],
+            'NN': ['ненец'], 'NO': ['осет'], 'NS': ['новосиб'],
+            'NZ': ['нижегород'], 'OB': ['оренбург'], 'OL': ['орлов'],
+            'OM': ['омск'], 'PE': ['перм'], 'PR': ['примор'],
+            'PS': ['псков'], 'PZ': ['пенз'], 'RK': ['крым'],
+            'RO': ['ростов'], 'RZ': ['ряз'], 'SA': ['самар'],
+            'SK': ['саха', 'якут'], 'SL': ['сахалин'], 'SM': ['смол'],
+            'SR': ['саратов'], 'ST': ['ставроп'], 'SV': ['свердлов'],
+            'TB': ['тамбов'], 'TL': ['туль'], 'TO': ['томск'],
+            'TT': ['татар'], 'TU': ['тыва'], 'TV': ['твер'],
+            'TY': ['тюмен'], 'UD': ['удмурт'], 'UL': ['ульян'],
+            'VG': ['волгоград'], 'VL': ['владимир'], 'VO': ['волог'],
+            'VR': ['воронеж'], 'YN': ['ямал'], 'YS': ['ярослав'],
+            'YV': ['еврей'], 'ZK': ['забайкал']
+        }
+        
+        def extract_region_code(cluster_value):
+            """
+            Из значения типа "Архангельск_ГМ_1" извлекает первую часть до "_"
+            и находит соответствующий код региона по ключевым словам
+            """
+            if pd.isna(cluster_value) or str(cluster_value).strip() in ['', 'nan', 'none', 'null']:
+                return 'не определен'
+            
+            cluster_str = str(cluster_value).strip()
+            
+            # Берем первую часть до разделителя "_"
+            first_part = cluster_str.split('_')[0].strip().lower()
+            
+            if not first_part:
+                return 'не определен'
+            
+            # Ищем по ключевым словам
+            for region_code, keywords in region_keywords.items():
+                for keyword in keywords:
+                    if keyword in first_part:
+                        return region_code
+            
+            return 'не определен'
+        
+        # Применяем обработку региона
+        result['Регион short'] = result['Регион short'].apply(extract_region_code)
+        
+        # Все записи ПроДата - полевые
+        result['Полевой'] = 1
+        
+        # ПО (портал) - по умолчанию "Мониторинги"
+        result['ПО'] = 'Мониторинги'
+        
+        # Обогащение ПО из Google-таблицы по коду проекта
+        if google_df is not None and 'Код анкеты' in result.columns:
+            google_code_col = self._find_column(google_df, ['Код проекта RU00.000.00.01SVZ24', 'Код проекта'])
+            google_portal_col = self._find_column(google_df, ['Портал на котором идет проект (для работы полевой команды)', 'ПО'])
+            
+            if google_code_col and google_portal_col:
+                portal_mapping = {}
+                for _, row in google_df.iterrows():
+                    code = str(row.get(google_code_col, '')).strip()
+                    portal = str(row.get(google_portal_col, '')).strip()
+                    if code and code.lower() not in ['nan', 'none', 'null', '']:
+                        portal_mapping[code] = portal
+                
+                def get_portal(code_value):
+                    if pd.isna(code_value) or str(code_value).strip() == '':
+                        return 'Мониторинги'
+                    clean_code = str(code_value).strip()
+                    return portal_mapping.get(clean_code, 'Мониторинги')
+                
+                result['ПО'] = result['Код анкеты'].apply(get_portal)
+        
+        # Добавление полного региона (из словаря - нужно добавить в класс)
+        # Временно используем упрощенный вариант
+        full_region_names = {
+            'AD': 'Республика Адыгея', 'AL': 'Алтайский край', 'AM': 'Амурская область',
+            'AR': 'Архангельская область', 'AS': 'Астраханская область', 'BK': 'Республика Башкортостан',
+            'BL': 'Белгородская область', 'BR': 'Брянская область', 'BU': 'Республика Бурятия',
+            'CL': 'Челябинская область', 'CN': 'Чеченская Республика', 'CV': 'Чувашская Республика',
+            'DA': 'Республика Дагестан', 'IN': 'Республика Ингушетия', 'IR': 'Иркутская область',
+            'IV': 'Ивановская область', 'KA': 'Камчатский край', 'KB': 'Кабардино-Балкарская Республика',
+            'KC': 'Карачаево-Черкесская Республика', 'KD': 'Краснодарский край', 'KE': 'Кемеровская область',
+            'KG': 'Калужская область', 'KH': 'Хабаровский край', 'KI': 'Республика Карелия',
+            'KK': 'Республика Хакасия', 'KL': 'Республика Калмыкия', 'KM': 'Ханты-Мансийский автономный округ',
+            'KN': 'Калининградская область', 'KO': 'Республика Коми', 'KS': 'Курская область',
+            'KT': 'Костромская область', 'KU': 'Курганская область', 'KV': 'Кировская область',
+            'KY': 'Красноярский край', 'LN': 'Ленинградская область', 'LP': 'Липецкая область',
+            'ME': 'Республика Марий Эл', 'MG': 'Магаданская область', 'MM': 'Мурманская область',
+            'MR': 'Республика Мордовия', 'MS': 'Московская область', 'NG': 'Новгородская область',
+            'NN': 'Ненецкий автономный округ', 'NO': 'Республика Северная Осетия',
+            'NS': 'Новосибирская область', 'NZ': 'Нижегородская область', 'OB': 'Оренбургская область',
+            'OL': 'Орловская область', 'OM': 'Омская область', 'PE': 'Пермский край',
+            'PR': 'Приморский край', 'PS': 'Псковская область', 'PZ': 'Пензенская область',
+            'RK': 'Республика Крым', 'RO': 'Ростовская область', 'RZ': 'Рязанская область',
+            'SA': 'Самарская область', 'SK': 'Республика Саха (Якутия)', 'SL': 'Сахалинская область',
+            'SM': 'Смоленская область', 'SR': 'Саратовская область', 'ST': 'Ставропольский край',
+            'SV': 'Свердловская область', 'TB': 'Тамбовская область', 'TL': 'Тульская область',
+            'TO': 'Томская область', 'TT': 'Республика Татарстан', 'TU': 'Республика Тыва',
+            'TV': 'Тверская область', 'TY': 'Тюменская область', 'UD': 'Удмуртская Республика',
+            'UL': 'Ульяновская область', 'VG': 'Волгоградская область', 'VL': 'Владимирская область',
+            'VO': 'Вологодская область', 'VR': 'Воронежская область', 'YN': 'Ямало-Ненецкий автономный округ',
+            'YS': 'Ярославская область', 'YV': 'Еврейская автономная область', 'ZK': 'Забайкальский край'
+        }
+        
+        def get_full_region(short):
+            if pd.isna(short) or str(short).strip() == '' or short == 'не определен':
+                return 'не определен'
+            short_clean = str(short).strip().upper()
+            return full_region_names.get(short_clean, 'не определен')
+        
+        result['Регион'] = result['Регион short'].apply(get_full_region)
+        
+        # Добавление ЗОД из встроенного справочника (по АСС)
+        if 'АСС' in result.columns:
+            extended_zod_mapping = ZOD_MAPPING.copy()
+            extended_zod_mapping.update({
+                'Воронин Евгений': 'Устинов Игорь',
+                'Яцевич Максим': 'Устинов Игорь'
+            })
+            
+            def get_zod(acc_value):
+                if pd.isna(acc_value) or str(acc_value).strip() in ['', 'nan', 'none', 'null']:
+                    return ''
+                clean_acc = str(acc_value).strip()
+                return extended_zod_mapping.get(clean_acc, '')
+            
+            result['ЗОД'] = result['АСС'].apply(get_zod)
+        else:
+            result['ЗОД'] = ''
+        
+        # Добавляем источник
+        result['Источник'] = 'Мониторинги'
+        
+        # ===== НОВАЯ ЛОГИКА ДЛЯ ПРОДАТА =====
+        if not result.empty:
+            # Группируем по клиенту и ТИПУ МОНИТОРИНГА
+            prodata_agg = result.groupby(['Имя клиента', 'Тип мониторинга']).size().reset_index(name='count')
+            
+            # Факт = количество / 70
+            prodata_agg['Факт проекта, шт.'] = (prodata_agg['count'] / 70).round(1)
+            
+            # План = Факт
+            prodata_agg['План проекта, шт.'] = prodata_agg['Факт проекта, шт.']
+            prodata_agg['План на дату, шт.'] = prodata_agg['План проекта, шт.']
+            prodata_agg['Факт на дату, шт.'] = prodata_agg['Факт проекта, шт.']
+            
+            # Переименовываем для отображения
+            result = prodata_agg.rename(columns={
+                'Имя клиента': 'Клиент'
+            })
+            
+            # Добавляем служебные колонки
+            result['ПО'] = 'Мониторинги'
+            result['Полевой'] = 1
+            result['Источник'] = 'ПроДата'
+            result['ЗОД'] = ''
+            result['АСС'] = ''
+            result['ЭМ'] = ''
+            result['Регион short'] = ''
+            result['Регион'] = ''
+            result['Статус'] = ''
+            result['Дата визита'] = pd.NaT
+        
+        return result
+    
     def _is_field_project(self, code):
         """Логика определения полевого проекта"""
         try:
@@ -1305,6 +1557,33 @@ class DataCleaner:
         except Exception as e:
             return array_field_df if array_field_df is not None else pd.DataFrame()
 
+    def remove_cxway_from_portal(self, portal_df, google_df):
+        """Удаляет из портала проекты, которые в google отмечены как CXWAY"""
+        if portal_df is None or portal_df.empty or google_df is None or google_df.empty:
+            return portal_df
+        
+        code_col = self._find_column(google_df, ['Код проекта RU00.000.00.01SVZ24', 'Код проекта'])
+        portal_col = self._find_column(google_df, ['Портал на котором идет проект (для работы полевой команды)', 'ПО'])
+        
+        if code_col is None or portal_col is None:
+            return portal_df
+        
+        cxway_mask = google_df[portal_col].astype(str).str.strip().str.upper() == 'CXWAY'
+        cxway_codes = google_df.loc[cxway_mask, code_col].astype(str).str.strip().tolist()
+        
+        if not cxway_codes:
+            return portal_df
+        
+        portal_code_col = self._find_column(portal_df, ['Код анкеты', 'Код'])
+        if portal_code_col is None:
+            return portal_df
+        
+        portal_df = portal_df.copy()
+        portal_codes = portal_df[portal_code_col].astype(str).str.strip()
+        portal_df = portal_df[~portal_codes.isin(cxway_codes)]
+        
+        return portal_df
+        
 # Глобальный экземпляр
 data_cleaner = DataCleaner()
 
