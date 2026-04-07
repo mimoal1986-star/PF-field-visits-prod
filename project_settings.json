@@ -1,0 +1,26 @@
+{
+  "excluded_projects": [],
+  "included_projects": [
+    {
+      "project_name": "ГЛАВСТРОЙ",
+      "wave_name": "2026.04",
+      "project_code": "RU00.343.06.02SVZ25",
+      "portal": "не определено",
+      "fio_om": "",
+      "added_at": "2026-04-07T14:51:57.150805",
+      "added_by": "unknown_user"
+    }
+  ],
+  "history": [
+    {
+      "action": "add_to_included",
+      "project_name": "ГЛАВСТРОЙ",
+      "wave_name": "2026.04",
+      "project_code": "RU00.343.06.02SVZ25",
+      "timestamp": "2026-04-07T14:51:57.150821",
+      "user": "unknown_user"
+    }
+  ],
+  "last_updated": "2026-04-07T14:51:57.150828",
+  "version": "1.0"
+}
