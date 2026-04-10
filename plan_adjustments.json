@@ -31,7 +31,15 @@
       "adjustment_value": -1000,
       "created_at": "2026-04-10T14:09:32.499171",
       "created_by": "unknown_user"
+    },
+    {
+      "project_name": "МегаФон",
+      "wave_name": "Результативные визиты",
+      "project_code": "Мультикод_186",
+      "adjustment_value": -100,
+      "created_at": "2026-04-10T14:12:42.130915",
+      "created_by": "unknown_user"
     }
   ],
-  "last_updated": "2026-04-10T14:09:32.671167"
+  "last_updated": "2026-04-10T14:12:42.311314"
 }
