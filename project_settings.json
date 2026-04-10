@@ -19,7 +19,17 @@
       "added_by": "unknown_user"
     }
   ],
-  "included_projects": [],
+  "included_projects": [
+    {
+      "project_name": "Лепим и Варим ",
+      "wave_name": "2026.04_Казахстан",
+      "project_code": "SNG00.030.01.03SPK25",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-04-10T14:05:00.499688",
+      "added_by": "unknown_user"
+    }
+  ],
   "history": [
     {
       "action": "add_to_included",
@@ -60,8 +70,16 @@
       "project_code": "RU00.306.01.01SVZ24",
       "timestamp": "2026-04-10T14:04:47.931157",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_included",
+      "project_name": "Лепим и Варим ",
+      "wave_name": "2026.04_Казахстан",
+      "project_code": "SNG00.030.01.03SPK25",
+      "timestamp": "2026-04-10T14:05:00.499725",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-04-10T14:04:47.931163",
+  "last_updated": "2026-04-10T14:05:00.499732",
   "version": "1.0"
 }
