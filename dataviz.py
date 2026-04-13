@@ -9,86 +9,35 @@ class DataVisualizer:
 
     def __init__(self):
         self.region_mapping = {
-            'AD': 'Республика Адыгея',
-            'AL': 'Алтайский край',
-            'AM': 'Амурская область',
-            'AR': 'Архангельская область',
-            'AS': 'Астраханская область',
-            'BK': 'Республика Башкортостан',
-            'BL': 'Белгородская область',
-            'BR': 'Брянская область',
-            'BU': 'Республика Бурятия',
-            'CL': 'Челябинская область',
-            'CN': 'Чеченская Республика',
-            'CV': 'Чувашская Республика',
-            'DA': 'Республика Дагестан',
-            'IN': 'Республика Ингушетия',
-            'IR': 'Иркутская область',
-            'IV': 'Ивановская область',
-            'KA': 'Камчатский край',
-            'KB': 'Кабардино-Балкарская Республика',
-            'KC': 'Карачаево-Черкесская Республика',
-            'KD': 'Краснодарский край',
-            'KE': 'Кемеровская область',
-            'KG': 'Калужская область',
-            'KH': 'Хабаровский край',
-            'KI': 'Республика Карелия',
-            'KK': 'Республика Хакасия',
-            'KL': 'Республика Калмыкия',
-            'KM': 'Ханты-Мансийский автономный округ',
-            'KN': 'Калининградская область',
-            'KO': 'Республика Коми',
-            'KS': 'Курская область',
-            'KT': 'Костромская область',
-            'KU': 'Курганская область',
-            'KV': 'Кировская область',
-            'KY': 'Красноярский край',
-            'LN': 'Ленинградская область',
-            'LP': 'Липецкая область',
-            'ME': 'Республика Марий Эл',
-            'MG': 'Магаданская область',
-            'MM': 'Мурманская область',
-            'MR': 'Республика Мордовия',
-            'MS': 'Московская область',
-            'NG': 'Новгородская область',
-            'NN': 'Ненецкий автономный округ',
-            'NO': 'Республика Северная Осетия',
-            'NS': 'Новосибирская область',
-            'NZ': 'Нижегородская область',
-            'OB': 'Оренбургская область',
-            'OL': 'Орловская область',
-            'OM': 'Омская область',
-            'PE': 'Пермский край',
-            'PR': 'Приморский край',
-            'PS': 'Псковская область',
-            'PZ': 'Пензенская область',
-            'RK': 'Республика Крым',
-            'RO': 'Ростовская область',
-            'RZ': 'Рязанская область',
-            'SA': 'Самарская область',
-            'SK': 'Республика Саха (Якутия)',
-            'SL': 'Сахалинская область',
-            'SM': 'Смоленская область',
-            'SR': 'Саратовская область',
-            'ST': 'Ставропольский край',
-            'SV': 'Свердловская область',
-            'TB': 'Тамбовская область',
-            'TL': 'Тульская область',
-            'TO': 'Томская область',
-            'TT': 'Республика Татарстан',
-            'TU': 'Республика Тыва',
-            'TV': 'Тверская область',
-            'TY': 'Тюменская область',
-            'UD': 'Удмуртская Республика',
-            'UL': 'Ульяновская область',
-            'VG': 'Волгоградская область',
-            'VL': 'Владимирская область',
-            'VO': 'Вологодская область',
-            'VR': 'Воронежская область',
-            'YN': 'Ямало-Ненецкий автономный округ',
-            'YS': 'Ярославская область',
-            'YV': 'Еврейская автономная область',
-            'ZK': 'Забайкальский край'
+            'AD': 'Республика Адыгея', 'AL': 'Алтайский край', 'AM': 'Амурская область',
+            'AR': 'Архангельская область', 'AS': 'Астраханская область', 'BK': 'Республика Башкортостан',
+            'BL': 'Белгородская область', 'BR': 'Брянская область', 'BU': 'Республика Бурятия',
+            'CK': 'Чукотский автономный округ', 'CL': 'Челябинская область', 'CN': 'Чеченская Республика',
+            'CV': 'Чувашская Республика', 'DA': 'Республика Дагестан', 'DN': 'Донецкая Народная Республика',
+            'GA': 'Республика Алтай', 'IN': 'Республика Ингушетия', 'IR': 'Иркутская область',
+            'IV': 'Ивановская область', 'KA': 'Камчатский край', 'KB': 'Кабардино-Балкарская Республика',
+            'KC': 'Карачаево-Черкесская Республика', 'KD': 'Краснодарский край', 'KE': 'Кемеровская область',
+            'KG': 'Калужская область', 'KH': 'Хабаровский край', 'KI': 'Республика Карелия',
+            'KK': 'Республика Хакасия', 'KL': 'Республика Калмыкия', 'KM': 'Ханты-Мансийский автономный округ',
+            'KN': 'Калининградская область', 'KO': 'Республика Коми', 'KS': 'Курская область',
+            'KT': 'Костромская область', 'KU': 'Курганская область', 'KV': 'Кировская область',
+            'KY': 'Красноярский край', 'LG': 'Луганская Народная Республика', 'LN': 'Ленинградская область',
+            'LP': 'Липецкая область', 'MC': 'Московская область', 'ME': 'Республика Марий Эл',
+            'MG': 'Магаданская область', 'MM': 'Мурманская область', 'MR': 'Республика Мордовия',
+            'MS': 'Московская область', 'NG': 'Новгородская область', 'NN': 'Ненецкий автономный округ',
+            'NO': 'Республика Северная Осетия', 'NS': 'Новосибирская область', 'NZ': 'Нижегородская область',
+            'OB': 'Оренбургская область', 'OL': 'Орловская область', 'OM': 'Омская область',
+            'PE': 'Пермский край', 'PR': 'Приморский край', 'PS': 'Псковская область',
+            'PZ': 'Пензенская область', 'RK': 'Республика Крым', 'RO': 'Ростовская область',
+            'RZ': 'Рязанская область', 'SA': 'Самарская область', 'SK': 'Республика Саха (Якутия)',
+            'SL': 'Сахалинская область', 'SM': 'Смоленская область', 'SR': 'Саратовская область',
+            'ST': 'Ставропольский край', 'SV': 'Свердловская область', 'TB': 'Тамбовская область',
+            'TL': 'Тульская область', 'TO': 'Томская область', 'TT': 'Республика Татарстан',
+            'TU': 'Республика Тыва', 'TV': 'Тверская область', 'TY': 'Тюменская область',
+            'UD': 'Удмуртская Республика', 'UL': 'Ульяновская область', 'VG': 'Волгоградская область',
+            'VL': 'Владимирская область', 'VO': 'Вологодская область', 'VR': 'Воронежская область',
+            'YN': 'Ямало-Ненецкий автономный округ', 'YS': 'Ярославская область', 'YV': 'Еврейская автономная область',
+            'ZK': 'Забайкальский край', 'ZO': 'Запорожская область'
         }
 
     def _compute_base_planfact_aggregations(self, data, region_col):
@@ -300,98 +249,98 @@ class DataVisualizer:
             return short_code
         return self.region_mapping.get(str(short_code).strip().upper(), short_code)
 
-    def create_project_summary(self, df):
-        """
-        Агрегация данных по проектам
-        Одна строка = один проект
-        """
-        if df is None or df.empty:
-            return pd.DataFrame()
+    # def create_project_summary(self, df):
+    #     """
+    #     Агрегация данных по проектам
+    #     Одна строка = один проект
+    #     """
+    #     if df is None or df.empty:
+    #         return pd.DataFrame()
         
-        # Проверяем наличие колонки 'Проект'
-        project_col = 'Проект'
-        if project_col not in df.columns:
-            st.error(f"❌ В данных нет колонки '{project_col}'")
-            return pd.DataFrame()
+    #     # Проверяем наличие колонки 'Проект'
+    #     project_col = 'Проект'
+    #     if project_col not in df.columns:
+    #         st.error(f"❌ В данных нет колонки '{project_col}'")
+    #         return pd.DataFrame()
         
-        # Список колонок для агрегации
-        agg_columns = {
-            'План проекта, шт.': 'sum',
-            'План на дату, шт.': 'sum',
-            'Факт проекта, шт.': 'sum',
-            'Факт на дату, шт.': 'sum',
-            'Длительность': 'first',
-            'Дата старта': 'first',
-            'Дата финиша': 'first',
-            'Клиент': 'first',
-            'ПО': 'first',
-            'Дней до конца проекта': 'first',
-            'Утилизация тайминга, %': 'first',
-            'Ср. план на день для 100% плана': 'sum'
-        }
+    #     # Список колонок для агрегации
+    #     agg_columns = {
+    #         'План проекта, шт.': 'sum',
+    #         'План на дату, шт.': 'sum',
+    #         'Факт проекта, шт.': 'sum',
+    #         'Факт на дату, шт.': 'sum',
+    #         'Длительность': 'first',
+    #         'Дата старта': 'first',
+    #         'Дата финиша': 'first',
+    #         'Клиент': 'first',
+    #         'ПО': 'first',
+    #         'Дней до конца проекта': 'first',
+    #         'Утилизация тайминга, %': 'first',
+    #         'Ср. план на день для 100% плана': 'sum'
+    #     }
         
-        # Только существующие колонки
-        existing_agg = {k: v for k, v in agg_columns.items() if k in df.columns}
+    #     # Только существующие колонки
+    #     existing_agg = {k: v for k, v in agg_columns.items() if k in df.columns}
         
-        # Группируем по проекту
-        project_agg = df.groupby(project_col).agg(existing_agg).reset_index()
+    #     # Группируем по проекту
+    #     project_agg = df.groupby(project_col).agg(existing_agg).reset_index()
         
-        # 1. План/Факт на дату,% (было Исполнение проекта,%)
-        project_agg['План/Факт на дату,%'] = 0.0
-        mask_plan = project_agg['План на дату, шт.'] > 0
-        if mask_plan.any():
-            project_agg.loc[mask_plan, 'План/Факт на дату,%'] = (
-                project_agg.loc[mask_plan, 'Факт на дату, шт.'] / 
-                project_agg.loc[mask_plan, 'План на дату, шт.'] * 100
-            ).round(1)
+    #     # 1. План/Факт на дату,% (было Исполнение проекта,%)
+    #     project_agg['План/Факт на дату,%'] = 0.0
+    #     mask_plan = project_agg['План на дату, шт.'] > 0
+    #     if mask_plan.any():
+    #         project_agg.loc[mask_plan, 'План/Факт на дату,%'] = (
+    #             project_agg.loc[mask_plan, 'Факт на дату, шт.'] / 
+    #             project_agg.loc[mask_plan, 'План на дату, шт.'] * 100
+    #         ).round(1)
         
-        # 2. △План/Факт на дату, шт (исправленная формула: Факт - План)
-        project_agg['△План/Факт на дату, шт'] = (
-            project_agg['Факт на дату, шт.'] - project_agg['План на дату, шт.']
-        ).round(1)
+    #     # 2. △План/Факт на дату, шт (исправленная формула: Факт - План)
+    #     project_agg['△План/Факт на дату, шт'] = (
+    #         project_agg['Факт на дату, шт.'] - project_agg['План на дату, шт.']
+    #     ).round(1)
         
-        # 3. △План/Факт на дату, % (исправленная формула)
-        project_agg['△План/Факт на дату, %'] = 0.0
-        if mask_plan.any():
-            project_agg.loc[mask_plan, '△План/Факт на дату, %'] = (
-                (project_agg.loc[mask_plan, 'Факт на дату, шт.'] / 
-                 project_agg.loc[mask_plan, 'План на дату, шт.']) - 1
-            ).round(3) * 100
+    #     # 3. △План/Факт на дату, % (исправленная формула)
+    #     project_agg['△План/Факт на дату, %'] = 0.0
+    #     if mask_plan.any():
+    #         project_agg.loc[mask_plan, '△План/Факт на дату, %'] = (
+    #             (project_agg.loc[mask_plan, 'Факт на дату, шт.'] / 
+    #              project_agg.loc[mask_plan, 'План на дату, шт.']) - 1
+    #         ).round(3) * 100
         
-        # 4. Исполнение проекта,% (было %ПФ проекта)
-        project_agg['Исполнение проекта,%'] = 0.0
-        mask_project_plan = project_agg['План проекта, шт.'] > 0
-        if mask_project_plan.any():
-            project_agg.loc[mask_project_plan, 'Исполнение проекта,%'] = (
-                project_agg.loc[mask_project_plan, 'Факт проекта, шт.'] / 
-                project_agg.loc[mask_project_plan, 'План проекта, шт.'] * 100
-            ).round(1)
+    #     # 4. Исполнение проекта,% (было %ПФ проекта)
+    #     project_agg['План/Факт проекта,%'] = 0.0
+    #     mask_project_plan = project_agg['План проекта, шт.'] > 0
+    #     if mask_project_plan.any():
+    #         project_agg.loc[mask_project_plan, 'План/Факт проекта,%'] = (
+    #             project_agg.loc[mask_project_plan, 'Факт проекта, шт.'] / 
+    #             project_agg.loc[mask_project_plan, 'План проекта, шт.'] * 100
+    #         ).round(1)
         
-        # 5. Прогноз на месяц, шт.
-        if 'plan_calc_params' in st.session_state:
-            days_in_period = (st.session_state['plan_calc_params']['end_date'] - 
-                            st.session_state['plan_calc_params']['start_date']).days + 1
-        else:
-            days_in_period = 12
+    #     # 5. Прогноз на месяц, шт.
+    #     if 'plan_calc_params' in st.session_state:
+    #         days_in_period = (st.session_state['plan_calc_params']['end_date'] - 
+    #                         st.session_state['plan_calc_params']['start_date']).days + 1
+    #     else:
+    #         days_in_period = 12
             
-        project_agg['Прогноз на месяц, шт.'] = (
-            project_agg['Факт на дату, шт.'] / days_in_period * 28
-        ).round(1)
+    #     project_agg['Прогноз на месяц, шт.'] = (
+    #         project_agg['Факт на дату, шт.'] / days_in_period * 28
+    #     ).round(1)
         
-        # 6. Фокус
-        project_agg['Фокус'] = 'Нет'
-        if all(col in project_agg.columns for col in ['Исполнение проекта,%', 'Утилизация тайминга, %']):
-            mask_focus = (
-                (project_agg['Исполнение проекта,%'] < 80) & 
-                (project_agg['Утилизация тайминга, %'] > 80) & 
-                (project_agg['Утилизация тайминга, %'] < 100)
-            )
-            project_agg.loc[mask_focus, 'Фокус'] = 'Да'
+    #     # 6. Фокус
+    #     project_agg['Фокус'] = 'Нет'
+    #     if all(col in project_agg.columns for col in ['План/Факт проекта,%', 'Утилизация тайминга, %']):
+    #         mask_focus = (
+    #             (project_agg['План/Факт проекта,%'] < 80) & 
+    #             (project_agg['Утилизация тайминга, %'] > 80) & 
+    #             (project_agg['Утилизация тайминга, %'] < 100)
+    #         )
+    #         project_agg.loc[mask_focus, 'Фокус'] = 'Да'
         
-        # Сортируем по План/Факт на дату,%
-        project_agg = project_agg.sort_values('План/Факт на дату,%', ascending=True)
+    #     # Сортируем по План/Факт на дату,%
+    #     project_agg = project_agg.sort_values('План/Факт на дату,%', ascending=True)
         
-        return project_agg
+    #     return project_agg
     
     def create_planfact_tab(self, data, hierarchy_df=None):
         """Создает вкладку ПланФакт на дату с фильтрами в форме"""
@@ -472,11 +421,8 @@ class DataVisualizer:
                 )
                 asm_mode = st.session_state.planfact_asm_mode
                 
-                if dsm_selected:
-                    asm_options = [a for a in all_asm if any(a in d for d in dsm_selected)]
-                else:
-                    asm_options = all_asm
                 
+                asm_options = all_asm
                 asm_selected = st.multiselect(
                     "Выбрать ASM",
                     asm_options,
@@ -516,8 +462,8 @@ class DataVisualizer:
                 
                 # Ограничиваем клиентов выбранными фильтрами
                 client_filtered = all_clients
-                if dsm_selected:
-                    client_filtered = [c for c in client_filtered if c in dsm_selected]
+                # if dsm_selected:
+                #     client_filtered = [c for c in client_filtered if c in dsm_selected]
                 
                 client_selected = st.multiselect(
                     "Выбрать клиента",
@@ -620,6 +566,15 @@ class DataVisualizer:
             project_data['Регион'] = project_data['Регион'].apply(self._get_long_region)
         elif region_col in project_data.columns and region_col != 'Регион':
             project_data[region_col] = project_data[region_col].apply(self._get_long_region)
+        
+        project_data['Фокус'] = 'Нет'
+        if 'План/Факт проекта,%' in project_data.columns and 'Утилизация тайминга, %' in project_data.columns:
+            mask_focus = (
+                (project_data['План/Факт проекта,%'] < 80) & 
+                (project_data['Утилизация тайминга, %'] > 80) & 
+                (project_data['Утилизация тайминга, %'] < 100)
+            )
+            project_data.loc[mask_focus, 'Фокус'] = 'Да'
         
         # Добавляем вычисляемые метрики
         mask_plan = project_data['План на дату, шт.'] > 0
@@ -729,7 +684,6 @@ class DataVisualizer:
         
         # Колонки, которые показываются всегда
         always_show = [
-            'Длительность',
             'План проекта, шт.', 
             'Факт проекта, шт.', 
             'План/Факт проекта,%',
@@ -738,8 +692,9 @@ class DataVisualizer:
             'План/Факт на дату,%',
             '△План/Факт на дату, шт',
             '△План/Факт на дату, %',
-            'Прогноз на месяц, шт.',
             'Фокус',
+            'Прогноз на месяц, шт.',
+            'Длительность',
             'Дней до конца проекта',
             'Утилизация тайминга, %',
             'Ср. план на день для 100% плана'
@@ -922,11 +877,8 @@ class DataVisualizer:
                 )
                 asm_mode = st.session_state.region_asm_mode
                 
-                if dsm_selected:
-                    asm_options = [a for a in all_asm if any(a in d for d in dsm_selected)]
-                else:
-                    asm_options = all_asm
                 
+                asm_options = all_asm
                 asm_selected = st.multiselect(
                     "Выбрать ASM",
                     asm_options,
@@ -1058,7 +1010,19 @@ class DataVisualizer:
         
         # ВСЕГДА группируем
         region_data = display_data.groupby(group_cols).agg(existing_agg).reset_index()
+        region_data['Фокус'] = 'Нет'
+        if 'План/Факт проекта,%' in region_data.columns and 'Утилизация тайминга, %' in region_data.columns:
+            mask_focus = (
+                (region_data['План/Факт проекта,%'] < 80) & 
+                (region_data['Утилизация тайминга, %'] > 80) & 
+                (region_data['Утилизация тайминга, %'] < 100)
+            )
+            region_data.loc[mask_focus, 'Фокус'] = 'Да'
         
+        # Преобразуем коды регионов в длинные названия
+        if 'Регион' in region_data.columns:
+            region_data['Регион'] = region_data['Регион'].apply(self._get_long_region)
+    
         # Добавляем вычисляемые метрики
         mask_plan = region_data['План на дату, шт.'] > 0
         region_data['План/Факт на дату,%'] = 0.0
@@ -1166,7 +1130,6 @@ class DataVisualizer:
         
         # Колонки, которые показываются всегда
         always_show = [
-            'Длительность',
             'План проекта, шт.', 
             'Факт проекта, шт.', 
             'План/Факт проекта,%',
@@ -1175,8 +1138,9 @@ class DataVisualizer:
             'План/Факт на дату,%',
             '△План/Факт на дату, шт',
             '△План/Факт на дату, %',
-            'Прогноз на месяц, шт.',
             'Фокус',
+            'Прогноз на месяц, шт.',
+            'Длительность',
             'Дней до конца проекта',
             'Утилизация тайминга, %',
             'Ср. план на день для 100% плана'
@@ -1284,12 +1248,8 @@ class DataVisualizer:
                     index=0 if st.session_state.get('dsm_asm_mode', 'Включить') == 'Включить' else 1
                 )
                 asm_mode = st.session_state.dsm_asm_mode
-                
-                if dsm_selected:
-                    asm_options = [a for a in all_asm if any(a in d for d in dsm_selected)]
-                else:
-                    asm_options = all_asm
-                
+
+                asm_options = all_asm
                 asm_selected = st.multiselect(
                     "Выбрать ASM",
                     asm_options,
@@ -1428,6 +1388,18 @@ class DataVisualizer:
         # ВСЕГДА группируем
         dsm_data = display_data.groupby(group_cols).agg(existing_agg).reset_index()
 
+        dsm_data['Фокус'] = 'Нет'
+        if 'План/Факт проекта,%' in dsm_data.columns and 'Утилизация тайминга, %' in dsm_data.columns:
+            mask_focus = (
+                (dsm_data['План/Факт проекта,%'] < 80) & 
+                (dsm_data['Утилизация тайминга, %'] > 80) & 
+                (dsm_data['Утилизация тайминга, %'] < 100)
+            )
+            dsm_data.loc[mask_focus, 'Фокус'] = 'Да'
+        
+        # Добавляем вычисляемые метрики
+        mask_plan = dsm_data['План на дату, шт.'] > 0
+
         # Преобразуем коды регионов в длинные названия
         if 'Регион' in dsm_data.columns:
             dsm_data['Регион'] = dsm_data['Регион'].apply(self._get_long_region)
@@ -1539,7 +1511,6 @@ class DataVisualizer:
         
         # Колонки, которые показываются всегда
         always_show = [
-            'Длительность',
             'План проекта, шт.', 
             'Факт проекта, шт.', 
             'План/Факт проекта,%',
@@ -1548,8 +1519,9 @@ class DataVisualizer:
             'План/Факт на дату,%',
             '△План/Факт на дату, шт',
             '△План/Факт на дату, %',
-            'Прогноз на месяц, шт.',
             'Фокус',
+            'Прогноз на месяц, шт.',
+            'Длительность',
             'Дней до конца проекта',
             'Утилизация тайминга, %',
             'Ср. план на день для 100% плана'
