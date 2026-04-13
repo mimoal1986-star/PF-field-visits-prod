@@ -55,7 +55,15 @@
       "adjustment_value": -100,
       "created_at": "2026-04-13T12:19:39.270384",
       "created_by": "unknown_user"
+    },
+    {
+      "project_name": "Мультибренд 2024 ",
+      "wave_name": "2026.04_Дилеры",
+      "project_code": "Мультикод_.209",
+      "adjustment_value": 100,
+      "created_at": "2026-04-13T12:20:58.164018",
+      "created_by": "unknown_user"
     }
   ],
-  "last_updated": "2026-04-13T12:19:39.461896"
+  "last_updated": "2026-04-13T12:20:58.331938"
 }
