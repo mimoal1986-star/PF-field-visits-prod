@@ -39,7 +39,15 @@
       "adjustment_value": -100,
       "created_at": "2026-04-10T14:12:42.130915",
       "created_by": "unknown_user"
+    },
+    {
+      "project_name": "Мультибренд 2024 ",
+      "wave_name": "2026.04_Пронто",
+      "project_code": "Мультикод_.209",
+      "adjustment_value": 1000,
+      "created_at": "2026-04-13T12:18:08.723128",
+      "created_by": "unknown_user"
     }
   ],
-  "last_updated": "2026-04-10T14:12:42.311314"
+  "last_updated": "2026-04-13T12:18:09.034757"
 }
