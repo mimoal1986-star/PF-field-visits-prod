@@ -1,53 +1,6 @@
 {
-  "excluded_projects": [
-    {
-      "project_name": "ЭКОНИКА",
-      "wave_name": "2026.04 (VIP)",
-      "project_code": "RU00.306.01.01SVZ24",
-      "portal": "не определено",
-      "fio_om": "",
-      "added_at": "2026-04-10T14:04:47.930989",
-      "added_by": "unknown_user"
-    },
-    {
-      "project_name": "ЭКОНИКА",
-      "wave_name": "2026.04 (72 волна)",
-      "project_code": "RU00.306.01.01SVZ24",
-      "portal": "не определено",
-      "fio_om": "",
-      "added_at": "2026-04-10T14:04:47.931148",
-      "added_by": "unknown_user"
-    },
-    {
-      "project_name": "Эконика ",
-      "wave_name": "Эконика_2026.04 (72 волна)",
-      "project_code": "Мультикод_.306",
-      "portal": "CXWAY",
-      "fio_om": "",
-      "added_at": "2026-04-10T14:05:13.766665",
-      "added_by": "unknown_user"
-    },
-    {
-      "project_name": "Эконика ",
-      "wave_name": "Эконика_2026.04_ВИП",
-      "project_code": "Мультикод_.306",
-      "portal": "CXWAY",
-      "fio_om": "",
-      "added_at": "2026-04-10T14:05:13.766876",
-      "added_by": "unknown_user"
-    }
-  ],
-  "included_projects": [
-    {
-      "project_name": "Лепим и Варим ",
-      "wave_name": "2026.04_Казахстан",
-      "project_code": "SNG00.030.01.03SPK25",
-      "portal": "CXWAY",
-      "fio_om": "",
-      "added_at": "2026-04-10T14:05:00.499688",
-      "added_by": "unknown_user"
-    }
-  ],
+  "excluded_projects": [],
+  "included_projects": [],
   "history": [
     {
       "action": "add_to_included",
@@ -112,8 +65,16 @@
       "project_code": "Мультикод_.306",
       "timestamp": "2026-04-10T14:05:13.766887",
       "user": "unknown_user"
+    },
+    {
+      "action": "clear_all",
+      "project_name": "",
+      "wave_name": "",
+      "project_code": "",
+      "timestamp": "2026-04-13T12:03:30.963778",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-04-10T14:05:13.766892",
+  "last_updated": "2026-04-13T12:03:30.963813",
   "version": "1.0"
 }
