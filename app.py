@@ -76,6 +76,34 @@ for key, default_value in DEFAULT_STATE.items():
 
 # Вспомогательные функции
 
+def deduplicate_by_priority(df, priority_sources):
+    """
+    Удаляет дубли по ключу (Код анкеты + Название проекта)
+    Оставляет только проект с наивысшим приоритетом источника
+    """
+    if df is None or df.empty:
+        return df
+    
+    df = df.copy()
+    
+    # Создаем уникальный ключ
+    df['_dedup_key'] = (
+        df['Код анкеты'].astype(str).str.strip() + '|' +
+        df['Название проекта'].astype(str).str.strip()
+    )
+    
+    # Создаем колонку с приоритетом (меньше = выше приоритет)
+    priority_map = {source: idx for idx, source in enumerate(priority_sources)}
+    df['_priority'] = df['ПО'].map(priority_map).fillna(len(priority_sources))
+    
+    # Сортируем по приоритету и удаляем дубли
+    df = df.sort_values('_priority').drop_duplicates(subset=['_dedup_key'], keep='first')
+    
+    # Удаляем временные колонки
+    df = df.drop(['_dedup_key', '_priority'], axis=1)
+    
+    return df
+    
 def process_all_data(settings_manager=None, force_recalc=False):
     """Полная обработка данных и расчет план/факт"""
     
@@ -298,6 +326,60 @@ def process_all_data(settings_manager=None, force_recalc=False):
                         st.session_state.cleaned_data['неполевые_проекты'],
                         cxway_non_field
                     ], ignore_index=True)
+
+
+        # ============================================
+        # УДАЛЕНИЕ ДУБЛЕЙ ПО ПРИОРИТЕТУ ИЗ GOOGLE (ВЕКТОРИЗИРОВАННО)
+        # ============================================
+        
+        if cxway_processed is not None and not cxway_processed.empty and field_df is not None and not field_df.empty:
+            # Ключи проектов
+            cxway_keys = (
+                cxway_processed['Код анкеты'].astype(str).str.strip() + '|' +
+                cxway_processed['Название проекта'].astype(str).str.strip()
+            )
+            portal_keys = (
+                field_df['Код анкеты'].astype(str).str.strip() + '|' +
+                field_df['Название проекта'].astype(str).str.strip()
+            )
+            
+            # Какие проекты в Google отмечены как Чеккер
+            checker_keys = set()
+            if google_with_field is not None and not google_with_field.empty:
+                google_code_col = data_cleaner._find_column(google_with_field, ['Код проекта RU00.000.00.01SVZ24', 'Код проекта'])
+                google_portal_col = data_cleaner._find_column(google_with_field, ['Портал на котором идет проект (для работы полевой команды)', 'ПО'])
+                google_wave_col = data_cleaner._find_column(google_with_field, ['Название волны на Чекере/ином ПО', 'Волна'])
+                
+                if google_code_col and google_portal_col:
+                    for _, row in google_with_field.iterrows():
+                        code = str(row.get(google_code_col, '')).strip()
+                        wave = str(row.get(google_wave_col, '')).strip() if google_wave_col else ''
+                        portal = str(row.get(google_portal_col, '')).strip()
+                        if code and portal == 'Чеккер':
+                            checker_keys.add(f"{code}|{wave}")
+            
+            # Находим пересекающиеся проекты
+            common_mask = cxway_keys.isin(portal_keys)
+            common_keys = cxway_keys[common_mask].unique()
+            
+            # Разделяем на два множества
+            remove_from_cxway = [k for k in common_keys if k in checker_keys]
+            remove_from_portal = [k for k in common_keys if k not in checker_keys]
+            
+            # Векторизированное удаление из CXWAY
+            if remove_from_cxway:
+                cxway_processed = cxway_processed[~cxway_keys.isin(remove_from_cxway)]
+            
+            # Векторизированное удаление из портала
+            if remove_from_portal:
+                field_df = field_df[~portal_keys.isin(remove_from_portal)]
+                # Обновляем field_df_with_zod для слияния
+                if not field_df.empty:
+                    field_df_with_zod = data_cleaner.add_zod_from_hierarchy(field_df)
+                else:
+                    field_df_with_zod = pd.DataFrame()
+                    
+            
         
         # ============================================
         # ФИНАЛЬНОЕ ОБЪЕДИНЕНИЕ ВСЕХ ИСТОЧНИКОВ
@@ -1438,6 +1520,7 @@ with tab3:
             st.info("⏳ Нет полевых проектов для корректировки")
     else:
         st.info("⏳ Сначала выполните расчет")
+
 
 
 
