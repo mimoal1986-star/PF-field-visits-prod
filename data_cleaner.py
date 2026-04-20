@@ -141,6 +141,14 @@ def _enrich_array_with_project_codes_cached(array_df, projects_df):
 
 class DataCleaner:
     
+    def is_non_unique_code(self, code):
+        """Проверяет, является ли код неуникальным (Мультикод, Пилот, Семпл и т.д.)"""
+        if pd.isna(code):
+            return False
+        code_str = str(code).strip().lower()
+        non_unique_keywords = ['мультикод', 'пилот', 'семпл']
+        return any(keyword in code_str for keyword in non_unique_keywords)
+    
     def _log_samples(self, df, stage_name):
         """Вспомогательная функция для отладки семплов"""
         if df is None or df.empty:
@@ -540,17 +548,26 @@ class DataCleaner:
                 return array_df
             
             portal_mapping = {}
+            cxway_mapping = {}
             for _, row in google_df.iterrows():
                 code = str(row.get(google_code_col, '')).strip()
                 portal = str(row.get(google_portal_col, '')).strip()
                 
                 if code and code.lower() not in ['nan', 'none', 'null', '']:
                     portal_mapping[code] = portal
+                    if portal.upper() == 'CXWAY':
+                        cxway_mapping[code] = 'CXWAY'
             
             def get_portal(code):
                 if pd.isna(code):
                     return 'Чеккер'
                 clean_code = str(code).strip()
+                # Если код неуникальный — не переопределяем, оставляем Чеккер
+                if self.is_non_unique_code(clean_code):
+                    return 'Чеккер'
+                # Переопределяем только если в Google проект отмечен как CXWAY
+                if clean_code in cxway_mapping:
+                    return 'CXWAY'
                 return portal_mapping.get(clean_code, 'Чеккер')
             
             array_df['ПО'] = array_df[array_code_col].apply(get_portal)
@@ -984,24 +1001,31 @@ class DataCleaner:
         # Добавление ПО
         result['ПО'] = 'CXWAY'  # значение по умолчанию
         
-        # Если есть Google, пытаемся найти более точное ПО
+        # Если есть Google, проверяем только на 'Чеккер'
         if google_df is not None and 'Код анкеты' in result.columns:
             google_code_col = self._find_column(google_df, ['Код проекта RU00.000.00.01SVZ24', 'Код проекта'])
             google_portal_col = self._find_column(google_df, ['Портал на котором идет проект (для работы полевой команды)', 'ПО'])
             
             if google_code_col and google_portal_col:
-                portal_mapping = {}
+                # Создаем словарь только для проектов с ПО 'Чеккер'
+                checker_mapping = {}
                 for _, row in google_df.iterrows():
                     code = str(row.get(google_code_col, '')).strip()
                     portal = str(row.get(google_portal_col, '')).strip()
-                    if code and code.lower() not in ['nan', 'none', 'null', '']:
-                        portal_mapping[code] = portal
+                    if code and portal.upper() == 'ЧЕККЕР':
+                        checker_mapping[code] = 'Чеккер'
                 
                 def get_portal_from_google(code_value):
                     if pd.isna(code_value) or str(code_value).strip() == '':
                         return 'CXWAY'
                     clean_code = str(code_value).strip()
-                    return portal_mapping.get(clean_code, 'CXWAY')
+                    # Если код неуникальный — не переопределяем, оставляем CXWAY
+                    if self.is_non_unique_code(clean_code):
+                        return 'CXWAY'
+                    # Переопределяем только если в Google проект отмечен как Чеккер
+                    if clean_code in checker_mapping:
+                        return 'Чеккер'
+                    return 'CXWAY'
                 
                 result['ПО'] = result['Код анкеты'].apply(get_portal_from_google)
         
@@ -1102,7 +1126,7 @@ class DataCleaner:
             'Имя клиента': ['Имя клиента'],
             'Название проекта': ['Название волны'],
             'АСС': ['АСМ'],
-            'ЭМ': ['ЭМ'],
+            'ЭМ': ['ЭМ', 'ТП'],
             'Регион short': ['Регион'],
             'Статус': ['Статус'],
             'Дата визита': ['Дата визита']
@@ -1141,11 +1165,13 @@ class DataCleaner:
                     if code and code.lower() not in ['nan', 'none', 'null', '']:
                         portal_mapping[code] = portal
                 
-                # Применяем маппинг
                 def get_portal(code_value):
                     if pd.isna(code_value) or str(code_value).strip() == '':
                         return 'Easymerch'
                     clean_code = str(code_value).strip()
+                    # Если код неуникальный — не переопределяем
+                    if self.is_non_unique_code(clean_code):
+                        return 'Easymerch'
                     return portal_mapping.get(clean_code, 'Easymerch')
                 
                 result['ПО'] = result['Код анкеты'].apply(get_portal)
@@ -1340,6 +1366,9 @@ class DataCleaner:
                     clean_code = str(code_value).strip()
                     if '\\' in clean_code:
                         clean_code = clean_code.split('\\')[0].strip()
+                    # Если код неуникальный — не переопределяем
+                    if self.is_non_unique_code(clean_code):
+                        return 'Оптима'
                     return portal_mapping.get(clean_code, 'Оптима')
                 
                 result['ПО'] = result['Код анкеты'].apply(get_portal)
@@ -1405,6 +1434,10 @@ class DataCleaner:
                 errors='coerce',
                 dayfirst=True
             )
+
+        # Заменяем фейковые даты (1900-01-01) на NaT
+        fake_date = pd.Timestamp('1900-01-01')
+        result['Дата визита'] = result['Дата визита'].replace(fake_date, pd.NaT)
         
         # --- СПЕЦИАЛЬНАЯ ОБРАБОТКА РЕГИОНА ---
         # Словарь для поиска региона по ключевым словам
@@ -1709,7 +1742,6 @@ class DataCleaner:
         
 # Глобальный экземпляр
 data_cleaner = DataCleaner()
-
 
 
 
