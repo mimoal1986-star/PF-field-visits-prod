@@ -15,11 +15,20 @@ if 'temp_adjustments' not in st.session_state:
 # ФУНКЦИЯ КЭШИРОВАНИЯ ЗАГРУЗКИ EXCEL
 @st.cache_data
 def load_excel(file_obj, file_key):
-    """Загружает Excel с кэшированием. file_key - уникальный ключ для кэша"""
+    """Загружает Excel с кэшированием и сжимает пробелы во всех строковых колонках"""
     if file_obj is None:
         return None
     try:
-        return pd.read_excel(file_obj, dtype=str)
+        df = pd.read_excel(file_obj, dtype=str)
+        
+        # Сжимаем пробелы во всех строковых колонках
+        for col in df.columns:
+            if df[col].dtype == 'object':  # строковые колонки
+                df[col] = df[col].astype(str).str.strip()
+                # Заменяем пустые строки и 'nan' на пустую строку
+                df[col] = df[col].replace(['nan', 'None', 'null', ''], '')
+        
+        return df
     except Exception as e:
         st.error(f"Ошибка загрузки файла {file_key}: {e}")
         return None
@@ -868,7 +877,6 @@ with tab1:
             st.info("📌 Загрузите оба основных файла для расчета")
             st.button("🚀 РАССЧИТАТЬ ПЛАН/ФАКТ", type="primary", width='stretch', disabled=True)
             
-
 with tab2:
     st.title("📈 Отчеты по полевым визитам")
 
@@ -876,7 +884,7 @@ with tab2:
         st.info("📌 Сначала выполните расчет на вкладке 'Загрузка данных'")
     
     else:
-        tab_projects, tab_regions, tab_dsm = st.tabs(["📊 ПФ проекты", "🗺️ Регионы", "👥 DSM"])
+        tab_projects, tab_regions, tab_dsm, tab_dynamics = st.tabs(["📊 ПФ проекты", "🗺️ Регионы", "👥 DSM", "📈 Динамика"])
         
         with tab_projects:
             data = st.session_state.visit_report['calculated_data']
@@ -893,6 +901,25 @@ with tab2:
         with tab_dsm:
             data = st.session_state.visit_report['calculated_data']
             dataviz.create_dsm_tab(data, None)
+        
+        with tab_dynamics:
+            visits_for_dynamics = st.session_state.cleaned_data.get('полевые_проекты')
+            
+            if visits_for_dynamics is not None and not visits_for_dynamics.empty:
+                # Исключаем ПроДата из динамики
+                if 'Источник' in visits_for_dynamics.columns:
+                    visits_for_dynamics = visits_for_dynamics[visits_for_dynamics['Источник'] != 'Мониторинги']
+                
+                if 'RS' not in visits_for_dynamics.columns and 'ЭМ' in visits_for_dynamics.columns:
+                    visits_for_dynamics = visits_for_dynamics.rename(columns={'ЭМ': 'RS'})
+                
+                dataviz.create_dynamics_tab(
+                    st.session_state.visit_report['calculated_data'],
+                    visits_for_dynamics,
+                    st.session_state.plan_calc_params
+                )
+            else:
+                st.warning("⚠️ Нет данных для динамики")
 
 # # ============================================
 # # ВЫГРУЗКА ПОЛЕВЫХ ПРОЕКТОВ
