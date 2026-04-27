@@ -154,89 +154,7 @@
       "added_by": "unknown_user"
     }
   ],
-  "included_projects": [
-    {
-      "project_name": "Askona ",
-      "wave_name": "2026.04_Home",
-      "project_code": "nan",
-      "portal": "CXWAY",
-      "fio_om": "",
-      "added_at": "2026-04-14T08:41:44.837294",
-      "added_by": "unknown_user"
-    },
-    {
-      "project_name": "Malltech ",
-      "wave_name": "2026.04_Malltech_Подарочные карты",
-      "project_code": "nan",
-      "portal": "CXWAY",
-      "fio_om": "",
-      "added_at": "2026-04-14T08:45:51.121627",
-      "added_by": "unknown_user"
-    },
-    {
-      "project_name": "Servizoria_Sushimaster ",
-      "wave_name": "2026.04_Servizoria_Sushimaster",
-      "project_code": "nan",
-      "portal": "CXWAY",
-      "fio_om": "",
-      "added_at": "2026-04-14T08:45:51.121810",
-      "added_by": "unknown_user"
-    },
-    {
-      "project_name": "АО «АКРИХИН»\t ",
-      "wave_name": "nan",
-      "project_code": "nan",
-      "portal": "CXWAY",
-      "fio_om": "",
-      "added_at": "2026-04-14T08:45:51.121970",
-      "added_by": "unknown_user"
-    },
-    {
-      "project_name": "Абсолют Банк ",
-      "wave_name": "nan",
-      "project_code": "nan",
-      "portal": "CXWAY",
-      "fio_om": "",
-      "added_at": "2026-04-14T08:45:51.122091",
-      "added_by": "unknown_user"
-    },
-    {
-      "project_name": "Абсолют Банк ",
-      "wave_name": "2026.04_Звонки Абсолют банк",
-      "project_code": "nan",
-      "portal": "CXWAY",
-      "fio_om": "",
-      "added_at": "2026-04-14T08:45:51.122205",
-      "added_by": "unknown_user"
-    },
-    {
-      "project_name": "Абсолют Банк ",
-      "wave_name": "2026.04_Визиты Абсолют банк",
-      "project_code": "nan",
-      "portal": "CXWAY",
-      "fio_om": "",
-      "added_at": "2026-04-14T08:45:51.122323",
-      "added_by": "unknown_user"
-    },
-    {
-      "project_name": "Айкрафт ",
-      "wave_name": "2026.04 Контрольная закупка Айкрафт",
-      "project_code": "nan",
-      "portal": "CXWAY",
-      "fio_om": "",
-      "added_at": "2026-04-14T08:45:51.122450",
-      "added_by": "unknown_user"
-    },
-    {
-      "project_name": "Аптеки Johnson & Johnson ",
-      "wave_name": "nan",
-      "project_code": "nan",
-      "portal": "CXWAY",
-      "fio_om": "",
-      "added_at": "2026-04-14T08:45:51.122561",
-      "added_by": "unknown_user"
-    }
-  ],
+  "included_projects": [],
   "history": [
     {
       "action": "add_to_included",
@@ -517,8 +435,80 @@
       "project_code": "RU00.390.02.01SVZ26",
       "timestamp": "2026-04-27T09:46:01.143464",
       "user": "unknown_user"
+    },
+    {
+      "action": "remove_from_included",
+      "project_name": "Askona ",
+      "wave_name": "2026.04_Home",
+      "project_code": "nan",
+      "timestamp": "2026-04-27T09:46:21.214244",
+      "user": "unknown_user"
+    },
+    {
+      "action": "remove_from_included",
+      "project_name": "Malltech ",
+      "wave_name": "2026.04_Malltech_Подарочные карты",
+      "project_code": "nan",
+      "timestamp": "2026-04-27T09:46:21.214336",
+      "user": "unknown_user"
+    },
+    {
+      "action": "remove_from_included",
+      "project_name": "Servizoria_Sushimaster ",
+      "wave_name": "2026.04_Servizoria_Sushimaster",
+      "project_code": "nan",
+      "timestamp": "2026-04-27T09:46:21.214399",
+      "user": "unknown_user"
+    },
+    {
+      "action": "remove_from_included",
+      "project_name": "АО «АКРИХИН»\t ",
+      "wave_name": "nan",
+      "project_code": "nan",
+      "timestamp": "2026-04-27T09:46:21.214454",
+      "user": "unknown_user"
+    },
+    {
+      "action": "remove_from_included",
+      "project_name": "Абсолют Банк ",
+      "wave_name": "nan",
+      "project_code": "nan",
+      "timestamp": "2026-04-27T09:46:21.214538",
+      "user": "unknown_user"
+    },
+    {
+      "action": "remove_from_included",
+      "project_name": "Абсолют Банк ",
+      "wave_name": "2026.04_Звонки Абсолют банк",
+      "project_code": "nan",
+      "timestamp": "2026-04-27T09:46:21.214623",
+      "user": "unknown_user"
+    },
+    {
+      "action": "remove_from_included",
+      "project_name": "Абсолют Банк ",
+      "wave_name": "2026.04_Визиты Абсолют банк",
+      "project_code": "nan",
+      "timestamp": "2026-04-27T09:46:21.214720",
+      "user": "unknown_user"
+    },
+    {
+      "action": "remove_from_included",
+      "project_name": "Айкрафт ",
+      "wave_name": "2026.04 Контрольная закупка Айкрафт",
+      "project_code": "nan",
+      "timestamp": "2026-04-27T09:46:21.214777",
+      "user": "unknown_user"
+    },
+    {
+      "action": "remove_from_included",
+      "project_name": "Аптеки Johnson & Johnson ",
+      "wave_name": "nan",
+      "project_code": "nan",
+      "timestamp": "2026-04-27T09:46:21.214828",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-04-27T09:46:01.143467",
+  "last_updated": "2026-04-27T09:46:21.214834",
   "version": "1.0"
 }
