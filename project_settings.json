@@ -1,5 +1,159 @@
 {
-  "excluded_projects": [],
+  "excluded_projects": [
+    {
+      "project_name": "ГЛАВСТРОЙ",
+      "wave_name": "2026.04",
+      "project_code": "RU00.343.06.02SVZ25",
+      "portal": "Чеккер",
+      "fio_om": "",
+      "added_at": "2026-04-27T09:46:01.142299",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ГЛАВСТРОЙ",
+      "wave_name": "2026.04",
+      "project_code": "RU00.342.06.01SVZ25",
+      "portal": "Чеккер",
+      "fio_om": "",
+      "added_at": "2026-04-27T09:46:01.142416",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Roseville",
+      "wave_name": "Rosseville_04-2026",
+      "project_code": "RU00.366.06.01SVZ25",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-04-27T09:46:01.142537",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Roseville",
+      "wave_name": "Rosseville_04-2026 (ECOM)",
+      "project_code": "RU00.366.06.03SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-04-27T09:46:01.142626",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Марафон Сервиса",
+      "wave_name": "2026.04_Марафон Сервиса",
+      "project_code": "Семпл",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-04-27T09:46:01.142695",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Avito ФО",
+      "wave_name": "",
+      "project_code": "",
+      "portal": "Оптима",
+      "fio_om": "",
+      "added_at": "2026-04-27T09:46:01.142760",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Банк ВТБ УТО ФО",
+      "wave_name": "",
+      "project_code": "",
+      "portal": "Оптима",
+      "fio_om": "",
+      "added_at": "2026-04-27T09:46:01.142823",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Керамир Аудит",
+      "wave_name": "",
+      "project_code": "",
+      "portal": "Оптима",
+      "fio_om": "",
+      "added_at": "2026-04-27T09:46:01.142885",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Керамир Аудит_ТП",
+      "wave_name": "",
+      "project_code": "",
+      "portal": "Оптима",
+      "fio_om": "",
+      "added_at": "2026-04-27T09:46:01.142951",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Лукойл",
+      "wave_name": "Март 2026",
+      "project_code": "RU00.177.05.03SVZ25",
+      "portal": "Оптима",
+      "fio_om": "",
+      "added_at": "2026-04-27T09:46:01.143019",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Лукойл",
+      "wave_name": "Март 2026",
+      "project_code": "RU00.177.05.04SVZ25",
+      "portal": "Оптима",
+      "fio_om": "",
+      "added_at": "2026-04-27T09:46:01.143080",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Лукойл",
+      "wave_name": "Январь 2026",
+      "project_code": "RU00.177.05.04SVZ25",
+      "portal": "Оптима",
+      "fio_om": "",
+      "added_at": "2026-04-27T09:46:01.143142",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Лукойл",
+      "wave_name": "Январь 2026",
+      "project_code": "RU00.177.05.03SVZ25",
+      "portal": "Оптима",
+      "fio_om": "",
+      "added_at": "2026-04-27T09:46:01.143211",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Лукойл",
+      "wave_name": "",
+      "project_code": "RU00.177.05.04SVZ25",
+      "portal": "Оптима",
+      "fio_om": "",
+      "added_at": "2026-04-27T09:46:01.143276",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Лукойл",
+      "wave_name": "Апрель 2026",
+      "project_code": "RU00.177.05.04SVZ25",
+      "portal": "Оптима",
+      "fio_om": "",
+      "added_at": "2026-04-27T09:46:01.143338",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Лукойл франчайзинг ФО",
+      "wave_name": "Апрель 2026",
+      "project_code": "RU00.391.02.01SVZ26/RU00.390.02.01SVZ26",
+      "portal": "Оптима",
+      "fio_om": "",
+      "added_at": "2026-04-27T09:46:01.143400",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Лукойл франчайзинг ФО",
+      "wave_name": "Апрель 2026",
+      "project_code": "RU00.390.02.01SVZ26",
+      "portal": "Оптима",
+      "fio_om": "",
+      "added_at": "2026-04-27T09:46:01.143459",
+      "added_by": "unknown_user"
+    }
+  ],
   "included_projects": [
     {
       "project_name": "Askona ",
@@ -227,8 +381,144 @@
       "project_code": "nan",
       "timestamp": "2026-04-14T08:45:51.122570",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ГЛАВСТРОЙ",
+      "wave_name": "2026.04",
+      "project_code": "RU00.343.06.02SVZ25",
+      "timestamp": "2026-04-27T09:46:01.142313",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ГЛАВСТРОЙ",
+      "wave_name": "2026.04",
+      "project_code": "RU00.342.06.01SVZ25",
+      "timestamp": "2026-04-27T09:46:01.142421",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Roseville",
+      "wave_name": "Rosseville_04-2026",
+      "project_code": "RU00.366.06.01SVZ25",
+      "timestamp": "2026-04-27T09:46:01.142545",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Roseville",
+      "wave_name": "Rosseville_04-2026 (ECOM)",
+      "project_code": "RU00.366.06.03SVZ26",
+      "timestamp": "2026-04-27T09:46:01.142631",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Марафон Сервиса",
+      "wave_name": "2026.04_Марафон Сервиса",
+      "project_code": "Семпл",
+      "timestamp": "2026-04-27T09:46:01.142700",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Avito ФО",
+      "wave_name": "",
+      "project_code": "",
+      "timestamp": "2026-04-27T09:46:01.142764",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Банк ВТБ УТО ФО",
+      "wave_name": "",
+      "project_code": "",
+      "timestamp": "2026-04-27T09:46:01.142827",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Керамир Аудит",
+      "wave_name": "",
+      "project_code": "",
+      "timestamp": "2026-04-27T09:46:01.142889",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Керамир Аудит_ТП",
+      "wave_name": "",
+      "project_code": "",
+      "timestamp": "2026-04-27T09:46:01.142956",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Лукойл",
+      "wave_name": "Март 2026",
+      "project_code": "RU00.177.05.03SVZ25",
+      "timestamp": "2026-04-27T09:46:01.143023",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Лукойл",
+      "wave_name": "Март 2026",
+      "project_code": "RU00.177.05.04SVZ25",
+      "timestamp": "2026-04-27T09:46:01.143085",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Лукойл",
+      "wave_name": "Январь 2026",
+      "project_code": "RU00.177.05.04SVZ25",
+      "timestamp": "2026-04-27T09:46:01.143147",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Лукойл",
+      "wave_name": "Январь 2026",
+      "project_code": "RU00.177.05.03SVZ25",
+      "timestamp": "2026-04-27T09:46:01.143216",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Лукойл",
+      "wave_name": "",
+      "project_code": "RU00.177.05.04SVZ25",
+      "timestamp": "2026-04-27T09:46:01.143280",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Лукойл",
+      "wave_name": "Апрель 2026",
+      "project_code": "RU00.177.05.04SVZ25",
+      "timestamp": "2026-04-27T09:46:01.143344",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Лукойл франчайзинг ФО",
+      "wave_name": "Апрель 2026",
+      "project_code": "RU00.391.02.01SVZ26/RU00.390.02.01SVZ26",
+      "timestamp": "2026-04-27T09:46:01.143405",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Лукойл франчайзинг ФО",
+      "wave_name": "Апрель 2026",
+      "project_code": "RU00.390.02.01SVZ26",
+      "timestamp": "2026-04-27T09:46:01.143464",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-04-14T08:45:51.122577",
+  "last_updated": "2026-04-27T09:46:01.143467",
   "version": "1.0"
 }
