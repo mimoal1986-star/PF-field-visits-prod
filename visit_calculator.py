@@ -54,8 +54,25 @@ class VisitCalculator:
             print(f"[DEBUG] Ошибка расчета долей RS: {e}")
             return {}
     
-    
 
+    def _get_working_days_in_range(self, start_date, end_date):
+        """Возвращает количество рабочих дней (пн-пт) в диапазоне"""
+        if pd.isna(start_date) or pd.isna(end_date):
+            return 0
+        if hasattr(start_date, 'date'):
+            start_date = start_date.date()
+        if hasattr(end_date, 'date'):
+            end_date = end_date.date()
+        
+        days = 0
+        current = start_date
+        while current <= end_date:
+            if current.weekday() < 5:
+                days += 1
+            current += timedelta(days=1)
+        return days
+        
+    
     def calculate_plan_with_stages(self, total_plan, duration, coefficients, start_date, finish_date, period_start, period_end):
         
         if total_plan == 0 or duration == 0:
@@ -112,7 +129,7 @@ class VisitCalculator:
         
         return plan_on_date, daily_plan_avg
             
-    def extract_hierarchical_data(self, visits_df, google_df=None):
+    def extract_hierarchical_data(self, visits_df, google_df=None, google_df_original=None):
         """
         Создаёт полную иерархию Проект→Клиент→Волна→Регион→DSM→ASM→RS
         с базовой информацией о проекте
@@ -154,7 +171,10 @@ class VisitCalculator:
             hierarchy['Дата старта'] = pd.NaT
             hierarchy['Дата финиша'] = pd.NaT
             
-            # Обогащаем датами из google_df
+
+            # ============================================
+            # 1. ОСНОВНЫЕ ДАТЫ (из очищенного google_df)
+            # ============================================
             if google_df is not None and not google_df.empty:
                 start = time.time()
                 try:
@@ -188,8 +208,69 @@ class VisitCalculator:
                     hierarchy['Дата финиша'] = hierarchy['Дата финиша'].fillna(last_day)
                     
                 except Exception as e:
+                    hierarchy['Дата старта'] = pd.NaT
+                    hierarchy['Дата финиша'] = pd.NaT
+                    
+                    if 'plan_calc_params' in st.session_state:
+                        first_day = pd.Timestamp(st.session_state['plan_calc_params']['start_date'])
+                        last_day = first_day + pd.offsets.MonthEnd(1)
+                    else:
+                        today = datetime.now()
+                        first_day = pd.Timestamp(year=today.year, month=today.month, day=1)
+                        last_day = first_day + pd.offsets.MonthEnd(1)
+                    
+                    hierarchy['Дата старта'] = hierarchy['Дата старта'].fillna(first_day)
+                    hierarchy['Дата финиша'] = hierarchy['Дата финиша'].fillna(last_day)
                     pass
-                st.write(f"[DETAIL] Обогащение датами: {time.time() - start:.2f} сек")
+                st.write(f"[DETAIL] Основные даты: {time.time() - start:.2f} сек")
+            else:
+                # Если google_df нет, ставим даты по умолчанию
+                if 'plan_calc_params' in st.session_state:
+                    first_day = pd.Timestamp(st.session_state['plan_calc_params']['start_date'])
+                    last_day = first_day + pd.offsets.MonthEnd(1)
+                else:
+                    today = datetime.now()
+                    first_day = pd.Timestamp(year=today.year, month=today.month, day=1)
+                    last_day = first_day + pd.offsets.MonthEnd(1)
+                
+                hierarchy['Дата старта'] = first_day
+                hierarchy['Дата финиша'] = last_day
+            
+            # ============================================
+            # 2. ОРИГИНАЛЬНЫЕ ДАТЫ ИЗ GOOGLE (для информации и коэффициента)
+            # ============================================
+            if google_df_original is not None and not google_df_original.empty:
+                start = time.time()
+                try:
+                    start_mapping_orig = {}
+                    finish_mapping_orig = {}
+                    
+                    for idx, row in google_df_original.iterrows():
+                        code = str(row.get('Код проекта RU00.000.00.01SVZ24', '')).strip()
+                        if code and code not in ['nan', '']:
+                            start_date = row.get('Дата старта')
+                            finish_date = row.get('Дата финиша с продлением')
+                            
+                            if pd.notna(start_date):
+                                start_mapping_orig[code] = start_date
+                            if pd.notna(finish_date):
+                                finish_mapping_orig[code] = finish_date
+                    
+                    hierarchy['Дата старта_гугл'] = hierarchy['Проект'].map(start_mapping_orig)
+                    hierarchy['Дата финиша_гугл'] = hierarchy['Проект'].map(finish_mapping_orig)
+                    # ПРЕОБРАЗУЕМ В DATETIME
+                    hierarchy['Дата старта_гугл'] = pd.to_datetime(hierarchy['Дата старта_гугл'], errors='coerce')
+                    hierarchy['Дата финиша_гугл'] = pd.to_datetime(hierarchy['Дата финиша_гугл'], errors='coerce')
+                    
+                except Exception as e:
+                    hierarchy['Дата старта_гугл'] = pd.NaT
+                    hierarchy['Дата финиша_гугл'] = pd.NaT
+                    pass
+                st.write(f"[DETAIL] Оригинальные даты: {time.time() - start:.2f} сек")
+            else:
+                hierarchy['Дата старта_гугл'] = pd.NaT
+                hierarchy['Дата финиша_гугл'] = pd.NaT
+                
             
             # Рассчитываем длительность
             start = time.time()
@@ -406,6 +487,52 @@ class VisitCalculator:
                 period_start = max(start_period, start_date.date())
                 period_end = min(end_period, finish_date.date())
                 days_in_period = max(0, (period_end - period_start).days + 1)
+
+                
+                # ============================================
+                # РАСЧЕТ КОЭФФИЦИЕНТА МЕСЯЦА
+                # ============================================
+                start_date_google = row.get('Дата старта_гугл', None)
+                finish_date_google = row.get('Дата финиша_гугл', None)
+                
+                if pd.isna(start_date_google):
+                    start_date_google = start_date
+                if pd.isna(finish_date_google):
+                    finish_date_google = finish_date
+                
+                # Приводим все к Timestamp (чтобы можно было сравнивать)
+                if hasattr(start_date_google, 'date'):
+                    start_ts = pd.Timestamp(start_date_google.date())
+                elif hasattr(start_date_google, 'year'):
+                    start_ts = pd.Timestamp(start_date_google)
+                else:
+                    start_ts = pd.Timestamp(start_date.date())
+                
+                if hasattr(finish_date_google, 'date'):
+                    finish_ts = pd.Timestamp(finish_date_google.date())
+                elif hasattr(finish_date_google, 'year'):
+                    finish_ts = pd.Timestamp(finish_date_google)
+                else:
+                    finish_ts = pd.Timestamp(finish_date.date())
+                
+                # Границы текущего месяца (как Timestamp)
+                month_start_ts = pd.Timestamp(calc_params['start_date'])
+                month_end_ts = month_start_ts + pd.offsets.MonthEnd(1)
+                
+                # Рабочие дни проекта в текущем месяце (числитель)
+                project_start_in_month = max(start_ts, month_start_ts)
+                project_end_in_month = min(finish_ts, month_end_ts)
+                working_days_in_month = self._get_working_days_in_range(project_start_in_month, project_end_in_month)
+                
+                # Общие рабочие дни проекта (знаменатель)
+                total_working_days = self._get_working_days_in_range(start_ts, finish_ts)
+                
+                if total_working_days > 0:
+                    month_coefficient = working_days_in_month / total_working_days
+                else:
+                    month_coefficient = 1.0
+                # ============================================
+                
                 
                 if days_in_period == 0:
                     continue
@@ -440,6 +567,9 @@ class VisitCalculator:
                         total_plan = project_wave_region_plans.get(plan_key, 0)
                         if total_plan <= 0:
                             continue
+                        
+                        # ПРИМЕНЯЕМ КОЭФФИЦИЕНТ МЕСЯЦА
+                        total_plan = round(total_plan * month_coefficient, 1)
                         
                         # Распределяем план по RS с помощью весов
                         weight_key = (client_name, project_code, wave_name, region, rs_name)
@@ -476,6 +606,9 @@ class VisitCalculator:
                     'Длительность': int(duration),
                     'Дата старта': start_date,
                     'Дата финиша': finish_date,
+                    'Дата старта_гугл': start_date_google,     
+                    'Дата финиша_гугл': finish_date_google,    
+                    'Коэффициент месяца': month_coefficient, 
                     'Дней в периоде': days_in_period,
                     'Дневной план RS, шт.': round(rs_daily_plan, 2)
                 })
@@ -746,8 +879,16 @@ class VisitCalculator:
         df = fact_df.copy()
         
         # 1. ПЛАН (из plan_df если есть)
-        if plan_df is not None and 'План на дату, шт.' in plan_df.columns:
-            df['План на дату, шт.'] = plan_df['План на дату, шт.']
+        if plan_df is not None:
+            if 'План на дату, шт.' in plan_df.columns:
+                df['План на дату, шт.'] = plan_df['План на дату, шт.']
+            # Сохраняем дополнительные колонки из plan_df
+            if 'Дата старта_гугл' in plan_df.columns:
+                df['Дата старта_гугл'] = plan_df['Дата старта_гугл']
+            if 'Дата финиша_гугл' in plan_df.columns:
+                df['Дата финиша_гугл'] = plan_df['Дата финиша_гугл']
+            if 'Коэффициент месяца' in plan_df.columns:
+                df['Коэффициент месяца'] = plan_df['Коэффициент месяца']
         elif 'План на дату, шт.' not in df.columns:
             df['План на дату, шт.'] = 0
         
@@ -826,8 +967,6 @@ class VisitCalculator:
 
 # Глобальный экземпляр
 visit_calculator = VisitCalculator()
-
-
 
 
 
