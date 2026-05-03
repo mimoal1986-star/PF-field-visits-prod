@@ -242,34 +242,64 @@ class VisitCalculator:
             if google_df_original is not None and not google_df_original.empty:
                 start = time.time()
                 try:
-                    start_mapping_orig = {}
-                    finish_mapping_orig = {}
+                    # Словарь с приоритетом: (код, волна) → (старт, финиш, метод)
+                    date_mapping = {}
                     
                     for idx, row in google_df_original.iterrows():
                         code = str(row.get('Код проекта RU00.000.00.01SVZ24', '')).strip()
+                        wave = str(row.get('Название волны на Чекере/ином ПО', '')).strip()
+                        
                         if code and code not in ['nan', '']:
                             start_date = row.get('Дата старта')
                             finish_date = row.get('Дата финиша с продлением')
                             
-                            if pd.notna(start_date):
-                                start_mapping_orig[code] = start_date
-                            if pd.notna(finish_date):
-                                finish_mapping_orig[code] = finish_date
+                            if pd.notna(start_date) and pd.notna(finish_date):
+                                # Ключ (код, волна) — приоритетный
+                                if wave and wave not in ['nan', '']:
+                                    key = (code, wave)
+                                    if key not in date_mapping:
+                                        date_mapping[key] = (start_date, finish_date, 'ВК')
+                                # Ключ только код — менее приоритетный
+                                else:
+                                    key = (code, None)
+                                    if key not in date_mapping:
+                                        date_mapping[key] = (start_date, finish_date, 'К')
                     
-                    hierarchy['Дата старта_гугл'] = hierarchy['Проект'].map(start_mapping_orig)
-                    hierarchy['Дата финиша_гугл'] = hierarchy['Проект'].map(finish_mapping_orig)
-                    # ПРЕОБРАЗУЕМ В DATETIME
+                    # Функция для получения дат по строке иерархии
+                    def get_dates(row):
+                        code = row['Проект']
+                        wave = row['Волна']
+                        
+                        # Точное совпадение по коду и волне
+                        if (code, wave) in date_mapping:
+                            start, finish, method = date_mapping[(code, wave)]
+                            return pd.Series([start, finish, method])
+                        
+                        # Код есть, но волна не совпала (или пустая/с разделителями)
+                        for (c, w), (start, finish, _) in date_mapping.items():
+                            if c == code:
+                                return pd.Series([start, finish, 'К'])
+                        
+                        # Код не найден
+                        return pd.Series([pd.NaT, pd.NaT, 'МП'])
+                    
+                    # Применяем маппинг
+                    hierarchy[['Дата старта_гугл', 'Дата финиша_гугл', 'Метод подбора дат']] = hierarchy.apply(get_dates, axis=1)
+                    
+                    # Преобразуем в datetime
                     hierarchy['Дата старта_гугл'] = pd.to_datetime(hierarchy['Дата старта_гугл'], errors='coerce')
                     hierarchy['Дата финиша_гугл'] = pd.to_datetime(hierarchy['Дата финиша_гугл'], errors='coerce')
                     
                 except Exception as e:
                     hierarchy['Дата старта_гугл'] = pd.NaT
                     hierarchy['Дата финиша_гугл'] = pd.NaT
+                    hierarchy['Метод подбора дат'] = 'МП'
                     pass
                 st.write(f"[DETAIL] Оригинальные даты: {time.time() - start:.2f} сек")
             else:
                 hierarchy['Дата старта_гугл'] = pd.NaT
                 hierarchy['Дата финиша_гугл'] = pd.NaT
+                hierarchy['Метод подбора дат'] = 'МП'
                 
             
             # Рассчитываем длительность
@@ -608,7 +638,8 @@ class VisitCalculator:
                     'Дата финиша': finish_date,
                     'Дата старта_гугл': start_date_google,     
                     'Дата финиша_гугл': finish_date_google,    
-                    'Коэффициент месяца': month_coefficient, 
+                    'Коэффициент месяца': month_coefficient,
+                    'Метод подбора дат': row['Метод подбора дат'],
                     'Дней в периоде': days_in_period,
                     'Дневной план RS, шт.': round(rs_daily_plan, 2)
                 })
@@ -889,6 +920,8 @@ class VisitCalculator:
                 df['Дата финиша_гугл'] = plan_df['Дата финиша_гугл']
             if 'Коэффициент месяца' in plan_df.columns:
                 df['Коэффициент месяца'] = plan_df['Коэффициент месяца']
+            if 'Метод подбора дат' in plan_df.columns:
+                df['Метод подбора дат'] = plan_df['Метод подбора дат']
         elif 'План на дату, шт.' not in df.columns:
             df['План на дату, шт.'] = 0
         
