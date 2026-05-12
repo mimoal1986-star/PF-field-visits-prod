@@ -603,6 +603,20 @@ class DataVisualizer:
                 (project_data.loc[mask_plan, 'Факт на дату, шт.'] / 
                  project_data.loc[mask_plan, 'План на дату, шт.']) - 1
             ).round(3) * 100
+
+        # △План/Факт проекта, шт (Факт - План)
+        project_data['△План/Факт проекта, шт'] = (
+            project_data['Факт проекта, шт.'] - project_data['План проекта, шт.']
+        ).round(1)
+        
+        # △План/Факт проекта, %
+        mask_project_plan = project_data['План проекта, шт.'] > 0
+        project_data['△План/Факт проекта, %'] = 0.0
+        if mask_project_plan.any():
+            project_data.loc[mask_project_plan, '△План/Факт проекта, %'] = (
+                (project_data.loc[mask_project_plan, 'Факт проекта, шт.'] / 
+                 project_data.loc[mask_project_plan, 'План проекта, шт.']) - 1
+            ).round(3) * 100
         
         # KPI
         st.markdown("### 📊 Ключевые показатели")
@@ -685,10 +699,12 @@ class DataVisualizer:
         # Колонки, которые показываются всегда
         always_show = [
             'План проекта, шт.', 
-            'Факт проекта, шт.', 
-            'План/Факт проекта,%',
+            'Факт проекта, шт.',
             'План на дату, шт.',
             'Факт на дату, шт.',
+            'План/Факт проекта,%',
+            '△План/Факт проекта, шт',
+            '△План/Факт проекта, %',
             'План/Факт на дату,%',
             '△План/Факт на дату, шт',
             '△План/Факт на дату, %',
@@ -712,8 +728,11 @@ class DataVisualizer:
         
         # Кнопка скачивания
         output = BytesIO()
+        # Используем existing_display для правильного порядка колонок
+        project_data_for_excel = project_data[existing_display]
+        
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            project_data.to_excel(writer, sheet_name='План_факт_проекты', index=False)
+            project_data_for_excel.to_excel(writer, sheet_name='План_факт_проекты', index=False)
         
         st.download_button(
             label="⬇️ Скачать Excel",
@@ -1045,6 +1064,18 @@ class DataVisualizer:
                 (region_data.loc[mask_plan, 'Факт на дату, шт.'] / 
                  region_data.loc[mask_plan, 'План на дату, шт.']) - 1
             ).round(3) * 100
+
+        region_data['△План/Факт проекта, шт'] = (
+            region_data['Факт проекта, шт.'] - region_data['План проекта, шт.']
+        ).round(1)
+        
+        mask_project_plan = region_data['План проекта, шт.'] > 0
+        region_data['△План/Факт проекта, %'] = 0.0
+        if mask_project_plan.any():
+            region_data.loc[mask_project_plan, '△План/Факт проекта, %'] = (
+                (region_data.loc[mask_project_plan, 'Факт проекта, шт.'] / 
+                 region_data.loc[mask_project_plan, 'План проекта, шт.']) - 1
+            ).round(3) * 100
         
         # KPI
         st.markdown("### 📊 Ключевые показатели")
@@ -1126,10 +1157,12 @@ class DataVisualizer:
         # Колонки, которые показываются всегда
         always_show = [
             'План проекта, шт.', 
-            'Факт проекта, шт.', 
-            'План/Факт проекта,%',
+            'Факт проекта, шт.',
             'План на дату, шт.',
             'Факт на дату, шт.',
+            'План/Факт проекта,%',
+            '△План/Факт проекта, шт',
+            '△План/Факт проекта, %',
             'План/Факт на дату,%',
             '△План/Факт на дату, шт',
             '△План/Факт на дату, %',
@@ -1139,7 +1172,7 @@ class DataVisualizer:
             'Дней до конца проекта',
             'Утилизация тайминга, %',
             'Ср. план на день для 100% плана',
-            'Метод подбора дат'  
+            'Метод подбора дат'
         ]
         
         for col in always_show:
@@ -1156,8 +1189,11 @@ class DataVisualizer:
         
         # Кнопка скачивания
         output = BytesIO()
+        # Используем existing_display для правильного порядка колонок
+        region_data_for_excel = region_data[existing_display]
+        
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            region_data.to_excel(writer, sheet_name='Регионы', index=False)
+            region_data_for_excel.to_excel(writer, sheet_name='Регионы', index=False)
         
         st.download_button(
             label="⬇️ Скачать Excel",
@@ -1421,6 +1457,18 @@ class DataVisualizer:
                 (dsm_data.loc[mask_plan, 'Факт на дату, шт.'] / 
                  dsm_data.loc[mask_plan, 'План на дату, шт.']) - 1
             ).round(3) * 100
+
+        dsm_data['△План/Факт проекта, шт'] = (
+            dsm_data['Факт проекта, шт.'] - dsm_data['План проекта, шт.']
+        ).round(1)
+        
+        mask_project_plan = dsm_data['План проекта, шт.'] > 0
+        dsm_data['△План/Факт проекта, %'] = 0.0
+        if mask_project_plan.any():
+            dsm_data.loc[mask_project_plan, '△План/Факт проекта, %'] = (
+                (dsm_data.loc[mask_project_plan, 'Факт проекта, шт.'] / 
+                 dsm_data.loc[mask_project_plan, 'План проекта, шт.']) - 1
+            ).round(3) * 100
         
         # KPI
         st.markdown("### 📊 Ключевые показатели")
@@ -1502,10 +1550,12 @@ class DataVisualizer:
         # Колонки, которые показываются всегда
         always_show = [
             'План проекта, шт.', 
-            'Факт проекта, шт.', 
-            'План/Факт проекта,%',
+            'Факт проекта, шт.',
             'План на дату, шт.',
             'Факт на дату, шт.',
+            'План/Факт проекта,%',
+            '△План/Факт проекта, шт',
+            '△План/Факт проекта, %',
             'План/Факт на дату,%',
             '△План/Факт на дату, шт',
             '△План/Факт на дату, %',
@@ -1515,7 +1565,7 @@ class DataVisualizer:
             'Дней до конца проекта',
             'Утилизация тайминга, %',
             'Ср. план на день для 100% плана',
-            'Метод подбора дат'  
+            'Метод подбора дат'
         ]
         
         for col in always_show:
@@ -1528,8 +1578,11 @@ class DataVisualizer:
         
         # Кнопка скачивания
         output = BytesIO()
+        # Используем existing_display для правильного порядка колонок
+        dsm_data_for_excel = dsm_data[existing_display]
+        
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            dsm_data.to_excel(writer, sheet_name='DSM', index=False)
+            dsm_data_for_excel.to_excel(writer, sheet_name='DSM', index=False)
         
         st.download_button(
             label="⬇️ Скачать Excel",
