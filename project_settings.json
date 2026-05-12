@@ -179,6 +179,15 @@
       "fio_om": "",
       "added_at": "2026-05-12T07:32:18.011348",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ТАЙНЫЙ ПАССАЖИР",
+      "wave_name": "Тестирование для Визитов",
+      "project_code": "RU00.265.01.05SVZ25",
+      "portal": "Чеккер",
+      "fio_om": "",
+      "added_at": "2026-05-12T07:40:36.997211",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [],
@@ -558,8 +567,16 @@
       "project_code": "RU00.265.01.05SVZ25",
       "timestamp": "2026-05-12T07:32:18.011355",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ТАЙНЫЙ ПАССАЖИР",
+      "wave_name": "Тестирование для Визитов",
+      "project_code": "RU00.265.01.05SVZ25",
+      "timestamp": "2026-05-12T07:40:36.997230",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-05-12T07:32:18.011359",
+  "last_updated": "2026-05-12T07:40:36.997234",
   "version": "1.0"
 }
