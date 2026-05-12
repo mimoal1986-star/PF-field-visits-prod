@@ -8,6 +8,7 @@ from typing import Optional, Dict, Tuple, List
 import io
 import calendar
 from github_settings import get_plan_adjustment_manager
+from github_settings import get_multon_plan_manager
 from data_cleaner import REGION_NAME_TO_CODE
 
 class VisitCalculator:
@@ -440,7 +441,9 @@ class VisitCalculator:
                     plan_adjustments[key] = current + adj.get('adjustment_value', 0)
             except Exception as e:
                 plan_adjustments = {}
-            
+
+
+        
             # ============================================
             # 2. ПРЕДВАРИТЕЛЬНЫЙ РАСЧЕТ ВЕСОВ RS
             # ============================================
@@ -488,6 +491,51 @@ class VisitCalculator:
                     if project_code not in prodata_regions:
                         prodata_regions[project_code] = set()
                     prodata_regions[project_code].add(region)
+                    
+
+            # === РАСШИРЕНИЕ ИЕРАРХИИ ДЛЯ МУЛТОН (добавляем проекты без визитов) ===
+            from github_settings import get_multon_plan_manager
+            multon_manager = get_multon_plan_manager()
+            plan_df = multon_manager.load_plan()
+            
+            if not plan_df.empty:
+                # Получаем существующие комбинации из иерархии
+                existing_combinations = set(zip(
+                    hierarchy_df[hierarchy_df['Клиент'] == 'Мултон']['Проект'],
+                    hierarchy_df[hierarchy_df['Клиент'] == 'Мултон']['Регион'],
+                    hierarchy_df[hierarchy_df['Клиент'] == 'Мултон']['ASM']
+                ))
+                
+                # Получаем все комбинации из JSON
+                json_combinations = set(zip(plan_df['project_code'], plan_df['region'], plan_df['rs']))
+                
+                # Находим недостающие комбинации
+                missing_combinations = json_combinations - existing_combinations
+                
+                if missing_combinations:
+                    # Создаем строки для недостающих комбинаций
+                    new_rows = []
+                    for project_code, region, asm in missing_combinations:
+                        new_rows.append({
+                            'Проект': project_code,
+                            'Клиент': 'Мултон',
+                            'Волна': 'не указано',
+                            'Регион': region,
+                            'DSM': 'не указано',
+                            'ASM': asm,
+                            'RS': 'нет',
+                            'ПО': 'ПО клиента',
+                            'Полевой': 1,
+                            'Дата старта': pd.Timestamp(start_period),
+                            'Дата финиша': pd.Timestamp(end_period),
+                            'Длительность': (pd.Timestamp(end_period) - pd.Timestamp(start_period)).days + 1,
+                            'Метод подбора дат': 'План (нет визитов)'
+                        })
+                    
+                    # Добавляем в иерархию
+                    new_rows_df = pd.DataFrame(new_rows)
+                    hierarchy_df = pd.concat([hierarchy_df, new_rows_df], ignore_index=True)
+        
             
             # ============================================
             # 4. ОСНОВНОЙ ЦИКЛ (ОПТИМИЗИРОВАННЫЙ)
@@ -584,12 +632,31 @@ class VisitCalculator:
                     # Сначала рассчитываем total_plan (как раньше)
                     
                     if po == 'ПО клиента' and client == 'Мултон':
-                        total_plan = multon_quotas.get(project_code, 0)
+                        # Проверяем, загружен ли Easymerch
+                        if 'easymerch' not in st.session_state.uploaded_files:
+                            continue
+                            
+                        # Загружаем распределение плана из JSON
+                        from github_settings import get_multon_plan_manager
+                        multon_manager = get_multon_plan_manager()
+                        plan_df = multon_manager.load_plan()
+                        
+                        if plan_df.empty:
+                            # Нет распределения → проект не существует
+                            total_plan = 0
+                        else:
+                            # Ищем план по (код_проекта, регион, RS)
+                            mask = (plan_df['project_code'] == project_code) & \
+                                   (plan_df['region'] == region) & \
+                                   (plan_df['rs'] == row['ASM'])
+                            
+                            if mask.any():
+                                total_plan = plan_df.loc[mask, 'plan'].iloc[0]
+                            else:
+                                total_plan = 0
+                        
                         if total_plan <= 0:
                             continue
-                        num_regions = len(multon_regions.get(project_code, []))
-                        if num_regions > 0:
-                            total_plan = total_plan / num_regions
                     
                     else:  # Чеккер, CXWAY, Easymerch, Optima
                         client_name = row['Клиент']
@@ -928,6 +995,15 @@ class VisitCalculator:
         # 2. ФАКТ
         if 'Факт на дату, шт.' not in df.columns:
             df['Факт на дату, шт.'] = 0
+
+        # 2.5 КОРРЕКТИРОВКА ПЛАНА: если факт > план
+        mask_fact_gt_plan_project = df['Факт проекта, шт.'] > df['План проекта, шт.']
+        if mask_fact_gt_plan_project.any():
+            df.loc[mask_fact_gt_plan_project, 'План проекта, шт.'] = df.loc[mask_fact_gt_plan_project, 'Факт проекта, шт.'].copy()
+        
+        mask_fact_gt_plan_date = df['Факт на дату, шт.'] > df['План на дату, шт.']
+        if mask_fact_gt_plan_date.any():
+            df.loc[mask_fact_gt_plan_date, 'План на дату, шт.'] = df.loc[mask_fact_gt_plan_date, 'Факт на дату, шт.'].copy()
         
         # 3. БАЗОВЫЕ МЕТРИКИ
         mask = df['План на дату, шт.'] > 0
@@ -955,6 +1031,28 @@ class VisitCalculator:
         
         # Исполнение проекта
         df['Исполнение Проекта,%'] = df['%ПФ на дату']
+
+        # План/Факт проекта, %
+        mask_project = df['План проекта, шт.'] > 0
+        df['План/Факт проекта,%'] = 0.0
+        if mask_project.any():
+            df.loc[mask_project, 'План/Факт проекта,%'] = (
+                df.loc[mask_project, 'Факт проекта, шт.'] / 
+                df.loc[mask_project, 'План проекта, шт.'] * 100
+            ).round(1)
+        
+        # △План/Факт проекта, шт
+        df['△План/Факт проекта, шт'] = (
+            df['Факт проекта, шт.'] - df['План проекта, шт.']
+        ).round(1)
+        
+        # △План/Факт проекта, %
+        df['△План/Факт проекта, %'] = 0.0
+        if mask_project.any():
+            df.loc[mask_project, '△План/Факт проекта, %'] = (
+                (df.loc[mask_project, 'Факт проекта, шт.'] / 
+                 df.loc[mask_project, 'План проекта, шт.']) - 1
+            ).round(3) * 100
         
         # 4. МЕТРИКИ ПО ДНЯМ (если есть calc_params)
         if calc_params and 'Дата старта' in df.columns and 'Дата финиша' in df.columns:
@@ -1000,7 +1098,6 @@ class VisitCalculator:
 
 # Глобальный экземпляр
 visit_calculator = VisitCalculator()
-
 
 
 
