@@ -224,6 +224,33 @@
       "fio_om": "",
       "added_at": "2026-05-15T07:54:23.424222",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Эконика",
+      "wave_name": "Эконика_2026.05_ВИП",
+      "project_code": "Мультикод_.306",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-05-15T07:55:37.227053",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Эконика",
+      "wave_name": "Эконика_2026.05 (73 волна)",
+      "project_code": "Мультикод_.306",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-05-15T07:55:37.227232",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Эконика",
+      "wave_name": "_SINGLE-Эконика",
+      "project_code": "Мультикод_.306",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-05-15T07:55:37.227393",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [],
@@ -707,8 +734,32 @@
       "project_code": "Sample_Марафон Сервиса_Улыбка радуги",
       "timestamp": "2026-05-15T07:54:23.424228",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Эконика",
+      "wave_name": "Эконика_2026.05_ВИП",
+      "project_code": "Мультикод_.306",
+      "timestamp": "2026-05-15T07:55:37.227081",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Эконика",
+      "wave_name": "Эконика_2026.05 (73 волна)",
+      "project_code": "Мультикод_.306",
+      "timestamp": "2026-05-15T07:55:37.227248",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Эконика",
+      "wave_name": "_SINGLE-Эконика",
+      "project_code": "Мультикод_.306",
+      "timestamp": "2026-05-15T07:55:37.227434",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-05-15T07:54:23.424232",
+  "last_updated": "2026-05-15T07:55:37.227441",
   "version": "1.0"
 }
