@@ -298,33 +298,6 @@
       "added_by": "unknown_user"
     },
     {
-      "project_name": "Tarkett_ru",
-      "wave_name": "2026.04-06 (27 волна)_2Q",
-      "project_code": "RU00.066.01.01SVZ24",
-      "portal": "CXWAY",
-      "fio_om": "",
-      "added_at": "2026-05-15T12:02:37.077775",
-      "added_by": "unknown_user"
-    },
-    {
-      "project_name": "Tarkett_ru",
-      "wave_name": "2026.04-06 (27 волна)_2Q_TARKETT SPACE",
-      "project_code": "RU00.066.01.01SVZ24",
-      "portal": "CXWAY",
-      "fio_om": "",
-      "added_at": "2026-05-15T12:02:37.077853",
-      "added_by": "unknown_user"
-    },
-    {
-      "project_name": "Абсолют Банк",
-      "wave_name": "2026.05_Визиты Абсолют банк",
-      "project_code": "RU00.080.01.01SVZ24",
-      "portal": "CXWAY",
-      "fio_om": "",
-      "added_at": "2026-05-15T12:02:37.077927",
-      "added_by": "unknown_user"
-    },
-    {
       "project_name": "Абсолют Банк",
       "wave_name": "2026.05_Звонки Абсолют банк",
       "project_code": "RU00.080.01.02SVZ24",
@@ -344,29 +317,11 @@
     },
     {
       "project_name": "SUBJOY",
-      "wave_name": "2026.05 Анкета Тайного Гостя 7 Волна",
-      "project_code": "RU00.250.01.01SPK24",
-      "portal": "CXWAY",
-      "fio_om": "",
-      "added_at": "2026-05-15T12:02:37.078255",
-      "added_by": "unknown_user"
-    },
-    {
-      "project_name": "SUBJOY",
       "wave_name": "2026.04 Анкета Тайного Гостя 7 Волна",
       "project_code": "RU00.250.01.01SPK24",
       "portal": "CXWAY",
       "fio_om": "",
       "added_at": "2026-05-15T12:02:37.078332",
-      "added_by": "unknown_user"
-    },
-    {
-      "project_name": "MIUZ Diamonds",
-      "wave_name": "2026.05 (91 волна)_MIUZ Diamonds",
-      "project_code": "RU00.201.01.01SVZ24",
-      "portal": "CXWAY",
-      "fio_om": "",
-      "added_at": "2026-05-15T12:02:37.078408",
       "added_by": "unknown_user"
     },
     {
