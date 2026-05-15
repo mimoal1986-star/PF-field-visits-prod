@@ -260,6 +260,15 @@
       "fio_om": "",
       "added_at": "2026-05-15T09:37:27.913637",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Этажи",
+      "wave_name": "2026.02-03_Этажи",
+      "project_code": "RU00.311.01.02SVZ24",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-05-15T09:45:36.427600",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [],
@@ -831,8 +840,16 @@
       "project_code": "",
       "timestamp": "2026-05-15T09:37:27.913645",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Этажи",
+      "wave_name": "2026.02-03_Этажи",
+      "project_code": "RU00.311.01.02SVZ24",
+      "timestamp": "2026-05-15T09:45:36.427622",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-05-15T09:37:27.913649",
+  "last_updated": "2026-05-15T09:45:36.427627",
   "version": "1.0"
 }
