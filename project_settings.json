@@ -242,6 +242,78 @@
       "fio_om": "",
       "added_at": "2026-05-15T07:55:37.227393",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ЦДМ",
+      "wave_name": "ЦДМ_Визиты_04.2025",
+      "project_code": "Мультикод_.298",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-05-15T09:37:27.912933",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ЦДМ",
+      "wave_name": "2026.05_ЦДМ",
+      "project_code": "RU00.298.01.06SPK26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-05-15T09:37:27.913048",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ЦДМ",
+      "wave_name": "2026.05_ЦДМ",
+      "project_code": "RU00.298.01.03SPK26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-05-15T09:37:27.913132",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ЦДМ",
+      "wave_name": "2026.05_ЦДМ",
+      "project_code": "RU00.298.01.07SPK26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-05-15T09:37:27.913205",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ЦДМ",
+      "wave_name": "2026.05_ЦДМ",
+      "project_code": "RU00.298.01.08SPK26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-05-15T09:37:27.913278",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ЦДМ",
+      "wave_name": "2026.05_ЦДМ",
+      "project_code": "RU00.298.01.04SPK26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-05-15T09:37:27.913362",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ЦДМ",
+      "wave_name": "2026.05_ЦДМ",
+      "project_code": "RU00.298.01.05SPK26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-05-15T09:37:27.913528",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Фреш Маркет ДА_тест",
+      "wave_name": "2026.04_Марафон Сервиса",
+      "project_code": "",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-05-15T09:37:27.913637",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [],
@@ -749,8 +821,72 @@
       "project_code": "Мультикод_.306",
       "timestamp": "2026-05-15T07:55:37.227434",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ЦДМ",
+      "wave_name": "ЦДМ_Визиты_04.2025",
+      "project_code": "Мультикод_.298",
+      "timestamp": "2026-05-15T09:37:27.912955",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ЦДМ",
+      "wave_name": "2026.05_ЦДМ",
+      "project_code": "RU00.298.01.06SPK26",
+      "timestamp": "2026-05-15T09:37:27.913057",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ЦДМ",
+      "wave_name": "2026.05_ЦДМ",
+      "project_code": "RU00.298.01.03SPK26",
+      "timestamp": "2026-05-15T09:37:27.913140",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ЦДМ",
+      "wave_name": "2026.05_ЦДМ",
+      "project_code": "RU00.298.01.07SPK26",
+      "timestamp": "2026-05-15T09:37:27.913213",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ЦДМ",
+      "wave_name": "2026.05_ЦДМ",
+      "project_code": "RU00.298.01.08SPK26",
+      "timestamp": "2026-05-15T09:37:27.913285",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ЦДМ",
+      "wave_name": "2026.05_ЦДМ",
+      "project_code": "RU00.298.01.04SPK26",
+      "timestamp": "2026-05-15T09:37:27.913372",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ЦДМ",
+      "wave_name": "2026.05_ЦДМ",
+      "project_code": "RU00.298.01.05SPK26",
+      "timestamp": "2026-05-15T09:37:27.913540",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Фреш Маркет ДА_тест",
+      "wave_name": "2026.04_Марафон Сервиса",
+      "project_code": "",
+      "timestamp": "2026-05-15T09:37:27.913645",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-05-15T07:55:37.227441",
+  "last_updated": "2026-05-15T09:37:27.913649",
   "version": "1.0"
 }
