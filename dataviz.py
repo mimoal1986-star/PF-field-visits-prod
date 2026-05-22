@@ -564,13 +564,34 @@ class DataVisualizer:
             'Дней до конца проекта': 'first',
             'Утилизация тайминга, %': 'first',
             'Ср. план на день для 100% плана': 'sum',
-            'Фокус': 'first'
+            'Фокус': 'first',
+            'Оплата факт': 'sum',
+            'Оплата_поручено': 'sum',
+            'Факт проекта_поручено, шт.': 'sum',
+            'Факт проекта_не_поручено, шт.': 'sum'
+            
         }
         
         existing_agg = {k: v for k, v in agg_columns.items() if k in display_data.columns}
 
         # ВСЕГДА группируем (даже если group_cols == ['Клиент'])
         project_data = display_data.groupby(group_cols).agg(existing_agg).reset_index()
+        # Расчет средней оплаты
+        if 'Оплата факт' in project_data.columns and 'Факт проекта, шт.' in project_data.columns:
+            mask = project_data['Факт проекта, шт.'] > 0
+            project_data['Оплата факт средн., руб.'] = 0.0
+            project_data.loc[mask, 'Оплата факт средн., руб.'] = (
+                project_data.loc[mask, 'Оплата факт'] / project_data.loc[mask, 'Факт проекта, шт.']
+            ).round(2)
+            project_data = project_data.drop('Оплата факт', axis=1)
+
+        # Расчет средней оплаты для порученных
+        if 'Оплата_поручено' in project_data.columns and 'Факт проекта_поручено, шт.' in project_data.columns:
+            mask_assigned = project_data['Факт проекта_поручено, шт.'] > 0
+            project_data['Оплата поручено средн., руб.'] = 0.0
+            project_data.loc[mask_assigned, 'Оплата поручено средн., руб.'] = (
+                project_data.loc[mask_assigned, 'Оплата_поручено'] / project_data.loc[mask_assigned, 'Факт проекта_поручено, шт.']
+            ).round(2)
 
         # === СРЕДНИЙ ПЛАН НА ДЕНЬ ДЛЯ 100% ПЛАНА ===
         remaining_plan = project_data['План проекта, шт.'] - project_data['Факт проекта, шт.']
@@ -724,7 +745,11 @@ class DataVisualizer:
             'Дней до конца проекта',
             'Утилизация тайминга, %',
             'Ср. план на день для 100% плана',
-            'Метод подбора дат'
+            'Метод подбора дат',
+            'Оплата факт средн., руб.',
+            'Оплата поручено средн., руб.',
+            'Факт проекта_поручено, шт.',
+            'Факт проекта_не_поручено, шт.' 
         ]
         
         # Добавляем всегда показываемые колонки, если они есть в данных
@@ -735,7 +760,13 @@ class DataVisualizer:
         existing_display = [c for c in display_cols if c in project_data.columns]
         st.dataframe(project_data[existing_display], use_container_width=True, hide_index=True)
 
-        
+
+        # Удаляем лишние колонки перед выгрузкой
+        cols_to_drop = ['Оплата_поручено']
+        for col in cols_to_drop:
+            if col in project_data.columns:
+                project_data = project_data.drop(col, axis=1)
+                
         # Кнопка скачивания
         output = BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
@@ -1032,13 +1063,34 @@ class DataVisualizer:
             'Дней до конца проекта': 'first',
             'Утилизация тайминга, %': 'first',
             'Ср. план на день для 100% плана': 'sum',
-            'Фокус': 'first'
+            'Фокус': 'first',
+            'Оплата факт': 'sum',
+            'Оплата_поручено': 'sum',
+            'Факт проекта_поручено, шт.': 'sum',
+            'Факт проекта_не_поручено, шт.': 'sum'
         }
         
         existing_agg = {k: v for k, v in agg_columns.items() if k in display_data.columns}
         
         # ВСЕГДА группируем
         region_data = display_data.groupby(group_cols).agg(existing_agg).reset_index()
+        
+        # Расчет средней оплаты
+        if 'Оплата факт' in region_data.columns and 'Факт проекта, шт.' in region_data.columns:
+            mask = region_data['Факт проекта, шт.'] > 0
+            region_data['Оплата факт средн., руб.'] = 0.0
+            region_data.loc[mask, 'Оплата факт средн., руб.'] = (
+                region_data.loc[mask, 'Оплата факт'] / region_data.loc[mask, 'Факт проекта, шт.']
+            ).round(2)
+            region_data = region_data.drop('Оплата факт', axis=1)
+
+        # Расчет средней оплаты для порученных
+        if 'Оплата_поручено' in region_data.columns and 'Факт проекта_поручено, шт.' in region_data.columns:
+            mask_assigned = region_data['Факт проекта_поручено, шт.'] > 0
+            region_data['Оплата поручено средн., руб.'] = 0.0
+            region_data.loc[mask_assigned, 'Оплата поручено средн., руб.'] = (
+                region_data.loc[mask_assigned, 'Оплата_поручено'] / region_data.loc[mask_assigned, 'Факт проекта_поручено, шт.']
+            ).round(2)
         
         # === СРЕДНИЙ ПЛАН НА ДЕНЬ ДЛЯ 100% ПЛАНА ===
         remaining_plan = region_data['План проекта, шт.'] - region_data['Факт проекта, шт.']
@@ -1188,7 +1240,11 @@ class DataVisualizer:
             'Дней до конца проекта',
             'Утилизация тайминга, %',
             'Ср. план на день для 100% плана',
-            'Метод подбора дат'
+            'Метод подбора дат',
+            'Оплата факт средн., руб.',
+            'Оплата поручено средн., руб.',
+            'Факт проекта_поручено, шт.',
+            'Факт проекта_не_поручено, шт.' 
         ]
         
         for col in always_show:
@@ -1202,6 +1258,12 @@ class DataVisualizer:
             region_data['Регион'] = region_data['Регион'].apply(self._get_long_region)
         
         st.dataframe(region_data[existing_display], use_container_width=True, hide_index=True)
+        
+        # Удаляем лишние колонки перед выгрузкой
+        cols_to_drop = ['Оплата_поручено']
+        for col in cols_to_drop:
+            if col in region_data.columns:
+                region_data = region_data.drop(col, axis=1)
         
         # Кнопка скачивания
         output = BytesIO()
@@ -1428,13 +1490,34 @@ class DataVisualizer:
             'Дней до конца проекта': 'first',
             'Утилизация тайминга, %': 'first',
             'Ср. план на день для 100% плана': 'sum',
-            'Фокус': 'first'
+            'Фокус': 'first',
+            'Оплата факт': 'sum',
+            'Оплата_поручено': 'sum',
+            'Факт проекта_поручено, шт.': 'sum',
+            'Факт проекта_не_поручено, шт.': 'sum'
         }
         
         existing_agg = {k: v for k, v in agg_columns.items() if k in display_data.columns}
         
         # ВСЕГДА группируем
         dsm_data = display_data.groupby(group_cols).agg(existing_agg).reset_index()
+        
+        # Расчет средней оплаты
+        if 'Оплата факт' in dsm_data.columns and 'Факт проекта, шт.' in dsm_data.columns:
+            mask = dsm_data['Факт проекта, шт.'] > 0
+            dsm_data['Оплата факт средн., руб.'] = 0.0
+            dsm_data.loc[mask, 'Оплата факт средн., руб.'] = (
+                dsm_data.loc[mask, 'Оплата факт'] / dsm_data.loc[mask, 'Факт проекта, шт.']
+            ).round(2)
+            dsm_data = dsm_data.drop('Оплата факт', axis=1)
+
+        # Расчет средней оплаты для порученных
+        if 'Оплата_поручено' in dsm_data.columns and 'Факт проекта_поручено, шт.' in dsm_data.columns:
+            mask_assigned = dsm_data['Факт проекта_поручено, шт.'] > 0
+            dsm_data['Оплата поручено средн., руб.'] = 0.0
+            dsm_data.loc[mask_assigned, 'Оплата поручено средн., руб.'] = (
+                dsm_data.loc[mask_assigned, 'Оплата_поручено'] / dsm_data.loc[mask_assigned, 'Факт проекта_поручено, шт.']
+            ).round(2)
         
         # === СРЕДНИЙ ПЛАН НА ДЕНЬ ДЛЯ 100% ПЛАНА ===
         remaining_plan = dsm_data['План проекта, шт.'] - dsm_data['Факт проекта, шт.']
@@ -1587,7 +1670,11 @@ class DataVisualizer:
             'Дней до конца проекта',
             'Утилизация тайминга, %',
             'Ср. план на день для 100% плана',
-            'Метод подбора дат'
+            'Метод подбора дат',
+            'Оплата факт средн., руб.',
+            'Оплата поручено средн., руб.',
+            'Факт проекта_поручено, шт.',
+            'Факт проекта_не_поручено, шт.' 
         ]
         
         for col in always_show:
@@ -1597,6 +1684,12 @@ class DataVisualizer:
         existing_display = [c for c in display_cols if c in dsm_data.columns]
         
         st.dataframe(dsm_data[existing_display], use_container_width=True, hide_index=True)
+
+        # Удаляем лишние колонки перед выгрузкой
+        cols_to_drop = ['Оплата_поручено']
+        for col in cols_to_drop:
+            if col in dsm_data.columns:
+                dsm_data = dsm_data.drop(col, axis=1)
         
         # Кнопка скачивания
         output = BytesIO()
