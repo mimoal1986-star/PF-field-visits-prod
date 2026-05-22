@@ -359,7 +359,23 @@ class DataCleaner:
         # === Добавить колонку ЗОД ===
         if 'ЗОД' not in df_clean.columns:
             df_clean['ЗОД'] = ''
+
+        # Расчет оплаты для Чеккера
+        # Ищем все колонки, начинающиеся с 'Total sum for payment' (pandas добавляет .1, .2 и т.д.)
+        payment_cols = [col for col in df_clean.columns if col.startswith('Total sum for payment')]
         
+        if payment_cols:
+            df_clean['Оплата факт'] = 0
+            for col in payment_cols:
+                df_clean['Оплата факт'] += pd.to_numeric(
+                    df_clean[col].astype(str).str.replace(',', '.'),
+                    errors='coerce'
+                ).fillna(0)
+            st.info(f"✅ Найдено колонок с оплатой: {len(payment_cols)}. Суммируем.")
+        else:
+            st.warning("⚠️ В файле Массив не найдены колонки 'Total sum for payment'. Оплата факт = 0")
+            df_clean['Оплата факт'] = 0
+            
         return df_clean
     
     def add_zod_from_hierarchy(self, array_df, hierarchy_df=None):
@@ -605,7 +621,8 @@ class DataCleaner:
                 'Полевой': ['Полевой'],
                 'Статус': [' Статус', 'Статус'],
                 'Дата визита': ['Дата визита'],
-                'ПО': ['ПО']
+                'ПО': ['ПО'],
+                'Оплата факт': ['Оплата факт']
             }
             
             # Находим фактические названия колонок
@@ -638,7 +655,7 @@ class DataCleaner:
             
             # Правильный порядок колонок
             final_columns = ['Код анкеты', 'Имя клиента', 'Название проекта', 
-                           'ЗОД', 'АСС', 'ЭМ', 'Регион short', 'Регион', 'ПО', 'Полевой', 'Статус', 'Дата визита']
+                           'ЗОД', 'АСС', 'ЭМ', 'Регион short', 'Регион', 'ПО', 'Полевой', 'Статус', 'Дата визита', 'Оплата факт']
             
             # Реорганизуем колонки
             if not field_projects.empty:
@@ -1110,6 +1127,35 @@ class DataCleaner:
         
         result['Источник'] = 'CXWAY'
         
+        # Расчет оплаты для CXWAY (Оплата + Доп. оплата)
+        payment_col = None
+        extra_payment_col = None
+        
+        for col in df_clean.columns:
+            if col == 'Оплата':
+                payment_col = col
+            elif col == 'Доп. оплата':
+                extra_payment_col = col
+        
+        # Проверка: найдены ли колонки с оплатой
+        if not payment_col and not extra_payment_col:
+            st.warning("⚠️ В файле CXWAY не найдены колонки 'Оплата' и 'Доп. оплата'. Оплата факт = 0")
+        
+        # Векторизованный расчет оплаты для CXWAY (быстро)
+        result['Оплата факт'] = 0
+        
+        if payment_col:
+            result['Оплата факт'] += pd.to_numeric(
+                df_clean[payment_col].astype(str).str.replace(',', '.'),
+                errors='coerce'
+            ).fillna(0)
+        
+        if extra_payment_col:
+            result['Оплата факт'] += pd.to_numeric(
+                df_clean[extra_payment_col].astype(str).str.replace(',', '.'),
+                errors='coerce'
+            ).fillna(0)
+    
         return result
     
     def clean_easymerch(self, df, google_df):
@@ -1236,6 +1282,8 @@ class DataCleaner:
         
         # Добавляем источник
         result['Источник'] = 'Easymerch'
+        
+        result['Оплата факт'] = 0
         
         return result
 
@@ -1542,6 +1590,7 @@ class DataCleaner:
             result['ЗОД'] = ''
         
         result['Источник'] = 'Оптима'
+        result['Оплата факт'] = 0
         
         return result
     
@@ -1770,7 +1819,8 @@ class DataCleaner:
             result['Регион'] = ''
             result['Статус'] = ''
             result['Дата визита'] = pd.NaT
-        
+
+        result['Оплата факт'] = 0
         return result
     
     def _is_field_project_vectorized(self, codes_series):
