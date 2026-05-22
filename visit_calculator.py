@@ -183,18 +183,57 @@ class VisitCalculator:
                     finish_mapping = {}
                     
                     for idx, row in google_df.iterrows():
-                        code = str(row.get('Код проекта RU00.000.00.01SVZ24', '')).strip()
-                        if code and code not in ['nan', '']:
+                        code_raw = str(row.get('Код проекта RU00.000.00.01SVZ24', '')).strip()
+                        if code_raw and code_raw not in ['nan', '']:
                             start_date = row.get('Дата старта')
                             finish_date = row.get('Дата финиша с продлением')
                             
-                            if pd.notna(start_date):
-                                start_mapping[code] = start_date
-                            if pd.notna(finish_date):
-                                finish_mapping[code] = finish_date
+                            # Разделяем составной код по '/'
+                            codes = code_raw.split('/')
+                            for code in codes:
+                                code = code.strip()
+                                if not code:
+                                    continue
+                                if pd.notna(start_date):
+                                    start_mapping[code] = start_date
+                                if pd.notna(finish_date):
+                                    finish_mapping[code] = finish_date
+
+                    # Функция для получения даты из start_mapping с учетом составных кодов
+                    def get_start_date(project_code):
+                        code_str = str(project_code)
+                        # Если нет слеша — ищем как есть
+                        if '/' not in code_str:
+                            return start_mapping.get(code_str, pd.NaT)
+                        
+                        # Разделяем на части и перебираем
+                        parts = code_str.split('/')
+                        for part in parts:
+                            part = part.strip()
+                            if not part:
+                                continue
+                            # Как только нашли часть в start_mapping — берем дату
+                            if part in start_mapping:
+                                return start_mapping[part]
+                        # Если ни одной части нет в mapping — возвращаем пустоту
+                        return pd.NaT
                     
-                    hierarchy['Дата старта'] = hierarchy['Проект'].map(start_mapping)
-                    hierarchy['Дата финиша'] = hierarchy['Проект'].map(finish_mapping)
+                    def get_finish_date(project_code):
+                        code_str = str(project_code)
+                        if '/' not in code_str:
+                            return finish_mapping.get(code_str, pd.NaT)
+                        
+                        parts = code_str.split('/')
+                        for part in parts:
+                            part = part.strip()
+                            if not part:
+                                continue
+                            if part in finish_mapping:
+                                return finish_mapping[part]
+                        return pd.NaT
+                    
+                    hierarchy['Дата старта'] = hierarchy['Проект'].apply(get_start_date)
+                    hierarchy['Дата финиша'] = hierarchy['Проект'].apply(get_finish_date)
                     
                     # Если дат нет, ставим первый и последний день месяца
                     if 'plan_calc_params' in st.session_state:
@@ -247,34 +286,41 @@ class VisitCalculator:
                     date_mapping = {}
                     
                     for idx, row in google_df_original.iterrows():
-                        code = str(row.get('Код проекта RU00.000.00.01SVZ24', '')).strip()
+                        code_raw = str(row.get('Код проекта RU00.000.00.01SVZ24', '')).strip()
                         
-                        # Получаем оба названия волны
-                        wave_checker = str(row.get('Название волны на Чекере/ином ПО', '')).strip()
-                        wave_dummy = str(row.get('Название волны холостой', '')).strip()
-                        
-                        if code and code not in ['nan', '']:
+                        if code_raw and code_raw not in ['nan', '']:
                             start_date = row.get('Дата старта')
                             finish_date = row.get('Дата финиша с продлением')
                             
                             if pd.notna(start_date) and pd.notna(finish_date):
-                                # Собираем все непустые названия волн
+                                # Получаем волны
+                                wave_checker = str(row.get('Название волны на Чекере/ином ПО', '')).strip()
+                                wave_dummy = str(row.get('Название волны холостой', '')).strip()
+                                
                                 waves = []
                                 if wave_checker and wave_checker not in ['nan', '']:
                                     waves.append(wave_checker)
                                 if wave_dummy and wave_dummy not in ['nan', '']:
                                     waves.append(wave_dummy)
                                 
-                                # Создаем записи ВК для каждой волны
-                                for wave in waves:
-                                    key = (code, wave)
-                                    if key not in date_mapping:
-                                        date_mapping[key] = (start_date, finish_date, 'ВК')
+                                # ✅ РАЗДЕЛЯЕМ СОСТАВНОЙ КОД ПО '/' 
+                                codes = code_raw.split('/')
                                 
-                                # Создаем запись только по коду (как fallback)
-                                key = (code, None)
-                                if key not in date_mapping:
-                                    date_mapping[key] = (start_date, finish_date, 'К')
+                                for single_code in codes:
+                                    single_code = single_code.strip()
+                                    if not single_code:
+                                        continue
+                                        
+                                    # Для каждой волны
+                                    for wave in waves:
+                                        key = (single_code, wave)
+                                        if key not in date_mapping:
+                                            date_mapping[key] = (start_date, finish_date, 'ВК')
+                                    
+                                    # Только по коду (без волны)
+                                    key = (single_code, None)
+                                    if key not in date_mapping:
+                                        date_mapping[key] = (start_date, finish_date, 'К')
                     
                     # Функция для получения дат по строке иерархии
                     def get_dates(row):
@@ -286,7 +332,25 @@ class VisitCalculator:
                             start, finish, method = date_mapping[(code, wave)]
                             return pd.Series([start, finish, method])
                         
-                        # Код есть, но волна не совпала (или пустая/с разделителями)
+                        # ✅ ЕСЛИ В КОДЕ ЕСТЬ '/', ПРОВЕРЯЕМ КАЖДУЮ ЧАСТЬ
+                        if '/' in code:
+                            parts = code.split('/')
+                            for part in parts:
+                                part = part.strip()
+                                if not part:
+                                    continue
+                                
+                                # Ищем совпадение по части кода и волне
+                                if (part, wave) in date_mapping:
+                                    start, finish, method = date_mapping[(part, wave)]
+                                    return pd.Series([start, finish, 'ВК'])
+                                
+                                # Ищем только по части кода (без волны)
+                                for (c, w), (start, finish, _) in date_mapping.items():
+                                    if c == part:
+                                        return pd.Series([start, finish, 'К'])
+                        
+                        # Код есть, но волна не совпала (или пустая)
                         for (c, w), (start, finish, _) in date_mapping.items():
                             if c == code:
                                 return pd.Series([start, finish, 'К'])
@@ -864,7 +928,7 @@ class VisitCalculator:
         
         return result
     
-    def calculate_hierarchical_fact_on_date(self, plan_df, visits_df, calc_params):
+    def calculate_hierarchical_fact_on_date(self, plan_df, visits_df, calc_params, status_filter='completed'):
         try:
             if plan_df.empty or visits_df.empty:
                 return pd.DataFrame()
@@ -911,12 +975,24 @@ class VisitCalculator:
                 # Нормализуем к началу дня (00:00:00)
                 visits_df['Дата визита'] = visits_df['Дата визита'].dt.normalize()
             
-            # ФИЛЬТРЫ
-            completed_mask = visits_df[status_col].isin([
-                'Выполнено', 'выполнен',
-                'Заполнена', 'Проверена','Принята',
-                'Завершено', 'Готово'
-            ])
+            # ФИЛЬТРЫ - выбор статуса в зависимости от параметра
+            if status_filter == 'completed':
+                status_mask = visits_df[status_col].isin([
+                    'Выполнено', 'выполнен',
+                    'Заполнена', 'Проверена', 'Принята',
+                    'Завершено', 'Готово'
+                ])
+                suffix = ''
+            elif status_filter == 'assigned':
+                status_mask = visits_df[status_col].astype(str).str.strip() == 'Поручено'
+                suffix = '_поручено'
+            elif status_filter == 'not_assigned':
+                status_mask = visits_df[status_col].astype(str).str.strip() == 'Не поручено'
+                suffix = '_не_поручено'
+            else:
+                status_mask = None
+                suffix = ''
+                
             start_date = pd.Timestamp(calc_params['start_date'])
             end_date = pd.Timestamp(calc_params['end_date'])
             period_mask = (
@@ -924,10 +1000,9 @@ class VisitCalculator:
                 (visits_df['Дата визита'] <= end_date)
             )
 
-                
             # СЧИТАЕМ ФАКТЫ
-            completed_df = visits_df[completed_mask]
-            rs_facts_total = completed_df.groupby([
+            filtered_df = visits_df[status_mask]
+            rs_facts_total = filtered_df.groupby([
                 'Имя клиента',
                 'Код анкеты',
                 'Название проекта',
@@ -935,6 +1010,16 @@ class VisitCalculator:
                 'АСС',
                 rs_col
             ]).size().to_dict()
+
+            # Суммируем оплату по группам
+            payment_sum = filtered_df.groupby([
+                'Имя клиента',
+                'Код анкеты',
+                'Название проекта',
+                region_col,
+                'АСС',
+                rs_col
+            ])['Оплата факт'].sum().to_dict()
             
             # Если нет колонки "Дата визита" — факт на дату = факт проекта
             if 'Дата визита' in visits_df.columns:
@@ -944,8 +1029,8 @@ class VisitCalculator:
                     (visits_df['Дата визита'] >= start_date) &
                     (visits_df['Дата визита'] <= end_date)
                 )
-                completed_in_period = visits_df[completed_mask & period_mask]
-                rs_facts_period = completed_in_period.groupby([
+                filtered_in_period = visits_df[status_mask & period_mask]
+                rs_facts_period = filtered_in_period.groupby([
                     'Имя клиента',
                     'Код анкеты',
                     'Название проекта',
@@ -957,10 +1042,9 @@ class VisitCalculator:
                 # Для Optima и других без дат
                 rs_facts_period = rs_facts_total.copy()
     
-            
             # ✅ СОЗДАЁМ КОЛОНКИ
-            result_df['Факт проекта, шт.'] = 0
-            result_df['Факт на дату, шт.'] = 0
+            result_df[f'Факт проекта{suffix}, шт.'] = 0
+            result_df[f'Факт на дату{suffix}, шт.'] = 0
             
             # ✅ ЗАПОЛНЯЕМ
             for idx in result_df[result_df['Уровень'] == 'RS'].index:
@@ -973,8 +1057,12 @@ class VisitCalculator:
                 client_name = str(row['Клиент']).strip()
                 asm = str(row['ASM']).strip()
                 key = (client_name, project, wave, region, asm, rs)
-                result_df.at[idx, 'Факт проекта, шт.'] = rs_facts_total.get(key, 0)
-                result_df.at[idx, 'Факт на дату, шт.'] = rs_facts_period.get(key, 0)
+                result_df.at[idx, f'Факт проекта{suffix}, шт.'] = rs_facts_total.get(key, 0)
+                result_df.at[idx, f'Факт на дату{suffix}, шт.'] = rs_facts_period.get(key, 0)
+                if suffix == '':
+                    result_df.at[idx, 'Оплата факт'] = payment_sum.get(key, 0)
+                else:
+                    result_df.at[idx, f'Оплата{suffix}'] = payment_sum.get(key, 0)
     
             return result_df
             
@@ -1135,12 +1223,19 @@ class VisitCalculator:
             #     st.write("Нет проектов с планом ≥ 200")
             #  # === ОТЛАДКА ===
         
+        # Расчет средней оплаты
+        if 'Оплата факт' in df.columns and 'Факт проекта, шт.' in df.columns:
+            mask = df['Факт проекта, шт.'] > 0
+            df['Оплата факт средн., руб.'] = 0.0
+            df.loc[mask, 'Оплата факт средн., руб.'] = (
+                df.loc[mask, 'Оплата факт'] / df.loc[mask, 'Факт проекта, шт.']
+            ).round(2)
+            
         return df
         
 
 # Глобальный экземпляр
 visit_calculator = VisitCalculator()
-
 
 
 
