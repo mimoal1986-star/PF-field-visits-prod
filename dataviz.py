@@ -562,6 +562,7 @@ class DataVisualizer:
             'Коэффициент месяца': 'first',
             'Метод подбора дат': 'first',
             'Дней до конца проекта': 'first',
+            'Прогноз, шт.': 'sum',
             'Утилизация тайминга, %': 'first',
             'Ср. план на день для 100% плана': 'sum',
             'Фокус': 'first',
@@ -576,6 +577,31 @@ class DataVisualizer:
 
         # ВСЕГДА группируем (даже если group_cols == ['Клиент'])
         project_data = display_data.groupby(group_cols).agg(existing_agg).reset_index()
+        
+        # ========== ДОБАВЛЕНИЕ КОЛОНОК ДЛЯ КРАТКОГО ОТЧЕТА ==========
+        # 1. Прогноз, шт - используем существующий расчет из _calculate_metrics
+        if 'Прогноз, шт' not in project_data.columns and 'Прогноз, шт.' in project_data.columns:
+            project_data['Прогноз, шт'] = project_data['Прогноз, шт.']
+        
+        # 2. Прогноз ВП, % - рассчитываем если есть прогноз и план
+        if 'Прогноз ВП, %' not in project_data.columns:
+            if 'Прогноз, шт' in project_data.columns and 'План проекта, шт.' in project_data.columns:
+                mask = project_data['План проекта, шт.'] > 0
+                project_data['Прогноз ВП, %'] = 0.0
+                project_data.loc[mask, 'Прогноз ВП, %'] = (
+                    project_data.loc[mask, 'Прогноз, шт'] / 
+                    project_data.loc[mask, 'План проекта, шт.'] * 100
+                ).round(1)
+        
+        # 3. Отклонение от плана на сегодня, шт.
+        if 'Отклонение от плана на сегодня, шт.' not in project_data.columns:
+            if 'Факт проекта, шт.' in project_data.columns and 'План на дату, шт.' in project_data.columns:
+                project_data['Отклонение от плана на сегодня, шт.'] = (
+                    project_data['Факт проекта, шт.'] - project_data['План на дату, шт.']
+                ).round(1)
+                
+        # ============================================================
+        
         # Расчет средней оплаты
         if 'Оплата факт' in project_data.columns and 'Факт проекта, шт.' in project_data.columns:
             mask = project_data['Факт проекта, шт.'] > 0
@@ -649,6 +675,7 @@ class DataVisualizer:
                  project_data.loc[mask_project_plan, 'План проекта, шт.']) - 1
             ).round(3) * 100
         
+        
         # KPI
         st.markdown("### 📊 Ключевые показатели")
         
@@ -673,40 +700,43 @@ class DataVisualizer:
             if 'Факт на дату, шт.' in prodata_df.columns:
                 prodata_fact_date_total = prodata_df['Факт на дату, шт.'].sum()
         
+        # Рассчитываем общие значения
+        plan_total = project_data['План проекта, шт.'].sum() if 'План проекта, шт.' in project_data.columns else 0
+        fact_total = project_data['Факт проекта, шт.'].sum() if 'Факт проекта, шт.' in project_data.columns else 0
+        plan_date_total = project_data['План на дату, шт.'].sum() if 'План на дату, шт.' in project_data.columns else 0
+        fact_date_total = project_data['Факт на дату, шт.'].sum() if 'Факт на дату, шт.' in project_data.columns else 0
+        assigned_total = project_data['Факт проекта_поручено, шт.'].sum() if 'Факт проекта_поручено, шт.' in project_data.columns else 0
+        
+        if include_prodata:
+            plan_total += prodata_plan_total
+            fact_total += prodata_fact_total
+            plan_date_total += prodata_plan_date_total
+            fact_date_total += prodata_fact_date_total
+        
+        # Отклонение от плана на сегодня, шт (Факт проекта - План на дату)
+        deviation = fact_total - plan_date_total
+        
+        # Проценты
+        pf_percent = (fact_total / plan_total * 100) if plan_total > 0 else 0
+        forecast_percent = (fact_date_total / plan_date_total * 100) if plan_date_total > 0 else 0
+        
+        # РЯД 1: План проекта, Факт проекта, Факт ВП, %
         col1, col2, col3 = st.columns(3)
         with col1:
-            plan_total = project_data['План проекта, шт.'].sum() if 'План проекта, шт.' in project_data.columns else 0
-            if include_prodata:
-                plan_total += prodata_plan_total
             st.metric("📊 План проекта", f"{plan_total:,.0f} шт")
-        
         with col2:
-            fact_total = project_data['Факт проекта, шт.'].sum() if 'Факт проекта, шт.' in project_data.columns else 0
-            if include_prodata:
-                fact_total += prodata_fact_total
             st.metric("✅ Факт проекта", f"{fact_total:,.0f} шт")
-        
         with col3:
-            pf_percent = (fact_total / plan_total * 100) if plan_total > 0 else 0
-            st.metric("🎯 План/Факт проекта", f"{pf_percent:.1f}%")
-
-        # Второй ряд: План на дату, Факт на дату, План/Факт на дату
+            st.metric("🎯 Факт ВП, %", f"{pf_percent:.1f}%")
+        
+        # РЯД 2: Отклонение, Факт поручено, Прогноз ВП, %
         col4, col5, col6 = st.columns(3)
         with col4:
-            plan_date_total = project_data['План на дату, шт.'].sum() if 'План на дату, шт.' in project_data.columns else 0
-            if include_prodata:
-                plan_date_total += prodata_plan_date_total
-            st.metric("📊 План на дату", f"{plan_date_total:,.0f} шт")
-        
+            st.metric("📉 Отклонение от плана на сегодня, шт", f"{deviation:+,.0f}")
         with col5:
-            fact_date_total = project_data['Факт на дату, шт.'].sum() if 'Факт на дату, шт.' in project_data.columns else 0
-            if include_prodata:
-                fact_date_total += prodata_fact_date_total
-            st.metric("✅ Факт на дату", f"{fact_date_total:,.0f} шт")
-        
+            st.metric("📋 Факт поручено, шт", f"{assigned_total:,.0f}")
         with col6:
-            pf_date_percent = (fact_date_total / plan_date_total * 100) if plan_date_total > 0 else 0
-            st.metric("🎯 План/Факт на дату", f"{pf_date_percent:.1f}%")
+            st.metric("🔮 Прогноз ВП, %", f"{forecast_percent:.1f}%")
         
         # Отображаем таблицу
         display_cols = ['Клиент']
@@ -779,6 +809,43 @@ class DataVisualizer:
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             type="primary",
             use_container_width=True
+        )
+        
+        # Кнопка скачивания краткого отчета
+        brief_cols = [
+            'Клиент',
+            'План проекта, шт.',
+            'Факт проекта, шт.',
+            'Факт проекта_поручено, шт.',
+            'Факт проекта_не_поручено, шт.',
+            'Длительность',
+            'Дата старта',
+            'Дата финиша',
+            'Дней до конца проекта',
+            'Прогноз, шт',
+            'Прогноз ВП, %',
+            'Отклонение от плана на сегодня, шт.',
+            'Ср. план на день для 100% плана',
+            'Оплата факт средн., руб.',
+            'Оплата поручено средн., руб.'
+        ]
+        
+        # Оставляем только существующие колонки
+        existing_brief_cols = [col for col in brief_cols if col in project_data.columns]
+        brief_report = project_data[existing_brief_cols].copy()
+        
+        output_brief = BytesIO()
+        with pd.ExcelWriter(output_brief, engine='openpyxl') as writer:
+            brief_report.to_excel(writer, sheet_name='Краткий_отчет', index=False)
+        
+        st.download_button(
+            label="📊 Скачать краткий отчет",
+            data=output_brief.getvalue(),
+            file_name=f"краткий_отчет_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            type="secondary",
+            use_container_width=True,
+            key="download_brief_planfact" 
         )
 
     def create_region_summary(self, df):
@@ -1061,6 +1128,7 @@ class DataVisualizer:
             'Дата старта': 'first',
             'Дата финиша': 'first',
             'Дней до конца проекта': 'first',
+            'Прогноз, шт.': 'sum',
             'Утилизация тайминга, %': 'first',
             'Ср. план на день для 100% плана': 'sum',
             'Фокус': 'first',
@@ -1074,6 +1142,29 @@ class DataVisualizer:
         
         # ВСЕГДА группируем
         region_data = display_data.groupby(group_cols).agg(existing_agg).reset_index()
+        
+        # ========== ДОБАВЛЕНИЕ КОЛОНОК ДЛЯ КРАТКОГО ОТЧЕТА ==========
+        # 1. Прогноз, шт - используем существующий расчет из _calculate_metrics
+        if 'Прогноз, шт' not in region_data.columns and 'Прогноз, шт.' in region_data.columns:
+            region_data['Прогноз, шт'] = region_data['Прогноз, шт.']
+        
+        # 2. Прогноз ВП, % - рассчитываем если есть прогноз и план
+        if 'Прогноз ВП, %' not in region_data.columns:
+            if 'Прогноз, шт' in region_data.columns and 'План проекта, шт.' in region_data.columns:
+                mask = region_data['План проекта, шт.'] > 0
+                region_data['Прогноз ВП, %'] = 0.0
+                region_data.loc[mask, 'Прогноз ВП, %'] = (
+                    region_data.loc[mask, 'Прогноз, шт'] / 
+                    region_data.loc[mask, 'План проекта, шт.'] * 100
+                ).round(1)
+        
+        # 3. Отклонение от плана на сегодня, шт. = Факт проекта, шт. - План на дату, шт.
+        if 'Отклонение от плана на сегодня, шт.' not in region_data.columns:
+            if 'Факт проекта, шт.' in region_data.columns and 'План на дату, шт.' in region_data.columns:
+                region_data['Отклонение от плана на сегодня, шт.'] = (
+                    region_data['Факт проекта, шт.'] - region_data['План на дату, шт.']
+                ).round(1)
+        # ============================================================
         
         # Расчет средней оплаты
         if 'Оплата факт' in region_data.columns and 'Факт проекта, шт.' in region_data.columns:
@@ -1145,6 +1236,30 @@ class DataVisualizer:
                  region_data.loc[mask_project_plan, 'План проекта, шт.']) - 1
             ).round(3) * 100
         
+        region_data['△План/Факт на дату, шт'] = (
+            region_data['Факт на дату, шт.'] - region_data['План на дату, шт.']
+        ).round(1)
+        
+        region_data['△План/Факт на дату, %'] = 0.0
+        if mask_plan.any():
+            region_data.loc[mask_plan, '△План/Факт на дату, %'] = (
+                (region_data.loc[mask_plan, 'Факт на дату, шт.'] / 
+                 region_data.loc[mask_plan, 'План на дату, шт.']) - 1
+            ).round(3) * 100
+
+        region_data['△План/Факт проекта, шт'] = (
+            region_data['Факт проекта, шт.'] - region_data['План проекта, шт.']
+        ).round(1)
+        
+        mask_project_plan = region_data['План проекта, шт.'] > 0
+        region_data['△План/Факт проекта, %'] = 0.0
+        if mask_project_plan.any():
+            region_data.loc[mask_project_plan, '△План/Факт проекта, %'] = (
+                (region_data.loc[mask_project_plan, 'Факт проекта, шт.'] / 
+                 region_data.loc[mask_project_plan, 'План проекта, шт.']) - 1
+            ).round(3) * 100
+        
+        
         # KPI
         st.markdown("### 📊 Ключевые показатели")
         
@@ -1169,40 +1284,43 @@ class DataVisualizer:
             if 'Факт на дату, шт.' in prodata_df.columns:
                 prodata_fact_date_total = prodata_df['Факт на дату, шт.'].sum()
         
+        # Рассчитываем общие значения
+        plan_total = region_data['План проекта, шт.'].sum() if 'План проекта, шт.' in region_data.columns else 0
+        fact_total = region_data['Факт проекта, шт.'].sum() if 'Факт проекта, шт.' in region_data.columns else 0
+        plan_date_total = region_data['План на дату, шт.'].sum() if 'План на дату, шт.' in region_data.columns else 0
+        fact_date_total = region_data['Факт на дату, шт.'].sum() if 'Факт на дату, шт.' in region_data.columns else 0
+        assigned_total = region_data['Факт проекта_поручено, шт.'].sum() if 'Факт проекта_поручено, шт.' in region_data.columns else 0
+        
+        if include_prodata:
+            plan_total += prodata_plan_total
+            fact_total += prodata_fact_total
+            plan_date_total += prodata_plan_date_total
+            fact_date_total += prodata_fact_date_total
+        
+        # Отклонение от плана на сегодня, шт (Факт проекта - План на дату)
+        deviation = fact_total - plan_date_total
+        
+        # Проценты
+        pf_percent = (fact_total / plan_total * 100) if plan_total > 0 else 0
+        forecast_percent = (fact_date_total / plan_date_total * 100) if plan_date_total > 0 else 0
+        
+        # РЯД 1: План проекта, Факт проекта, Факт ВП, %
         col1, col2, col3 = st.columns(3)
         with col1:
-            plan_total = region_data['План проекта, шт.'].sum() if 'План проекта, шт.' in region_data.columns else 0
-            if include_prodata:
-                plan_total += prodata_plan_total
             st.metric("📊 План проекта", f"{plan_total:,.0f} шт")
-        
         with col2:
-            fact_total = region_data['Факт проекта, шт.'].sum() if 'Факт проекта, шт.' in region_data.columns else 0
-            if include_prodata:
-                fact_total += prodata_fact_total
             st.metric("✅ Факт проекта", f"{fact_total:,.0f} шт")
-        
         with col3:
-            pf_percent = (fact_total / plan_total * 100) if plan_total > 0 else 0
-            st.metric("🎯 План/Факт проекта", f"{pf_percent:.1f}%")
-
-        # Второй ряд: План на дату, Факт на дату, План/Факт на дату
+            st.metric("🎯 Факт ВП, %", f"{pf_percent:.1f}%")
+        
+        # РЯД 2: Отклонение, Факт поручено, Прогноз ВП, %
         col4, col5, col6 = st.columns(3)
         with col4:
-            plan_date_total = region_data['План на дату, шт.'].sum() if 'План на дату, шт.' in region_data.columns else 0
-            if include_prodata:
-                plan_date_total += prodata_plan_date_total
-            st.metric("📊 План на дату", f"{plan_date_total:,.0f} шт")
-        
+            st.metric("📉 Отклонение от плана на сегодня, шт", f"{deviation:+,.0f}")
         with col5:
-            fact_date_total = region_data['Факт на дату, шт.'].sum() if 'Факт на дату, шт.' in region_data.columns else 0
-            if include_prodata:
-                fact_date_total += prodata_fact_date_total
-            st.metric("✅ Факт на дату", f"{fact_date_total:,.0f} шт")
-        
+            st.metric("📋 Факт поручено, шт", f"{assigned_total:,.0f}")
         with col6:
-            pf_date_percent = (fact_date_total / plan_date_total * 100) if plan_date_total > 0 else 0
-            st.metric("🎯 План/Факт на дату", f"{pf_date_percent:.1f}%")
+            st.metric("🔮 Прогноз ВП, %", f"{forecast_percent:.1f}%")
         
         # Отображаем таблицу
         display_cols = ['Регион']
@@ -1277,6 +1395,43 @@ class DataVisualizer:
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             type="primary",
             use_container_width=True
+        )
+
+        # Кнопка скачивания краткого отчета
+        brief_cols = [
+            'Клиент',
+            'План проекта, шт.',
+            'Факт проекта, шт.',
+            'Факт проекта_поручено, шт.',
+            'Факт проекта_не_поручено, шт.',
+            'Длительность',
+            'Дата старта',
+            'Дата финиша',
+            'Дней до конца проекта',
+            'Прогноз, шт',
+            'Прогноз ВП, %',
+            'Отклонение от плана на сегодня, шт.',
+            'Ср. план на день для 100% плана',
+            'Оплата факт средн., руб.',
+            'Оплата поручено средн., руб.'
+        ]
+        
+        # Оставляем только существующие колонки
+        existing_brief_cols = [col for col in brief_cols if col in region_data.columns]
+        brief_report = region_data[existing_brief_cols].copy()
+        
+        output_brief = BytesIO()
+        with pd.ExcelWriter(output_brief, engine='openpyxl') as writer:
+            brief_report.to_excel(writer, sheet_name='Краткий_отчет', index=False)
+        
+        st.download_button(
+            label="📊 Скачать краткий отчет",
+            data=output_brief.getvalue(),
+            file_name=f"краткий_отчет_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            type="secondary",
+            use_container_width=True,
+            key="download_brief_region"
         )
     
     def create_dsm_tab(self, data, hierarchy_df=None):
@@ -1488,6 +1643,7 @@ class DataVisualizer:
             'Дата старта': 'first',
             'Дата финиша': 'first',
             'Дней до конца проекта': 'first',
+            'Прогноз, шт.': 'sum',
             'Утилизация тайминга, %': 'first',
             'Ср. план на день для 100% плана': 'sum',
             'Фокус': 'first',
@@ -1498,9 +1654,32 @@ class DataVisualizer:
         }
         
         existing_agg = {k: v for k, v in agg_columns.items() if k in display_data.columns}
-        
+
         # ВСЕГДА группируем
         dsm_data = display_data.groupby(group_cols).agg(existing_agg).reset_index()
+        
+        # ========== ДОБАВЛЕНИЕ КОЛОНОК ДЛЯ КРАТКОГО ОТЧЕТА ==========
+        # 1. Прогноз, шт - используем существующий расчет из _calculate_metrics
+        if 'Прогноз, шт' not in dsm_data.columns and 'Прогноз, шт.' in dsm_data.columns:
+            dsm_data['Прогноз, шт'] = dsm_data['Прогноз, шт.']
+        
+        # 2. Прогноз ВП, % - рассчитываем если есть прогноз и план
+        if 'Прогноз ВП, %' not in dsm_data.columns:
+            if 'Прогноз, шт' in dsm_data.columns and 'План проекта, шт.' in dsm_data.columns:
+                mask = dsm_data['План проекта, шт.'] > 0
+                dsm_data['Прогноз ВП, %'] = 0.0
+                dsm_data.loc[mask, 'Прогноз ВП, %'] = (
+                    dsm_data.loc[mask, 'Прогноз, шт'] / 
+                    dsm_data.loc[mask, 'План проекта, шт.'] * 100
+                ).round(1)
+        
+        # 3. Отклонение от плана на сегодня, шт. = Факт проекта, шт. - План на дату, шт.
+        if 'Отклонение от плана на сегодня, шт.' not in dsm_data.columns:
+            if 'Факт проекта, шт.' in dsm_data.columns and 'План на дату, шт.' in dsm_data.columns:
+                dsm_data['Отклонение от плана на сегодня, шт.'] = (
+                    dsm_data['Факт проекта, шт.'] - dsm_data['План на дату, шт.']
+                ).round(1)
+        # ============================================================
         
         # Расчет средней оплаты
         if 'Оплата факт' in dsm_data.columns and 'Факт проекта, шт.' in dsm_data.columns:
@@ -1575,6 +1754,30 @@ class DataVisualizer:
                  dsm_data.loc[mask_project_plan, 'План проекта, шт.']) - 1
             ).round(3) * 100
         
+        dsm_data['△План/Факт на дату, шт'] = (
+            dsm_data['Факт на дату, шт.'] - dsm_data['План на дату, шт.']
+        ).round(1)
+        
+        dsm_data['△План/Факт на дату, %'] = 0.0
+        if mask_plan.any():
+            dsm_data.loc[mask_plan, '△План/Факт на дату, %'] = (
+                (dsm_data.loc[mask_plan, 'Факт на дату, шт.'] / 
+                 dsm_data.loc[mask_plan, 'План на дату, шт.']) - 1
+            ).round(3) * 100
+
+        dsm_data['△План/Факт проекта, шт'] = (
+            dsm_data['Факт проекта, шт.'] - dsm_data['План проекта, шт.']
+        ).round(1)
+        
+        mask_project_plan = dsm_data['План проекта, шт.'] > 0
+        dsm_data['△План/Факт проекта, %'] = 0.0
+        if mask_project_plan.any():
+            dsm_data.loc[mask_project_plan, '△План/Факт проекта, %'] = (
+                (dsm_data.loc[mask_project_plan, 'Факт проекта, шт.'] / 
+                 dsm_data.loc[mask_project_plan, 'План проекта, шт.']) - 1
+            ).round(3) * 100
+        
+        
         # KPI
         st.markdown("### 📊 Ключевые показатели")
         
@@ -1599,40 +1802,43 @@ class DataVisualizer:
             if 'Факт на дату, шт.' in prodata_df.columns:
                 prodata_fact_date_total = prodata_df['Факт на дату, шт.'].sum()
         
+        # Рассчитываем общие значения
+        plan_total = dsm_data['План проекта, шт.'].sum() if 'План проекта, шт.' in dsm_data.columns else 0
+        fact_total = dsm_data['Факт проекта, шт.'].sum() if 'Факт проекта, шт.' in dsm_data.columns else 0
+        plan_date_total = dsm_data['План на дату, шт.'].sum() if 'План на дату, шт.' in dsm_data.columns else 0
+        fact_date_total = dsm_data['Факт на дату, шт.'].sum() if 'Факт на дату, шт.' in dsm_data.columns else 0
+        assigned_total = dsm_data['Факт проекта_поручено, шт.'].sum() if 'Факт проекта_поручено, шт.' in dsm_data.columns else 0
+        
+        if include_prodata:
+            plan_total += prodata_plan_total
+            fact_total += prodata_fact_total
+            plan_date_total += prodata_plan_date_total
+            fact_date_total += prodata_fact_date_total
+        
+        # Отклонение от плана на сегодня, шт (Факт проекта - План на дату)
+        deviation = fact_total - plan_date_total
+        
+        # Проценты
+        pf_percent = (fact_total / plan_total * 100) if plan_total > 0 else 0
+        forecast_percent = (fact_date_total / plan_date_total * 100) if plan_date_total > 0 else 0
+        
+        # РЯД 1: План проекта, Факт проекта, Факт ВП, %
         col1, col2, col3 = st.columns(3)
         with col1:
-            plan_total = dsm_data['План проекта, шт.'].sum() if 'План проекта, шт.' in dsm_data.columns else 0
-            if include_prodata:
-                plan_total += prodata_plan_total
             st.metric("📊 План проекта", f"{plan_total:,.0f} шт")
-        
         with col2:
-            fact_total = dsm_data['Факт проекта, шт.'].sum() if 'Факт проекта, шт.' in dsm_data.columns else 0
-            if include_prodata:
-                fact_total += prodata_fact_total
             st.metric("✅ Факт проекта", f"{fact_total:,.0f} шт")
-        
         with col3:
-            pf_percent = (fact_total / plan_total * 100) if plan_total > 0 else 0
-            st.metric("🎯 План/Факт проекта", f"{pf_percent:.1f}%")
-
-        # Второй ряд: План на дату, Факт на дату, План/Факт на дату
+            st.metric("🎯 Факт ВП, %", f"{pf_percent:.1f}%")
+        
+        # РЯД 2: Отклонение, Факт поручено, Прогноз ВП, %
         col4, col5, col6 = st.columns(3)
         with col4:
-            plan_date_total = dsm_data['План на дату, шт.'].sum() if 'План на дату, шт.' in dsm_data.columns else 0
-            if include_prodata:
-                plan_date_total += prodata_plan_date_total
-            st.metric("📊 План на дату", f"{plan_date_total:,.0f} шт")
-        
+            st.metric("📉 Отклонение от плана на сегодня, шт", f"{deviation:+,.0f}")
         with col5:
-            fact_date_total = dsm_data['Факт на дату, шт.'].sum() if 'Факт на дату, шт.' in dsm_data.columns else 0
-            if include_prodata:
-                fact_date_total += prodata_fact_date_total
-            st.metric("✅ Факт на дату", f"{fact_date_total:,.0f} шт")
-        
+            st.metric("📋 Факт поручено, шт", f"{assigned_total:,.0f}")
         with col6:
-            pf_date_percent = (fact_date_total / plan_date_total * 100) if plan_date_total > 0 else 0
-            st.metric("🎯 План/Факт на дату", f"{pf_date_percent:.1f}%")
+            st.metric("🔮 Прогноз ВП, %", f"{forecast_percent:.1f}%")
         
         # Отображаем таблицу
         display_cols = ['DSM']
@@ -1704,7 +1910,43 @@ class DataVisualizer:
             type="primary",
             use_container_width=True
         )
+
+        # Кнопка скачивания краткого отчета
+        brief_cols = [
+            'Клиент',
+            'План проекта, шт.',
+            'Факт проекта, шт.',
+            'Факт проекта_поручено, шт.',
+            'Факт проекта_не_поручено, шт.',
+            'Длительность',
+            'Дата старта',
+            'Дата финиша',
+            'Дней до конца проекта',
+            'Прогноз, шт',
+            'Прогноз ВП, %',
+            'Отклонение от плана на сегодня, шт.',
+            'Ср. план на день для 100% плана',
+            'Оплата факт средн., руб.',
+            'Оплата поручено средн., руб.'
+        ]
         
+        # Оставляем только существующие колонки
+        existing_brief_cols = [col for col in brief_cols if col in dsm_data.columns]
+        brief_report = dsm_data[existing_brief_cols].copy()
+        
+        output_brief = BytesIO()
+        with pd.ExcelWriter(output_brief, engine='openpyxl') as writer:
+            brief_report.to_excel(writer, sheet_name='Краткий_отчет', index=False)
+        
+        st.download_button(
+            label="📊 Скачать краткий отчет",
+            data=output_brief.getvalue(),
+            file_name=f"краткий_отчет_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            type="secondary",
+            use_container_width=True,
+            key="download_brief_dsm"
+        )
     def create_prodata_table(self, prodata_df):
         """
         Создает отдельную таблицу для ПроДата с возможностью развертки по Типу мониторинга
