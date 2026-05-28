@@ -1925,6 +1925,15 @@
       "fio_om": "",
       "added_at": "2026-05-18T08:43:41.010697",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Sminex",
+      "wave_name": "Sminex_05.2026",
+      "project_code": "RU00.398.06.01SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-05-28T10:26:22.958552",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [],
@@ -4072,8 +4081,16 @@
       "project_code": "RU00.174.01.01SVZ24",
       "timestamp": "2026-05-20T10:51:05.478456",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Sminex",
+      "wave_name": "Sminex_05.2026",
+      "project_code": "RU00.398.06.01SVZ26",
+      "timestamp": "2026-05-28T10:26:22.958625",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-05-20T10:51:05.478468",
+  "last_updated": "2026-05-28T10:26:22.958632",
   "version": "1.0"
 }
