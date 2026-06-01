@@ -9,7 +9,9 @@ import io
 import calendar
 from github_settings import get_plan_adjustment_manager
 from github_settings import get_multon_plan_manager
+from github_settings import get_plan_adjustment_manager, get_multon_plan_manager, get_multibrand_plan_manager
 from data_cleaner import REGION_NAME_TO_CODE
+
 
 class VisitCalculator:
     
@@ -516,7 +518,20 @@ class VisitCalculator:
             except Exception as e:
                 plan_adjustments = {}
 
-
+            # ============================================
+            # ЗАГРУЗКА РАСПРЕДЕЛЕНИЯ ДЛЯ МУЛЬТИБРЕНД 2024 (ОДИН РАЗ)
+            # ============================================
+            multibrand_dilers_df = pd.DataFrame()
+            multibrand_pronto_df = pd.DataFrame()
+            multibrand_loaded = False
+            
+            if 'cxway' in st.session_state.uploaded_files:
+                try:
+                    multibrand_manager = get_multibrand_plan_manager()
+                    multibrand_dilers_df, multibrand_pronto_df = multibrand_manager.load_plan()
+                    multibrand_loaded = not (multibrand_dilers_df.empty and multibrand_pronto_df.empty)
+                except:
+                    pass
         
             # ============================================
             # 2. ПРЕДВАРИТЕЛЬНЫЙ РАСЧЕТ ВЕСОВ RS
@@ -732,10 +747,72 @@ class VisitCalculator:
                         if total_plan <= 0:
                             continue
                     
-                    else:  # Чеккер, CXWAY, Easymerch, Optima
+                    elif client == 'Мультибренд 2024' and po == 'CXWAY':
+                        # Проверяем, загружен ли CXWAY
+                        if 'cxway' not in st.session_state.uploaded_files:
+                            continue
+                        
+                        # 1. Определяем тип волны по названию (после последнего '_')
+                        wave_parts = wave_name.split('_')
+                        if len(wave_parts) >= 2:
+                            wave_type = '_'.join(wave_parts[1:])
+                        else:
+                            wave_type = wave_name
+                        
+                        # 2. Определяем план в зависимости от типа волны
+                        asm_from_plan = row['ASM']
+                        rs_from_plan = row['RS']
+                        skip_plan_correction = False
+                        
+                        if wave_type == 'Нерезультативные_Пронто_Дилеры':
+                            total_plan = 0
+                            skip_plan_correction = True
+                            
+                        elif wave_type == 'Дилеры':
+                            # ИСПРАВЛЕНО: region_code → region_short
+                            plan_row = multibrand_dilers_df[multibrand_dilers_df['region_short'] == region]
+                            if not plan_row.empty:
+                                total_plan = plan_row.iloc[0]['plan']
+                            else:
+                                total_plan = 0
+                            
+                        elif wave_type == 'Пронто' or wave_type == 'Пронто М':
+                            # Поиск по короткому коду региона и типу волны
+                            if 'wave_type' in multibrand_pronto_df.columns:
+                                plan_row = multibrand_pronto_df[
+                                    (multibrand_pronto_df['region_short'] == region) &
+                                    (multibrand_pronto_df['wave_type'] == wave_type)
+                                ]
+                            else:
+                                plan_row = multibrand_pronto_df[multibrand_pronto_df['region_short'] == region]
+                            
+                            if not plan_row.empty:
+                                total_plan = plan_row.iloc[0]['plan']
+                            else:
+                                total_plan = 0
+                            
+                        else:
+                            total_plan = 0
+                        
+                        if total_plan <= 0 and not skip_plan_correction:
+                            continue
+                        
+                        # Рассчитываем план на дату с учетом этапов
+                        rs_plan_on_date, rs_daily_plan = self.calculate_plan_with_stages(
+                            total_plan,
+                            duration,
+                            coefficients,
+                            start_date,
+                            finish_date,
+                            period_start,
+                            period_end
+                        )
+    
+                    else:  # Чеккер, CXWAY (другие), Easymerch, Optima
                         client_name = row['Клиент']
                         plan_key = (client_name, project_code, wave_name, region)
                         total_plan = project_wave_region_plans.get(plan_key, 0)
+                        
                         if total_plan <= 0:
                             continue
                         
@@ -748,28 +825,32 @@ class VisitCalculator:
                         
                         if weight > 0:
                             total_plan = round(total_plan * weight, 1)
+                        
+                        # Рассчитываем план на дату с учетом этапов
+                        rs_plan_on_date, rs_daily_plan = self.calculate_plan_with_stages(
+                            total_plan,
+                            duration,
+                            coefficients,
+                            start_date,
+                            finish_date,
+                            period_start,
+                            period_end
+                        )
+                        
+                        asm_from_plan = row['ASM']
+                        rs_from_plan = rs_name
+                        skip_plan_correction = False
                     
-                    # Рассчитываем план на дату с учетом этапов
-                    rs_plan_on_date, rs_daily_plan = self.calculate_plan_with_stages(
-                        total_plan,
-                        duration,
-                        coefficients,
-                        start_date,
-                        finish_date,
-                        period_start,
-                        period_end
-                    )
 
-                
-                
+
                 results.append({
                     'Проект': project_code,
                     'Клиент': row['Клиент'],
                     'Волна': wave_name,
                     'Регион': region,
                     'DSM': row['DSM'],
-                    'ASM': row['ASM'],
-                    'RS': rs_name,
+                    'ASM': asm_from_plan,
+                    'RS': rs_from_plan,
                     'ПО': po,
                     'Уровень': 'RS',
                     'План проекта, шт.': total_plan,
@@ -782,7 +863,8 @@ class VisitCalculator:
                     'Коэффициент месяца': month_coefficient,
                     'Метод подбора дат': row['Метод подбора дат'],
                     'Дней в периоде': days_in_period,
-                    'Дневной план RS, шт.': round(rs_daily_plan, 2)
+                    'Дневной план RS, шт.': round(rs_daily_plan, 2),
+                    'skip_plan_correction': skip_plan_correction
                 })
 
 
@@ -825,6 +907,9 @@ class VisitCalculator:
                 
                 # 4. Применяем коэффициенты к каждой строке
                 for idx, row in results_df.iterrows():
+                    # Пропускаем строки с флагом skip_plan_correction
+                    if row.get('skip_plan_correction', False):
+                        continue
                     key = row['_project_key']
                     coeff = correction_factors.get(key, 1)
                     
@@ -1098,8 +1183,12 @@ class VisitCalculator:
         if 'Факт на дату, шт.' not in df.columns:
             df['Факт на дату, шт.'] = 0
 
-        # 2.5 КОРРЕКТИРОВКА ПЛАНА: если факт > план
-        mask_fact_gt_plan_project = df['Факт проекта, шт.'] > df['План проекта, шт.']
+        # 2.5 КОРРЕКТИРОВКА ПЛАНА: если факт > план (кроме строк с skip_plan_correction)
+        if 'skip_plan_correction' in df.columns:
+            mask_fact_gt_plan_project = (df['Факт проекта, шт.'] > df['План проекта, шт.']) & (~df['skip_plan_correction'])
+        else:
+            mask_fact_gt_plan_project = df['Факт проекта, шт.'] > df['План проекта, шт.']
+        
         if mask_fact_gt_plan_project.any():
             df.loc[mask_fact_gt_plan_project, 'План проекта, шт.'] = df.loc[mask_fact_gt_plan_project, 'Факт проекта, шт.'].copy()
         
@@ -1276,7 +1365,6 @@ class VisitCalculator:
 
 # Глобальный экземпляр
 visit_calculator = VisitCalculator()
-
 
 
 
