@@ -856,4 +856,152 @@ def get_plan_adjustment_manager():
         settings_manager = get_settings_manager()
         st.session_state.plan_adjustment_manager = PlanAdjustmentManager(settings_manager)
     return st.session_state.plan_adjustment_manager
+
+# ============================================
+# МЕНЕДЖЕР ДЛЯ МУЛЬТИБРЕНД 2024 (CXWAY)
+# ============================================
+
+class MultibrandPlanManager:
+    """Менеджер для работы с распределением плана Мультибренд 2024"""
+    
+    def __init__(self):
+        """Инициализация с настройками из Streamlit Secrets"""
+        if 'github' not in st.secrets:
+            self.available = False
+            return
+            
+        self.token = st.secrets['github']['token']
+        self.repo = st.secrets['github']['repo']
+        self.branch = st.secrets['github']['branch']
+        self.file_path = 'multibrand_plan.json'
+        
+        self.api_url = f"https://api.github.com/repos/{self.repo}/contents/{self.file_path}"
+        self.headers = {
+            "Authorization": f"token {self.token}",
+            "Accept": "application/vnd.github.v3+json"
+        }
+        self.available = True
+    
+    def _get_file_sha(self):
+        """Получает SHA текущего файла"""
+        try:
+            response = requests.get(
+                self.api_url,
+                headers=self.headers,
+                params={"ref": self.branch}
+            )
+            if response.status_code == 200:
+                return response.json()["sha"]
+            return None
+        except Exception:
+            return None
+    
+    def load_plan(self):
+        """
+        Загружает распределение плана из GitHub
+        
+        Returns:
+            tuple: (dilers_df, pronto_df) - два DataFrame
+        """
+        if not self.available:
+            return pd.DataFrame(), pd.DataFrame()
+        
+        try:
+            response = requests.get(
+                self.api_url,
+                headers=self.headers,
+                params={"ref": self.branch}
+            )
+            
+            if response.status_code == 200:
+                content = response.json()
+                file_content = base64.b64decode(content["content"]).decode("utf-8")
+                data = json.loads(file_content)
+                
+                dilers_df = pd.DataFrame(data.get('dilers', []))
+                pronto_df = pd.DataFrame(data.get('pronto', []))
+                return dilers_df, pronto_df
+            return pd.DataFrame(), pd.DataFrame()
+                
+        except Exception as e:
+            return pd.DataFrame(), pd.DataFrame()
+    
+    def save_plan(self, dilers_df, pronto_df):
+        """
+        Сохраняет распределение плана в GitHub
+        
+        Args:
+            dilers_df: pd.DataFrame — таблица Дилеры
+            pronto_df: pd.DataFrame — таблица Пронто
+        
+        Returns:
+            (bool, str): (успех, сообщение)
+        """
+        if not self.available:
+            return False, "GitHub не доступен. Проверьте секреты."
+        
+        try:
+            # Преобразуем DataFrames в списки словарей
+            dilers_data = dilers_df.to_dict('records') if not dilers_df.empty else []
+            pronto_data = pronto_df.to_dict('records') if not pronto_df.empty else []
+            
+            data = {
+                'dilers': dilers_data,
+                'pronto': pronto_data,
+                'updated_at': datetime.now().isoformat()
+            }
+            
+            content = json.dumps(data, indent=2, ensure_ascii=False, default=str)
+            content_bytes = content.encode("utf-8")
+            content_base64 = base64.b64encode(content_bytes).decode("utf-8")
+            
+            sha = self._get_file_sha()
+            payload = {
+                "message": f"Обновление распределения Мультибренд 2024 ({datetime.now().strftime('%Y-%m-%d %H:%M')})",
+                "content": content_base64,
+                "branch": self.branch
+            }
+            if sha:
+                payload["sha"] = sha
+            
+            response = requests.put(self.api_url, headers=self.headers, json=payload)
+            
+            if response.status_code in [200, 201]:
+                return True, "Распределение плана Мультибренд 2024 сохранено в GitHub!"
+            else:
+                return False, f"❌ Ошибка: {response.status_code}"
+                
+        except Exception as e:
+            return False, f"Ошибка сохранения: {str(e)}"
+    
+    def delete_plan(self):
+        """Удаляет распределение плана из GitHub"""
+        if not self.available:
+            return False, "GitHub не доступен"
+        
+        try:
+            sha = self._get_file_sha()
+            if not sha:
+                return False, "❌ Файл не найден"
+            
+            payload = {
+                "message": f"Удаление распределения Мультибренд 2024 ({datetime.now().strftime('%Y-%m-%d %H:%M')})",
+                "sha": sha,
+                "branch": self.branch
+            }
+            
+            response = requests.delete(self.api_url, headers=self.headers, json=payload)
+            
+            if response.status_code == 204:
+                return True, "Распределение плана Мультибренд 2024 удалено"
+            else:
+                return False, f"❌ Ошибка: {response.status_code}"
+                
+        except Exception as e:
+            return False, f"Ошибка удаления: {str(e)}"
+
+@st.cache_resource
+def get_multibrand_plan_manager():
+    """Возвращает экземпляр менеджера для Мультибренд 2024"""
+    return MultibrandPlanManager()
     
