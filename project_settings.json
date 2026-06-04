@@ -1943,6 +1943,33 @@
       "fio_om": "",
       "added_at": "2026-05-28T10:31:50.860965",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Beeline_Фотомониторинг",
+      "wave_name": "май",
+      "project_code": "RU00.109.02.01SVZ24",
+      "portal": "Оптима",
+      "fio_om": "",
+      "added_at": "2026-06-04T08:54:47.514206",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Beeline_Фотомониторинг",
+      "wave_name": "июнь",
+      "project_code": "",
+      "portal": "Оптима",
+      "fio_om": "",
+      "added_at": "2026-06-04T08:54:47.514435",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Beeline_Фотомониторинг",
+      "wave_name": "июнь",
+      "project_code": "RU00.109.02.01SVZ24",
+      "portal": "Оптима",
+      "fio_om": "",
+      "added_at": "2026-06-04T08:54:47.514603",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [],
@@ -4098,8 +4125,32 @@
       "project_code": "RU00.265.01.05SVZ25",
       "timestamp": "2026-05-28T10:31:50.861059",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Beeline_Фотомониторинг",
+      "wave_name": "май",
+      "project_code": "RU00.109.02.01SVZ24",
+      "timestamp": "2026-06-04T08:54:47.514282",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Beeline_Фотомониторинг",
+      "wave_name": "июнь",
+      "project_code": "",
+      "timestamp": "2026-06-04T08:54:47.514482",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Beeline_Фотомониторинг",
+      "wave_name": "июнь",
+      "project_code": "RU00.109.02.01SVZ24",
+      "timestamp": "2026-06-04T08:54:47.514644",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-05-28T10:31:50.861068",
+  "last_updated": "2026-06-04T08:54:47.514650",
   "version": "1.0"
 }
