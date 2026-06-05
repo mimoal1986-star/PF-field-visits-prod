@@ -1952,6 +1952,24 @@
       "fio_om": "",
       "added_at": "2026-06-04T08:54:47.514206",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Лукойл",
+      "wave_name": "Июнь 2026",
+      "project_code": "RU00.177.05.03SVZ25",
+      "portal": "Оптима",
+      "fio_om": "",
+      "added_at": "2026-06-05T10:23:00.157762",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Лукойл",
+      "wave_name": "Июнь 2026",
+      "project_code": "RU00.177.05.04SVZ25",
+      "portal": "Оптима",
+      "fio_om": "",
+      "added_at": "2026-06-05T10:23:00.158008",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [],
@@ -4131,8 +4149,24 @@
       "project_code": "RU00.109.02.01SVZ24",
       "timestamp": "2026-06-04T08:54:47.514644",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Лукойл",
+      "wave_name": "Июнь 2026",
+      "project_code": "RU00.177.05.03SVZ25",
+      "timestamp": "2026-06-05T10:23:00.157838",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Лукойл",
+      "wave_name": "Июнь 2026",
+      "project_code": "RU00.177.05.04SVZ25",
+      "timestamp": "2026-06-05T10:23:00.158052",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-06-04T08:54:47.514650",
+  "last_updated": "2026-06-05T10:23:00.158056",
   "version": "1.0"
 }
