@@ -12,6 +12,8 @@ from multon_excel_parser import parse_multon_excel_to_df, preview_multon_plan
 from optima_rs_parser import parse_optima_rs_excel, preview_optima_rs_mapping
 from multibrand_excel_parser import parse_multibrand_excel, preview_multibrand_plan
 from github_settings import get_multibrand_plan_manager
+from region_coefficients_parser import parse_region_coefficients_excel, preview_region_coefficients
+from github_settings import get_region_coefficient_manager
 
 # Инициализация временных корректировок
 if 'temp_adjustments' not in st.session_state:
@@ -330,6 +332,29 @@ def process_all_data(settings_manager=None, force_recalc=False):
                     st.session_state.cleaned_data['prodata_processed'] = prodata_processed
             except Exception as e:
                 st.warning(f"⚠️ Ошибка при обработке ПроДата: {e}")
+
+        # Обработка БДР (плановая оплата) - опционально
+        bdr_processed = None
+        bdr_raw = st.session_state.uploaded_files.get('bdr')
+        if bdr_raw is not None:
+            bdr_processed = data_cleaner.clean_bdr(bdr_raw)
+            if bdr_processed is not None and not bdr_processed.empty:
+                st.session_state.cleaned_data['bdr_processed'] = bdr_processed
+                # # === ТЕСТОВАЯ ВЫГРУЗКА ===
+                # st.write("### 📊 БДР после обработки")
+                # st.dataframe(bdr_processed.head(10), use_container_width=True)
+                
+                # output = BytesIO()
+                # with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                #     bdr_processed.to_excel(writer, sheet_name='БДР_обработанный', index=False)
+                # st.download_button(
+                #     label="⬇️ Скачать обработанный БДР",
+                #     data=output.getvalue(),
+                #     file_name=f"БДР_обработанный_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
+                #     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                #     type="secondary"
+                # )
+                # # === ТЕСТОВАЯ ВЫГРУЗКА ===
         
         # Обработка CXWAY (если есть)
         cxway_processed = None
@@ -648,6 +673,15 @@ def process_all_data(settings_manager=None, force_recalc=False):
                 optima_df=st.session_state.cleaned_data.get('optima_processed')
             )
             
+            # === ДОБАВЛЕНИЕ ПЛАНОВОЙ ОПЛАТЫ ===
+            if plan_result is not None and not plan_result.empty:
+                bdr_df = st.session_state.cleaned_data.get('bdr_processed')
+                if bdr_df is not None and not bdr_df.empty:
+                    region_coeff_manager = get_region_coefficient_manager()
+                    region_coeffs = region_coeff_manager.load_coefficients()
+                    plan_result = visit_calculator.add_plan_payment(plan_result, bdr_df, region_coeffs)
+            # ===================================
+            
             st.session_state.debug_times.append(f"[DEBUG] План: {time.time() - start:.2f} сек")
             start = time.time()
             
@@ -792,7 +826,7 @@ with tab1:
     
     # Размещаем загрузчики БЕЗ формы (чтобы они обновляли session_state сразу)
     col1, col2, col3, col4, col5, col6 = st.columns(6)
-    
+
     with col1:
         st.subheader("1. 📋 Портал (Массив.xlsx)")
         portal_file = st.file_uploader(
@@ -800,6 +834,17 @@ with tab1:
             type=['xlsx', 'xls'],
             key="portal_uploader",
             label_visibility="collapsed"
+        )
+        
+        st.markdown("---")  # разделитель
+        
+        st.subheader("1.5. 💰 БДР (плановая оплата)")
+        bdr_file = st.file_uploader(
+            "Загрузите файл БДР.xlsx (опционально)",
+            type=['xlsx', 'xls'],
+            key="bdr_uploader",
+            label_visibility="collapsed",
+            help="Колонки: 'КОД' и 'Расходы на ТП/Респонденты (план на 1 ед.)'"
         )
     
     with col2:
@@ -863,6 +908,7 @@ with tab1:
                     # 1. ЗАГРУЖАЕМ ФАЙЛЫ из session_state
                     portal_file_obj = st.session_state.get('portal_uploader')
                     projects_file_obj = st.session_state.get('projects_uploader')
+                    bdr_file_obj = st.session_state.get('bdr_uploader')
                     cxway_file_obj = st.session_state.get('cxway_uploader')
                     easymerch_file_obj = st.session_state.get('easymerch_uploader')
                     optima_file_obj = st.session_state.get('optima_uploader')
@@ -870,6 +916,7 @@ with tab1:
                     
                     portal_df = load_excel(portal_file_obj, "портал")
                     projects_df = load_excel(projects_file_obj, "проекты")
+                    bdr_df = load_excel(bdr_file_obj, "bdr") if bdr_file_obj else None
                     cxway_df = load_excel(cxway_file_obj, "cxway")
                     easymerch_df = load_excel(easymerch_file_obj, "easymerch")
                     optima_df = load_excel(optima_file_obj, "optima")
@@ -880,6 +927,8 @@ with tab1:
                         st.session_state.uploaded_files['портал'] = portal_df
                     if projects_df is not None:
                         st.session_state.uploaded_files['сервизория'] = projects_df
+                    if bdr_df is not None:
+                        st.session_state.uploaded_files['bdr'] = bdr_df
                     if cxway_df is not None:
                         st.session_state.uploaded_files['cxway'] = cxway_df
                     if easymerch_df is not None:
@@ -957,7 +1006,7 @@ with tab2:
             else:
                 st.warning("⚠️ Нет данных для динамики")
 
-# ============================================
+# # ============================================
 # # ВЫГРУЗКА ПОЛЕВЫХ ПРОЕКТОВ
 # # ============================================
 # if st.session_state.cleaned_data.get('полевые_проекты') is not None:
@@ -1804,6 +1853,112 @@ with tab3:
             with col2:
                 if st.button("💾 Сохранить распределение", type="primary", use_container_width=True, key="save_optima_rs"):
                     success, msg = optima_rs_manager.save_distribution(region_mapping, moscow_mapping, spb_mapping)
+                    if success:
+                        st.success(msg)
+                        st.rerun()
+                    else:
+                        st.error(msg)
+
+    # ============================================
+    # БЛОК: КОЭФФИЦИЕНТЫ РЕГИОНОВ
+    # ============================================
+    
+    st.markdown("---")
+    st.subheader("💰 Коэффициенты регионов")
+    st.caption("Загрузите Excel-файл с коэффициентами регионов для расчета плановой оплаты")
+    st.caption("📌 Формат: первая строка — коды регионов (AA, AD...), вторая строка — коэффициенты (100%, 95%...)")
+    
+    # Инициализируем менеджер
+    from github_settings import get_region_coefficient_manager
+    from region_coefficients_parser import parse_region_coefficients_excel, preview_region_coefficients
+    from data_cleaner import REGION_MAPPING
+    
+    region_coeff_manager = get_region_coefficient_manager()
+    
+    # Текущие коэффициенты
+    current_coefficients = region_coeff_manager.load_coefficients()
+    
+    # Формируем полную таблицу для отображения:
+    # 1. Все загруженные регионы
+    # 2. Все регионы из REGION_MAPPING, которых нет в загруженных (коэффициент 1.0)
+    
+    all_regions_display = {}
+    
+    # Добавляем загруженные
+    for code, coeff in current_coefficients.items():
+        all_regions_display[code] = coeff
+    
+    # Добавляем недостающие из REGION_MAPPING
+    for code in REGION_MAPPING.keys():
+        if code not in all_regions_display:
+            all_regions_display[code] = 1.0
+    
+    # Сортируем по коду региона
+    all_regions_display = dict(sorted(all_regions_display.items()))
+    
+    # Отображение текущих коэффициентов
+    if all_regions_display:
+        with st.expander("📋 Текущие коэффициенты регионов", expanded=False):
+            preview_data = []
+            for code, coeff in all_regions_display.items():
+                region_name = REGION_MAPPING.get(code, code)
+                is_defined = 'Да' if code in REGION_MAPPING else 'Нет'
+                preview_data.append({
+                    'Регион (код)': code,
+                    'Регион (название)': region_name,
+                    'Коэффициент': coeff,
+                    'Регион определен': is_defined
+                })
+            
+            preview_df = pd.DataFrame(preview_data)
+            st.dataframe(preview_df, use_container_width=True, hide_index=True)
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                st.caption(f"📊 Всего регионов: {len(all_regions_display)}")
+            with col2:
+                if st.button("🗑️ Удалить коэффициенты", key="delete_region_coefficients"):
+                    success, msg = region_coeff_manager.delete_coefficients()
+                    if success:
+                        st.success(msg)
+                        st.rerun()
+                    else:
+                        st.error(msg)
+    
+    # Загрузка нового файла
+    uploaded_file = st.file_uploader(
+        "📂 Загрузить Excel с коэффициентами регионов",
+        type=['xlsx', 'xls'],
+        key="region_coefficients_uploader",
+        help="Файл должен содержать две строки: первая — коды регионов, вторая — коэффициенты в процентах"
+    )
+    
+    if uploaded_file is not None:
+        # Парсим файл
+        coefficients_dict = parse_region_coefficients_excel(uploaded_file)
+        
+        if not coefficients_dict:
+            st.error("❌ Не удалось извлечь коэффициенты. Проверьте формат файла.")
+        else:
+            # Показываем предпросмотр
+            st.markdown("### 📋 Предпросмотр загружаемых данных")
+            preview_df = preview_region_coefficients(coefficients_dict)
+            st.dataframe(preview_df, use_container_width=True, hide_index=True)
+            
+            # Статистика
+            st.markdown("### 📊 Статистика")
+            col1, col2 = st.columns(2)
+            with col1:
+                defined_count = sum(1 for code in coefficients_dict.keys() if code in REGION_MAPPING)
+                st.metric("✅ Регионы из справочника", f"{defined_count} / {len(coefficients_dict)}")
+            with col2:
+                st.metric("📍 Всего регионов", len(coefficients_dict))
+            
+            # Кнопка сохранения
+            col1, col2, col3 = st.columns([1, 2, 1])
+            with col2:
+                if st.button("💾 Сохранить коэффициенты", type="primary", use_container_width=True, key="save_region_coefficients"):
+                    success, msg = region_coeff_manager.save_coefficients(coefficients_dict)
                     if success:
                         st.success(msg)
                         st.rerun()
