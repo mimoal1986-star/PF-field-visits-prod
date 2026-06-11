@@ -2078,6 +2078,15 @@
       "fio_om": "",
       "added_at": "2026-06-11T06:29:49.034592",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ОТП Банк Розница",
+      "wave_name": "2026.05_ОТП Банк Розница",
+      "project_code": "RU00.224.01.13SVZ25",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-06-11T06:31:59.390035",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -4420,8 +4429,16 @@
       "project_code": "Мультикод_.404",
       "timestamp": "2026-06-11T06:31:16.197907",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ОТП Банк Розница",
+      "wave_name": "2026.05_ОТП Банк Розница",
+      "project_code": "RU00.224.01.13SVZ25",
+      "timestamp": "2026-06-11T06:31:59.390235",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-06-11T06:31:16.197917",
+  "last_updated": "2026-06-11T06:31:59.390245",
   "version": "1.0"
 }
