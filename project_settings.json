@@ -2080,7 +2080,26 @@
       "added_by": "unknown_user"
     }
   ],
-  "included_projects": [],
+  "included_projects": [
+    {
+      "project_name": "Гротекс",
+      "wave_name": "Гротекс_Реко_06.2026 (04 волна)_УСТМ",
+      "project_code": "Мультикод_.404",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-06-11T06:31:16.197538",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Гротекс",
+      "wave_name": "Гротекс_МП_06.2026 (02 волна)_Сообщение",
+      "project_code": "Мультикод_.404",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-06-11T06:31:16.197893",
+      "added_by": "unknown_user"
+    }
+  ],
   "history": [
     {
       "action": "add_to_included",
@@ -4385,8 +4404,24 @@
       "project_code": "Мультикод_.306",
       "timestamp": "2026-06-11T06:29:49.034640",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_included",
+      "project_name": "Гротекс",
+      "wave_name": "Гротекс_Реко_06.2026 (04 волна)_УСТМ",
+      "project_code": "Мультикод_.404",
+      "timestamp": "2026-06-11T06:31:16.197574",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_included",
+      "project_name": "Гротекс",
+      "wave_name": "Гротекс_МП_06.2026 (02 волна)_Сообщение",
+      "project_code": "Мультикод_.404",
+      "timestamp": "2026-06-11T06:31:16.197907",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-06-11T06:29:49.034649",
+  "last_updated": "2026-06-11T06:31:16.197917",
   "version": "1.0"
 }
