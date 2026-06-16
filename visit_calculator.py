@@ -6,6 +6,7 @@ import streamlit as st
 from datetime import datetime, timedelta
 from typing import Optional, Dict, Tuple, List
 import io
+from io import BytesIO
 import calendar
 from github_settings import get_plan_adjustment_manager
 from github_settings import get_multon_plan_manager
@@ -1171,6 +1172,9 @@ class VisitCalculator:
                         })
                 
                 # 2. Ключи плана (из result_df для Мултон)
+                # Используем правильное имя колонки с фактом
+                fact_col_name = f'Факт проекта{suffix}, шт.'
+                
                 for idx in result_df[result_df['Клиент'] == 'Мултон'].index:
                     row = result_df.loc[idx]
                     plan_key = (
@@ -1181,7 +1185,8 @@ class VisitCalculator:
                         row['ASM'],
                         row['RS']
                     )
-                    fact_value = row['Факт проекта, шт.']
+                    # Используем правильную колонку
+                    fact_value = row.get(fact_col_name, 0)
                     
                     # Проверяем, есть ли такой ключ в фактах
                     matched = '✅ Да' if fact_value > 0 else '❌ Нет'
