@@ -1149,6 +1149,78 @@ class VisitCalculator:
                 else:
                     result_df.at[idx, f'Оплата{suffix}'] = payment_sum.get(key, 0)
     
+            # === ДИАГНОСТИКА МАТЧИНГА ДЛЯ МУЛТОН ===
+            try:
+                # Собираем данные по Мултон
+                debug_data = []
+                
+                # 1. Ключи фактов (из группировки)
+                fact_keys = list(rs_facts_total.keys())
+                for key in fact_keys:
+                    if 'Мултон' in str(key[0]):
+                        debug_data.append({
+                            'Источник': 'Факт',
+                            'Клиент': key[0],
+                            'Проект': key[1],
+                            'Волна': key[2],
+                            'Регион': key[3],
+                            'ASM': key[4],
+                            'RS': key[5],
+                            'Количество': rs_facts_total[key],
+                            'Матчинг': 'Есть в фактах'
+                        })
+                
+                # 2. Ключи плана (из result_df для Мултон)
+                for idx in result_df[result_df['Клиент'] == 'Мултон'].index:
+                    row = result_df.loc[idx]
+                    plan_key = (
+                        row['Клиент'],
+                        row['Проект'],
+                        row['Волна'],
+                        row['Регион'],
+                        row['ASM'],
+                        row['RS']
+                    )
+                    fact_value = row['Факт проекта, шт.']
+                    
+                    # Проверяем, есть ли такой ключ в фактах
+                    matched = '✅ Да' if fact_value > 0 else '❌ Нет'
+                    
+                    debug_data.append({
+                        'Источник': 'План',
+                        'Клиент': plan_key[0],
+                        'Проект': plan_key[1],
+                        'Волна': plan_key[2],
+                        'Регион': plan_key[3],
+                        'ASM': plan_key[4],
+                        'RS': plan_key[5],
+                        'Количество': fact_value,
+                        'Матчинг': matched
+                    })
+                
+                if debug_data:
+                    debug_df = pd.DataFrame(debug_data)
+                    
+                    # Показываем в интерфейсе
+                    st.write("### 🔍 Диагностика матчинга для Мултон")
+                    st.dataframe(debug_df, use_container_width=True, hide_index=True)
+                    
+                    # Скачивание
+                    output = BytesIO()
+                    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                        debug_df.to_excel(writer, sheet_name='Матчинг_Мултон', index=False)
+                    st.download_button(
+                        label="⬇️ Скачать диагностику матчинга",
+                        data=output.getvalue(),
+                        file_name=f"матчинг_мултон_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        type="secondary"
+                    )
+            except Exception as e:
+                st.warning(f"⚠️ Ошибка при диагностике матчинга: {e}")
+
+            # === ДИАГНОСТИКА МАТЧИНГА ДЛЯ МУЛТОН ===
+            
             return result_df
             
         except Exception as e:
