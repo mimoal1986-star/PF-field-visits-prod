@@ -1172,7 +1172,6 @@ class VisitCalculator:
                         })
                 
                 # 2. Ключи плана (из result_df для Мултон)
-                # Используем правильное имя колонки с фактом
                 fact_col_name = f'Факт проекта{suffix}, шт.'
                 
                 for idx in result_df[result_df['Клиент'] == 'Мултон'].index:
@@ -1185,10 +1184,8 @@ class VisitCalculator:
                         row['ASM'],
                         row['RS']
                     )
-                    # Используем правильную колонку
                     fact_value = row.get(fact_col_name, 0)
                     
-                    # Проверяем, есть ли такой ключ в фактах
                     matched = '✅ Да' if fact_value > 0 else '❌ Нет'
                     
                     debug_data.append({
@@ -1206,20 +1203,20 @@ class VisitCalculator:
                 if debug_data:
                     debug_df = pd.DataFrame(debug_data)
                     
-                    # Показываем в интерфейсе
                     st.write("### 🔍 Диагностика матчинга для Мултон")
                     st.dataframe(debug_df, use_container_width=True, hide_index=True)
                     
-                    # Скачивание
                     output = BytesIO()
                     with pd.ExcelWriter(output, engine='openpyxl') as writer:
                         debug_df.to_excel(writer, sheet_name='Матчинг_Мултон', index=False)
+                    
                     st.download_button(
                         label="⬇️ Скачать диагностику матчинга",
                         data=output.getvalue(),
                         file_name=f"матчинг_мултон_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                        type="secondary"
+                        type="secondary",
+                        key=f"download_matching_{suffix}"  # ← уникальный ключ
                     )
             except Exception as e:
                 st.warning(f"⚠️ Ошибка при диагностике матчинга: {e}")
