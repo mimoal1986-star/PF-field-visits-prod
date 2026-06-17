@@ -2096,6 +2096,60 @@
       "fio_om": "",
       "added_at": "2026-06-16T09:26:19.361219",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ОТП Банк ЦКД",
+      "wave_name": "Тест_ОТП Банк ЦКД",
+      "project_code": "RU00.224.01.14SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-06-17T09:00:11.211075",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "DEGA",
+      "wave_name": "2025.04 - Хирург",
+      "project_code": "",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-06-17T09:00:11.211268",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "DEGA",
+      "wave_name": "2025.03 - Хирург",
+      "project_code": "RU00.320.06.02SVZ25",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-06-17T09:00:11.211386",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "DEGA",
+      "wave_name": "2025.04 - Хирург",
+      "project_code": "RU00.320.06.02SVZ25",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-06-17T09:00:11.211487",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "DEGA",
+      "wave_name": "2025.05 - Хирург",
+      "project_code": "RU00.320.06.02SVZ25",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-06-17T09:00:11.211593",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "DEGA",
+      "wave_name": "2025.05 - Косметолог",
+      "project_code": "RU00.320.01.01SVZ25",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-06-17T09:00:11.211687",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -4454,8 +4508,56 @@
       "project_code": "Мультикод_.306",
       "timestamp": "2026-06-16T09:26:19.361299",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ОТП Банк ЦКД",
+      "wave_name": "Тест_ОТП Банк ЦКД",
+      "project_code": "RU00.224.01.14SVZ26",
+      "timestamp": "2026-06-17T09:00:11.211150",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "DEGA",
+      "wave_name": "2025.04 - Хирург",
+      "project_code": "",
+      "timestamp": "2026-06-17T09:00:11.211305",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "DEGA",
+      "wave_name": "2025.03 - Хирург",
+      "project_code": "RU00.320.06.02SVZ25",
+      "timestamp": "2026-06-17T09:00:11.211417",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "DEGA",
+      "wave_name": "2025.04 - Хирург",
+      "project_code": "RU00.320.06.02SVZ25",
+      "timestamp": "2026-06-17T09:00:11.211515",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "DEGA",
+      "wave_name": "2025.05 - Хирург",
+      "project_code": "RU00.320.06.02SVZ25",
+      "timestamp": "2026-06-17T09:00:11.211621",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "DEGA",
+      "wave_name": "2025.05 - Косметолог",
+      "project_code": "RU00.320.01.01SVZ25",
+      "timestamp": "2026-06-17T09:00:11.211714",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-06-16T09:26:19.361304",
+  "last_updated": "2026-06-17T09:00:11.211718",
   "version": "1.0"
 }
