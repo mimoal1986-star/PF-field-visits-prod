@@ -2150,6 +2150,15 @@
       "fio_om": "",
       "added_at": "2026-06-17T09:00:11.211687",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Эконика",
+      "wave_name": "Эконика_2026.07_ВИП",
+      "project_code": "Мультикод_.306",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-06-19T09:38:40.022641",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -4556,8 +4565,16 @@
       "project_code": "RU00.320.01.01SVZ25",
       "timestamp": "2026-06-17T09:00:11.211714",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Эконика",
+      "wave_name": "Эконика_2026.07_ВИП",
+      "project_code": "Мультикод_.306",
+      "timestamp": "2026-06-19T09:38:40.022722",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-06-17T09:00:11.211718",
+  "last_updated": "2026-06-19T09:38:40.022728",
   "version": "1.0"
 }
