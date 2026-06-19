@@ -175,7 +175,15 @@
       "adjustment_value": -137,
       "created_at": "2026-06-19T08:45:47.138005",
       "created_by": "unknown_user"
+    },
+    {
+      "project_name": "Мултон",
+      "wave_name": "нет",
+      "project_code": "RU00.381.02.03SVZ25",
+      "adjustment_value": -244,
+      "created_at": "2026-06-19T08:45:48.284760",
+      "created_by": "unknown_user"
     }
   ],
-  "last_updated": "2026-06-19T08:45:47.314407"
+  "last_updated": "2026-06-19T08:45:48.481109"
 }
