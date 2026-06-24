@@ -2159,6 +2159,15 @@
       "fio_om": "",
       "added_at": "2026-06-19T09:38:40.022641",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ГЛАВСТРОЙ",
+      "wave_name": "2026.06_ЖК Баланс",
+      "project_code": "RU00.342.06.01SVZ25",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-06-24T07:39:50.933847",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -4573,8 +4582,16 @@
       "project_code": "Мультикод_.306",
       "timestamp": "2026-06-19T09:38:40.022722",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ГЛАВСТРОЙ",
+      "wave_name": "2026.06_ЖК Баланс",
+      "project_code": "RU00.342.06.01SVZ25",
+      "timestamp": "2026-06-24T07:39:50.933950",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-06-19T09:38:40.022728",
+  "last_updated": "2026-06-24T07:39:50.933956",
   "version": "1.0"
 }
