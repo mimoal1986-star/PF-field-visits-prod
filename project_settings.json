@@ -2168,6 +2168,24 @@
       "fio_om": "",
       "added_at": "2026-06-24T07:39:50.933847",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ОТП Банк Премиум",
+      "wave_name": "2026.06_ОТП Банк Премиум Звонки",
+      "project_code": "RU00.224.01.06SVZ24",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-06-26T08:01:20.878081",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Panacea",
+      "wave_name": "2026.06_Panacea",
+      "project_code": "RU00.384.01.01SVZ25",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-06-26T08:01:20.878413",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -4590,8 +4608,24 @@
       "project_code": "RU00.342.06.01SVZ25",
       "timestamp": "2026-06-24T07:39:50.933950",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ОТП Банк Премиум",
+      "wave_name": "2026.06_ОТП Банк Премиум Звонки",
+      "project_code": "RU00.224.01.06SVZ24",
+      "timestamp": "2026-06-26T08:01:20.878215",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Panacea",
+      "wave_name": "2026.06_Panacea",
+      "project_code": "RU00.384.01.01SVZ25",
+      "timestamp": "2026-06-26T08:01:20.878459",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-06-24T07:39:50.933956",
+  "last_updated": "2026-06-26T08:01:20.878464",
   "version": "1.0"
 }
