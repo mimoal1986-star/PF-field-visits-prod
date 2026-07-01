@@ -2089,15 +2089,6 @@
       "added_by": "unknown_user"
     },
     {
-      "project_name": "Эконика",
-      "wave_name": "Эконика_2026.06 (74 волна)",
-      "project_code": "Мультикод_.306",
-      "portal": "CXWAY",
-      "fio_om": "",
-      "added_at": "2026-06-16T09:26:19.361219",
-      "added_by": "unknown_user"
-    },
-    {
       "project_name": "ОТП Банк ЦКД",
       "wave_name": "Тест_ОТП Банк ЦКД",
       "project_code": "RU00.224.01.14SVZ26",
@@ -4616,14 +4607,6 @@
       "wave_name": "2026.05_ОТП Банк Розница",
       "project_code": "RU00.224.01.13SVZ25",
       "timestamp": "2026-06-11T06:31:59.390235",
-      "user": "unknown_user"
-    },
-    {
-      "action": "add_to_excluded",
-      "project_name": "Эконика",
-      "wave_name": "Эконика_2026.06 (74 волна)",
-      "project_code": "Мультикод_.306",
-      "timestamp": "2026-06-16T09:26:19.361299",
       "user": "unknown_user"
     },
     {
