@@ -191,7 +191,15 @@
       "adjustment_value": 2357,
       "created_at": "2026-07-02T09:29:07.084159",
       "created_by": "unknown_user"
+    },
+    {
+      "project_name": "Beeline_Фотомониторинг",
+      "wave_name": "июнь",
+      "project_code": "RU00.109.02.01SVZ24",
+      "adjustment_value": -2357,
+      "created_at": "2026-07-02T09:29:41.502373",
+      "created_by": "unknown_user"
     }
   ],
-  "last_updated": "2026-07-02T09:29:07.276629"
+  "last_updated": "2026-07-02T09:29:41.686268"
 }
