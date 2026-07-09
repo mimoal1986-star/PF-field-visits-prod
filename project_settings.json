@@ -2258,6 +2258,33 @@
       "fio_om": "",
       "added_at": "2026-06-29T07:29:02.554205",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Лукойл франчайзинг ФО",
+      "wave_name": "Июль 2026",
+      "project_code": "RU00.175.01.04SVZ24/RU00.175.01.02SVZ24",
+      "portal": "Оптима",
+      "fio_om": "",
+      "added_at": "2026-07-09T11:46:21.546772",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Лукойл",
+      "wave_name": "Июль 2026",
+      "project_code": "RU00.177.05.03SVZ25",
+      "portal": "Оптима",
+      "fio_om": "",
+      "added_at": "2026-07-09T11:46:21.547116",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Лукойл",
+      "wave_name": "Июль 2026",
+      "project_code": "RU00.177.05.04SVZ25",
+      "portal": "Оптима",
+      "fio_om": "",
+      "added_at": "2026-07-09T11:46:21.547303",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -4760,8 +4787,32 @@
       "project_code": "RU00.320.01.05SVZ25",
       "timestamp": "2026-06-29T07:29:02.554250",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Лукойл франчайзинг ФО",
+      "wave_name": "Июль 2026",
+      "project_code": "RU00.175.01.04SVZ24/RU00.175.01.02SVZ24",
+      "timestamp": "2026-07-09T11:46:21.546930",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Лукойл",
+      "wave_name": "Июль 2026",
+      "project_code": "RU00.177.05.03SVZ25",
+      "timestamp": "2026-07-09T11:46:21.547181",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Лукойл",
+      "wave_name": "Июль 2026",
+      "project_code": "RU00.177.05.04SVZ25",
+      "timestamp": "2026-07-09T11:46:21.547379",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-06-29T07:29:02.554254",
+  "last_updated": "2026-07-09T11:46:21.547387",
   "version": "1.0"
 }
