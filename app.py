@@ -342,7 +342,7 @@ def process_all_data(settings_manager=None, force_recalc=False):
                 st.session_state.cleaned_data['bdr_processed'] = bdr_processed
                 # # === ТЕСТОВАЯ ВЫГРУЗКА ===
                 # st.write("### 📊 БДР после обработки")
-                # st.dataframe(bdr_processed.head(10), use_container_width=True)
+                # st.dataframe(bdr_processed.head(10), width='stretch')
                 
                 # output = BytesIO()
                 # with pd.ExcelWriter(output, engine='openpyxl') as writer:
@@ -1755,7 +1755,7 @@ with tab3:
     if not current_plan.empty:
         with st.expander("📋 Текущее распределение плана", expanded=False):
             preview_df = preview_multon_plan(current_plan)
-            st.dataframe(preview_df, use_container_width=True, hide_index=True)
+            st.dataframe(preview_df, width='stretch', hide_index=True)
             
             col1, col2 = st.columns(2)
             with col1:
@@ -1785,7 +1785,7 @@ with tab3:
             # Показываем предпросмотр
             st.markdown("### 📋 Предпросмотр загружаемых данных")
             preview_df = preview_multon_plan(parsed_df)
-            st.dataframe(preview_df, use_container_width=True, hide_index=True)
+            st.dataframe(preview_df, width='stretch', hide_index=True)
             
             # Группировка по проектам для статистики
             st.markdown("### 📊 Статистика")
@@ -1800,7 +1800,7 @@ with tab3:
             # Кнопка сохранения
             col1, col2, col3 = st.columns([1, 2, 1])
             with col2:
-                if st.button("💾 Сохранить распределение", type="primary", use_container_width=True):
+                if st.button("💾 Сохранить распределение", type="primary", width='stretch'):
                     success, msg = multon_manager.save_plan(parsed_df)
                     if success:
                         st.success(msg)
@@ -1831,7 +1831,7 @@ with tab3:
     if not current_dilers_df.empty or not current_pronto_df.empty:
         with st.expander("📋 Текущее распределение плана Мультибренд 2024", expanded=False):
             preview_df = preview_multibrand_plan(current_dilers_df, current_pronto_df)
-            st.dataframe(preview_df, use_container_width=True, hide_index=True)
+            st.dataframe(preview_df, width='stretch', hide_index=True)
             
             col1, col2 = st.columns(2)
             with col1:
@@ -1861,7 +1861,7 @@ with tab3:
             # Показываем предпросмотр
             st.markdown("### 📋 Предпросмотр загружаемых данных")
             preview_df = preview_multibrand_plan(dilers_df, pronto_df)
-            st.dataframe(preview_df, use_container_width=True, hide_index=True)
+            st.dataframe(preview_df, width='stretch', hide_index=True)
             
             # Статистика
             st.markdown("### 📊 Статистика")
@@ -1876,7 +1876,7 @@ with tab3:
             # Кнопка сохранения
             col1, col2, col3 = st.columns([1, 2, 1])
             with col2:
-                if st.button("💾 Сохранить распределение", type="primary", use_container_width=True, key="save_multibrand_plan"):
+                if st.button("💾 Сохранить распределение", type="primary", width='stretch', key="save_multibrand_plan"):
                     success, msg = multibrand_manager.save_plan(dilers_df, pronto_df)
                     if success:
                         st.success(msg)
@@ -1907,7 +1907,7 @@ with tab3:
     if current_region_mapping or current_moscow_mapping or current_spb_mapping:
         with st.expander("📋 Текущее распределение RS", expanded=False):
             preview_df = preview_optima_rs_mapping(current_region_mapping, current_moscow_mapping, current_spb_mapping)
-            st.dataframe(preview_df, use_container_width=True, hide_index=True)
+            st.dataframe(preview_df, width='stretch', hide_index=True)
             
             col1, col2 = st.columns(2)
             with col1:
@@ -1937,7 +1937,7 @@ with tab3:
             # Показываем предпросмотр
             st.markdown("### 📋 Предпросмотр загружаемых данных")
             preview_df = preview_optima_rs_mapping(region_mapping, moscow_mapping, spb_mapping)
-            st.dataframe(preview_df, use_container_width=True, hide_index=True)
+            st.dataframe(preview_df, width='stretch', hide_index=True)
             
             # Статистика
             st.markdown("### 📊 Статистика")
@@ -1952,7 +1952,7 @@ with tab3:
             # Кнопка сохранения
             col1, col2, col3 = st.columns([1, 2, 1])
             with col2:
-                if st.button("💾 Сохранить распределение", type="primary", use_container_width=True, key="save_optima_rs"):
+                if st.button("💾 Сохранить распределение", type="primary", width='stretch', key="save_optima_rs"):
                     success, msg = optima_rs_manager.save_distribution(region_mapping, moscow_mapping, spb_mapping)
                     if success:
                         st.success(msg)
@@ -2012,7 +2012,7 @@ with tab3:
                 })
             
             preview_df = pd.DataFrame(preview_data)
-            st.dataframe(preview_df, use_container_width=True, hide_index=True)
+            st.dataframe(preview_df, width='stretch', hide_index=True)
             
             col1, col2 = st.columns(2)
             with col1:
@@ -2044,7 +2044,7 @@ with tab3:
             # Показываем предпросмотр
             st.markdown("### 📋 Предпросмотр загружаемых данных")
             preview_df = preview_region_coefficients(coefficients_dict)
-            st.dataframe(preview_df, use_container_width=True, hide_index=True)
+            st.dataframe(preview_df, width='stretch', hide_index=True)
             
             # Статистика
             st.markdown("### 📊 Статистика")
@@ -2058,7 +2058,7 @@ with tab3:
             # Кнопка сохранения
             col1, col2, col3 = st.columns([1, 2, 1])
             with col2:
-                if st.button("💾 Сохранить коэффициенты", type="primary", use_container_width=True, key="save_region_coefficients"):
+                if st.button("💾 Сохранить коэффициенты", type="primary", width='stretch', key="save_region_coefficients"):
                     success, msg = region_coeff_manager.save_coefficients(coefficients_dict)
                     if success:
                         st.success(msg)
