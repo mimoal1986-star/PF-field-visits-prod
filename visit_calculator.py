@@ -730,64 +730,81 @@ class VisitCalculator:
                         # Проверяем, загружен ли Easymerch
                         if 'easymerch' not in st.session_state.uploaded_files:
                             continue
-                            
+                    
                         # Загружаем распределение плана из JSON
                         from github_settings import get_multon_plan_manager
                         multon_manager = get_multon_plan_manager()
                         plan_df = multon_manager.load_plan()
-                        
+                    
                         if plan_df.empty:
-                            # Нет распределения → проект не существует
                             total_plan = 0
                         else:
-                            # Ищем план по (код_проекта, регион, RS)
                             mask = (plan_df['project_code'] == project_code) & \
                                    (plan_df['region'] == region) & \
                                    (plan_df['rs'] == row['ASM'])
-                            
+                    
                             if mask.any():
                                 total_plan = plan_df.loc[mask, 'plan'].iloc[0]
                             else:
                                 total_plan = 0
-                        
+                    
                         asm_from_plan = row['ASM']
                         rs_from_plan = row['RS']
                         skip_plan_correction = False
-                        
+                    
                         if total_plan <= 0:
                             continue
+                    
+                        # ✅ НОВАЯ ЛОГИКА: переходящий проект только если start_date >= start_period
+                        start_date_date = start_date.date() if hasattr(start_date, 'date') else start_date
+                        start_period_date = start_period.date() if hasattr(start_period, 'date') else start_period
+                    
+                        if start_date_date >= start_period_date:
+                            rs_plan_on_date, rs_daily_plan = self.calculate_plan_with_stages(
+                                total_plan,
+                                duration,
+                                coefficients,
+                                start_date,
+                                finish_date,
+                                period_start,
+                                period_end
+                            )
+                        else:
+                            period_days = (period_end - period_start).days + 1
+                            rs_plan_on_date = total_plan
+                            rs_daily_plan = total_plan / period_days if period_days > 0 else 0
                     
                     elif client == 'Мультибренд 2024' and po == 'CXWAY':
                         # Проверяем, загружен ли CXWAY
                         if 'cxway' not in st.session_state.uploaded_files:
                             continue
-                        
+                    
                         # 1. Определяем тип волны по названию (после последнего '_')
                         wave_parts = wave_name.split('_')
                         if len(wave_parts) >= 2:
                             wave_type = '_'.join(wave_parts[1:])
                         else:
                             wave_type = wave_name
-                        
+                    
                         # 2. Определяем план в зависимости от типа волны
                         asm_from_plan = row['ASM']
                         rs_from_plan = row['RS']
                         skip_plan_correction = False
-                        
+                    
                         if wave_type == 'Нерезультативные_Пронто_Дилеры':
                             total_plan = 0
                             skip_plan_correction = True
-                            
+                            # Пропускаем этот проект
+                            continue
+                    
                         elif wave_type == 'Дилеры':
-                            # ИСПРАВЛЕНО: region_code → region_short
                             plan_row = multibrand_dilers_df[multibrand_dilers_df['region_short'] == region]
                             if not plan_row.empty:
                                 total_plan = plan_row.iloc[0]['plan']
                             else:
                                 total_plan = 0
-                            
+                    
                         elif wave_type == 'Пронто' or wave_type == 'Пронто М':
-                            # Поиск по короткому коду региона и типу волны
                             if 'wave_type' in multibrand_pronto_df.columns:
                                 plan_row = multibrand_pronto_df[
                                     (multibrand_pronto_df['region_short'] == region) &
@@ -795,61 +812,85 @@ class VisitCalculator:
                                 ]
                             else:
                                 plan_row = multibrand_pronto_df[multibrand_pronto_df['region_short'] == region]
-                            
+                    
                             if not plan_row.empty:
                                 total_plan = plan_row.iloc[0]['plan']
                             else:
                                 total_plan = 0
-                            
+                    
                         else:
                             total_plan = 0
-                        
+                    
                         if total_plan <= 0 and not skip_plan_correction:
                             continue
-                        
-                        # Рассчитываем план на дату с учетом этапов
-                        rs_plan_on_date, rs_daily_plan = self.calculate_plan_with_stages(
-                            total_plan,
-                            duration,
-                            coefficients,
-                            start_date,
-                            finish_date,
-                            period_start,
-                            period_end
-                        )
+                    
+                        # ✅ НОВАЯ ЛОГИКА: переходящий проект только если start_date >= start_period
+                        start_date_date = start_date.date() if hasattr(start_date, 'date') else start_date
+                        start_period_date = start_period.date() if hasattr(start_period, 'date') else start_period
+                    
+                        if start_date_date >= start_period_date:
+                            # Проект начался внутри отчетного периода → переходящий (разбивка по этапам)
+                            rs_plan_on_date, rs_daily_plan = self.calculate_plan_with_stages(
+                                total_plan,
+                                duration,
+                                coefficients,
+                                start_date,
+                                finish_date,
+                                period_start,
+                                period_end
+                            )
+                        else:
+                            # Проект начался ДО отчетного периода → обычный (план = total_plan)
+                            period_days = (period_end - period_start).days + 1
+                            rs_plan_on_date = total_plan
+                            rs_daily_plan = total_plan / period_days if period_days > 0 else 0
     
                     else:  # Чеккер, CXWAY (другие), Easymerch, Optima
                         client_name = row['Клиент']
                         plan_key = (client_name, project_code, wave_name, region)
                         total_plan = project_wave_region_plans.get(plan_key, 0)
-
+                    
                         asm_from_plan = row['ASM']
                         rs_from_plan = rs_name
                         skip_plan_correction = False
-                        
+                    
                         if total_plan <= 0:
                             continue
-                        
+                    
                         # ПРИМЕНЯЕМ КОЭФФИЦИЕНТ МЕСЯЦА
                         total_plan = round(total_plan * month_coefficient, 1)
-                        
+                    
                         # Распределяем план по RS с помощью весов
                         weight_key = (client_name, project_code, wave_name, region, rs_name)
                         weight = rs_weights_for_plan.get(weight_key, 0)
-                        
+                    
                         if weight > 0:
                             total_plan = round(total_plan * weight, 1)
-                        
-                        # Рассчитываем план на дату с учетом этапов
-                        rs_plan_on_date, rs_daily_plan = self.calculate_plan_with_stages(
-                            total_plan,
-                            duration,
-                            coefficients,
-                            start_date,
-                            finish_date,
-                            period_start,
-                            period_end
-                        )
+                    
+                        # ✅ Если после всех расчетов план стал 0 — пропускаем
+                        if total_plan <= 0:
+                            continue
+                    
+                        # ✅ НОВАЯ ЛОГИКА: переходящий проект только если start_date >= start_period
+                        start_date_date = start_date.date() if hasattr(start_date, 'date') else start_date
+                        start_period_date = start_period.date() if hasattr(start_period, 'date') else start_period
+                    
+                        if start_date_date >= start_period_date:
+                            # Проект начался внутри отчетного периода → переходящий (разбивка по этапам)
+                            rs_plan_on_date, rs_daily_plan = self.calculate_plan_with_stages(
+                                total_plan,
+                                duration,
+                                coefficients,
+                                start_date,
+                                finish_date,
+                                period_start,
+                                period_end
+                            )
+                        else:
+                            # Проект начался ДО отчетного периода → обычный (план = total_plan)
+                            period_days = (period_end - period_start).days + 1
+                            rs_plan_on_date = total_plan
+                            rs_daily_plan = total_plan / period_days if period_days > 0 else 0
                         
                 results.append({
                     'Проект': project_code,
