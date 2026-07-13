@@ -756,10 +756,15 @@ class VisitCalculator:
                             continue
                     
                         # ✅ НОВАЯ ЛОГИКА: переходящий проект только если start_date >= start_period
-                        start_date_date = start_date.date() if hasattr(start_date, 'date') else start_date
+                        # ✅ НОВАЯ ЛОГИКА: используем оригинальную дату из Google
+                        start_date_google = row.get('Дата старта_гугл', None)
+                        if pd.isna(start_date_google):
+                            start_date_google = start_date  # fallback
+                        start_date_google_date = start_date_google.date() if hasattr(start_date_google, 'date') else start_date_google
                         start_period_date = start_period.date() if hasattr(start_period, 'date') else start_period
-                    
-                        if start_date_date >= start_period_date:
+                        
+                        if start_date_google_date >= start_period_date:
+                            # Проект начался внутри отчетного периода → переходящий (разбивка по этапам)
                             rs_plan_on_date, rs_daily_plan = self.calculate_plan_with_stages(
                                 total_plan,
                                 duration,
@@ -770,6 +775,7 @@ class VisitCalculator:
                                 period_end
                             )
                         else:
+                            # Проект начался ДО отчетного периода → обычный (план = total_plan)
                             period_days = (period_end - period_start).days + 1
                             rs_plan_on_date = total_plan
                             rs_daily_plan = total_plan / period_days if period_days > 0 else 0
@@ -825,10 +831,14 @@ class VisitCalculator:
                             continue
                     
                         # ✅ НОВАЯ ЛОГИКА: переходящий проект только если start_date >= start_period
-                        start_date_date = start_date.date() if hasattr(start_date, 'date') else start_date
+                        # ✅ НОВАЯ ЛОГИКА: используем оригинальную дату из Google
+                        start_date_google = row.get('Дата старта_гугл', None)
+                        if pd.isna(start_date_google):
+                            start_date_google = start_date  # fallback
+                        start_date_google_date = start_date_google.date() if hasattr(start_date_google, 'date') else start_date_google
                         start_period_date = start_period.date() if hasattr(start_period, 'date') else start_period
-                    
-                        if start_date_date >= start_period_date:
+                        
+                        if start_date_google_date >= start_period_date:
                             # Проект начался внутри отчетного периода → переходящий (разбивка по этапам)
                             rs_plan_on_date, rs_daily_plan = self.calculate_plan_with_stages(
                                 total_plan,
@@ -872,10 +882,14 @@ class VisitCalculator:
                             continue
                     
                         # ✅ НОВАЯ ЛОГИКА: переходящий проект только если start_date >= start_period
-                        start_date_date = start_date.date() if hasattr(start_date, 'date') else start_date
+                        # ✅ НОВАЯ ЛОГИКА: используем оригинальную дату из Google
+                        start_date_google = row.get('Дата старта_гугл', None)
+                        if pd.isna(start_date_google):
+                            start_date_google = start_date  # fallback
+                        start_date_google_date = start_date_google.date() if hasattr(start_date_google, 'date') else start_date_google
                         start_period_date = start_period.date() if hasattr(start_period, 'date') else start_period
-                    
-                        if start_date_date >= start_period_date:
+                        
+                        if start_date_google_date >= start_period_date:
                             # Проект начался внутри отчетного периода → переходящий (разбивка по этапам)
                             rs_plan_on_date, rs_daily_plan = self.calculate_plan_with_stages(
                                 total_plan,
