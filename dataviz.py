@@ -480,7 +480,7 @@ class DataVisualizer:
             apply_filters = st.form_submit_button(
                 "✅ Применить фильтры",
                 type="primary",
-                width='stretch',
+                use_container_width=True,
                 key="planfact_apply_filters_btn"
             )
         
@@ -868,7 +868,7 @@ class DataVisualizer:
                 display_cols.append(col)
         
         existing_display = [c for c in display_cols if c in project_data.columns]
-        st.dataframe(project_data[existing_display], width='stretch', hide_index=True)
+        st.dataframe(project_data[existing_display], use_container_width=True, hide_index=True)
 
 
         # Удаляем лишние колонки перед выгрузкой
@@ -888,7 +888,7 @@ class DataVisualizer:
             file_name=f"план_факт_проекты_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             type="primary",
-            width='stretch'
+            use_container_width=True
         )
         
         # Кнопка скачивания краткого отчета
@@ -931,7 +931,7 @@ class DataVisualizer:
             file_name=f"краткий_отчет_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             type="secondary",
-            width='stretch',
+            use_container_width=True,
             key="download_brief_planfact" 
         )
 
@@ -1140,7 +1140,7 @@ class DataVisualizer:
             apply_filters = st.form_submit_button(
                 "✅ Применить фильтры",
                 type="primary",
-                width='stretch',
+                use_container_width=True,
                 key="region_apply_filters_btn"
             )
         
@@ -1549,7 +1549,7 @@ class DataVisualizer:
         if 'Регион' in region_data.columns:
             region_data['Регион'] = region_data['Регион'].apply(self._get_long_region)
         
-        st.dataframe(region_data[existing_display], width='stretch', hide_index=True)
+        st.dataframe(region_data[existing_display], use_container_width=True, hide_index=True)
         
         # Удаляем лишние колонки перед выгрузкой
         cols_to_drop = ['Оплата_поручено']
@@ -1568,7 +1568,7 @@ class DataVisualizer:
             file_name=f"регионы_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             type="primary",
-            width='stretch'
+            use_container_width=True
         )
 
         # Кнопка скачивания краткого отчета
@@ -1611,7 +1611,7 @@ class DataVisualizer:
             file_name=f"краткий_отчет_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             type="secondary",
-            width='stretch',
+            use_container_width=True,
             key="download_brief_region"
         )
     
@@ -1748,7 +1748,7 @@ class DataVisualizer:
             apply_filters = st.form_submit_button(
                 "✅ Применить фильтры",
                 type="primary",
-                width='stretch',
+                use_container_width=True,
                 key="dsm_apply_filters_btn"
             )
         
@@ -2155,7 +2155,7 @@ class DataVisualizer:
         
         existing_display = [c for c in display_cols if c in dsm_data.columns]
         
-        st.dataframe(dsm_data[existing_display], width='stretch', hide_index=True)
+        st.dataframe(dsm_data[existing_display], use_container_width=True, hide_index=True)
 
         # Удаляем лишние колонки перед выгрузкой
         cols_to_drop = ['Оплата_поручено']
@@ -2174,7 +2174,7 @@ class DataVisualizer:
             file_name=f"dsm_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             type="primary",
-            width='stretch'
+            use_container_width=True
         )
 
         # Кнопка скачивания краткого отчета
@@ -2217,7 +2217,7 @@ class DataVisualizer:
             file_name=f"краткий_отчет_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             type="secondary",
-            width='stretch',
+            use_container_width=True,
             key="download_brief_dsm"
         )
     def create_prodata_table(self, prodata_df):
@@ -2246,7 +2246,7 @@ class DataVisualizer:
             # Отображаем таблицу
             st.dataframe(
                 table_df,
-                width='stretch',
+                use_container_width=True,
                 hide_index=True,
                 column_config={
                     'Клиент': 'Клиент',
@@ -2266,7 +2266,7 @@ class DataVisualizer:
                 file_name=f"prodata_detailed_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 type="secondary",
-                width='stretch'
+                use_container_width=True
             )
         else:
             # Свернутая таблица - группируем по клиенту (суммируем все типы мониторинга)
@@ -2279,7 +2279,7 @@ class DataVisualizer:
             # Отображаем таблицу
             st.dataframe(
                 prodata_agg,
-                width='stretch',
+                use_container_width=True,
                 hide_index=True,
                 column_config={
                     'Клиент': 'Клиент',
@@ -2298,7 +2298,7 @@ class DataVisualizer:
                 file_name=f"prodata_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 type="secondary",
-                width='stretch'
+                use_container_width=True
             )
     def create_dynamics_tab(self, data, visits_df, calc_params):
         """
@@ -2362,7 +2362,7 @@ class DataVisualizer:
             with col_detail6:
                 show_rs = st.checkbox("RS", key="dynamics_show_rs")
             
-            apply_filters = st.form_submit_button("✅ Применить фильтры", type="primary", width='stretch')
+            apply_filters = st.form_submit_button("✅ Применить фильтры", type="primary", use_container_width=True)
         
         # Применяем фильтры напрямую к visits_df
         filtered_visits = visits_df.copy()
@@ -2459,7 +2459,7 @@ class DataVisualizer:
         st.metric("📊 Всего визитов за период", f"{total_fact:,.0f}")
         st.markdown("---")
         
-        st.dataframe(result_df, width='stretch', hide_index=True)
+        st.dataframe(result_df, use_container_width=True, hide_index=True)
         
         # Скачивание
         output = BytesIO()
@@ -2472,7 +2472,7 @@ class DataVisualizer:
             file_name=f"динамика_факта_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             type="primary",
-            width='stretch'
+            use_container_width=True
         )
     
     def calculate_focus(self, df, aggregation_level='auto'):
