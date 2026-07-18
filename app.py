@@ -122,6 +122,7 @@ def deduplicate_by_priority(df, priority_sources):
     return df
     
 def process_all_data(settings_manager=None, force_recalc=False):
+    
     """Полная обработка данных и расчет план/факт"""
 
     # Проверяем, изменились ли загруженные файлы
@@ -144,59 +145,77 @@ def process_all_data(settings_manager=None, force_recalc=False):
             st.session_state.debug_times = []
         st.session_state.debug_times = []
         
-        # Проверяем наличие основных файлов
-        required_files = ['портал', 'сервизория']
-        missing_files = [f for f in required_files if f not in st.session_state.uploaded_files]
+        # Проверяем наличие Сервизория (всегда обязательна)
+        if 'сервизория' not in st.session_state.uploaded_files:
+            return False
         
-        if missing_files:
+        # Проверяем наличие ХОТЯ БЫ одного источника визитов
+        has_visits_source = (
+            'портал' in st.session_state.uploaded_files or
+            'cxway' in st.session_state.uploaded_files or
+            'easymerch' in st.session_state.uploaded_files or
+            'optima' in st.session_state.uploaded_files
+        )
+        
+        if not has_visits_source:
             return False
         
         # Получаем данные
-        portal_raw = st.session_state.uploaded_files['портал']
         google_raw = st.session_state.uploaded_files['сервизория']
         
-        # Очистка портала
-        portal_cleaned = data_cleaner.clean_array(portal_raw)
-        if portal_cleaned is None:
-            portal_cleaned = portal_raw
-        st.session_state.cleaned_data['портал'] = portal_cleaned
-        
-        # Очистка проектов
+        # ОЧИСТКА ПРОЕКТОВ (GOOGLE)
         google_cleaned = data_cleaner.clean_google(google_raw)
         if google_cleaned is None:
             google_cleaned = google_raw
         st.session_state.cleaned_data['сервизория'] = google_cleaned
-        st.session_state.cleaned_data['сервизория_original'] = google_raw.copy() 
-        
-        # Обогащение массива кодами проектов
-        enriched_result = data_cleaner.enrich_array_with_project_codes(
-            st.session_state.cleaned_data['портал'],
-            st.session_state.cleaned_data['сервизория']
-        )
-        
-        if enriched_result:
-            enriched_array, discrepancy_df, stats = enriched_result
-            st.session_state.cleaned_data['портал'] = enriched_array
+        st.session_state.cleaned_data['сервизория_original'] = google_raw.copy()
         
         # Добавление признака полевой проект
         google_with_field = data_cleaner.update_field_projects_flag(st.session_state.cleaned_data['сервизория'])
         st.session_state.cleaned_data['сервизория'] = google_with_field
         st.session_state.debug_times.append(f"[DEBUG] Очистка: {time.time() - start:.2f} сек")
         start = time.time()
+        
+
+        # ОБРАБОТКА ПОРТАЛА (CHECKER) - ЕСЛИ ЗАГРУЖЕН
+        if 'портал' in st.session_state.uploaded_files:
+            portal_raw = st.session_state.uploaded_files['портал']
+            portal_cleaned = data_cleaner.clean_array(portal_raw)
+            if portal_cleaned is None:
+                portal_cleaned = portal_raw
+            st.session_state.cleaned_data['портал'] = portal_cleaned
+            
+            enriched_result = data_cleaner.enrich_array_with_project_codes(
+                st.session_state.cleaned_data['портал'],
+                st.session_state.cleaned_data['сервизория']  # ← ТЕПЕРЬ СУЩЕСТВУЕТ!
+            )
+            
+            if enriched_result:
+                enriched_array, discrepancy_df, stats = enriched_result
+                st.session_state.cleaned_data['портал'] = enriched_array
+        else:
+            st.session_state.cleaned_data['портал'] = pd.DataFrame()
 
         
-        # ============================================
         # ОБОГАЩЕНИЕ ДАННЫХ (ОПТИМИЗИРОВАННО)
-        # ============================================
         
-        # Добавляем поле 'Полевой' и 'ПО'
-        array_with_field = data_cleaner.add_field_flag_to_array(st.session_state.cleaned_data['портал'])
-        array_with_portal = data_cleaner.add_portal_to_array(array_with_field, google_with_field)
-        array_with_portal = data_cleaner.remove_cxway_from_portal(array_with_portal, google_with_field)
-        st.session_state.cleaned_data['портал_с_полем'] = array_with_portal
+        # Добавляем поле 'Полевой' и 'ПО' (только если есть портал)
+        if 'портал' in st.session_state.cleaned_data and not st.session_state.cleaned_data['портал'].empty:
+            array_with_field = data_cleaner.add_field_flag_to_array(st.session_state.cleaned_data['портал'])
+            array_with_portal = data_cleaner.add_portal_to_array(array_with_field, google_with_field)
+            array_with_portal = data_cleaner.remove_cxway_from_portal(array_with_portal, google_with_field)
+            st.session_state.cleaned_data['портал_с_полем'] = array_with_portal
+        else:
+            st.session_state.cleaned_data['портал_с_полем'] = pd.DataFrame()
         
-        # Разделение на полевые/неполевые
-        field_df, non_field_df = data_cleaner.split_array_by_field_flag(array_with_portal)
+        # Разделение на полевые/неполевые (только если есть портал_с_полем)
+        if not st.session_state.cleaned_data['портал_с_полем'].empty:
+            field_df, non_field_df = data_cleaner.split_array_by_field_flag(
+                st.session_state.cleaned_data['портал_с_полем']
+            )
+        else:
+            field_df = pd.DataFrame()
+            non_field_df = pd.DataFrame()
         
         # Загружаем настройки
         if settings_manager is None:
@@ -253,16 +272,30 @@ def process_all_data(settings_manager=None, force_recalc=False):
             non_field_df = non_field_df.drop('_temp_key', axis=1)
         
         # Объединяем все проекты в один датасет
-        all_projects = pd.concat([field_df, non_field_df], ignore_index=True)
+        # Проверяем, есть ли данные из портала
+        if not field_df.empty or not non_field_df.empty:
+            all_projects = pd.concat([field_df, non_field_df], ignore_index=True)
+        else:
+            # Если портала нет — создаем пустой DataFrame с нужными колонками
+            all_projects = pd.DataFrame(columns=[
+                'Код анкеты', 'Имя клиента', 'Название проекта', 
+                'ЗОД', 'АСС', 'ЭМ', 'Регион short', 'Регион', 'ПО', 
+                'Полевой', 'Статус', 'Дата визита', 'Оплата факт', 'Источник'
+            ])
         st.session_state.cleaned_data['all_projects'] = all_projects
-
-        # 2. Создаем обновленные датасеты
-        field_df = all_projects[all_projects['Полевой'] == 1].copy()
-        non_field_df = all_projects[all_projects['Полевой'] == 0].copy()
         
-        # Создаем датасеты на основе актуального значения Полевой
-        st.session_state.cleaned_data['полевые_проекты'] = all_projects[all_projects['Полевой'] == 1].copy()
-        st.session_state.cleaned_data['неполевые_проекты'] = all_projects[all_projects['Полевой'] == 0].copy()
+        # Создаем датасеты из портала (если есть данные)
+        if not all_projects.empty and 'Полевой' in all_projects.columns:
+            field_df = all_projects[all_projects['Полевой'] == 1].copy()
+            non_field_df = all_projects[all_projects['Полевой'] == 0].copy()
+            st.session_state.cleaned_data['полевые_проекты'] = all_projects[all_projects['Полевой'] == 1].copy()
+            st.session_state.cleaned_data['неполевые_проекты'] = all_projects[all_projects['Полевой'] == 0].copy()
+        else:
+            field_df = pd.DataFrame()
+            non_field_df = pd.DataFrame()
+            st.session_state.cleaned_data['полевые_проекты'] = pd.DataFrame()
+            st.session_state.cleaned_data['неполевые_проекты'] = pd.DataFrame()
+    
         
         # ============================================
         # ВЕКТОРИЗОВАННОЕ ДОБАВЛЕНИЕ ЗОД
@@ -340,21 +373,6 @@ def process_all_data(settings_manager=None, force_recalc=False):
             bdr_processed = data_cleaner.clean_bdr(bdr_raw)
             if bdr_processed is not None and not bdr_processed.empty:
                 st.session_state.cleaned_data['bdr_processed'] = bdr_processed
-                # # === ТЕСТОВАЯ ВЫГРУЗКА ===
-                # st.write("### 📊 БДР после обработки")
-                # st.dataframe(bdr_processed.head(10), width='stretch')
-                
-                # output = BytesIO()
-                # with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                #     bdr_processed.to_excel(writer, sheet_name='БДР_обработанный', index=False)
-                # st.download_button(
-                #     label="⬇️ Скачать обработанный БДР",
-                #     data=output.getvalue(),
-                #     file_name=f"БДР_обработанный_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
-                #     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                #     type="secondary"
-                # )
-                # # === ТЕСТОВАЯ ВЫГРУЗКА ===
         
         # Обработка CXWAY (если есть)
         cxway_processed = None
@@ -647,11 +665,35 @@ def process_all_data(settings_manager=None, force_recalc=False):
         start_hier = tm.time()
         # st.write(f"🔍 НАЧАЛО ИЕРАРХИИ: {tm.time() - start_total:.2f} сек от старта")
         
+        # ✅ ДИАГНОСТИКА ПЕРЕД ИЕРАРХИЕЙ
+        st.write(f"📊 ПОЛЕВЫЕ_ПРОЕКТЫ ПЕРЕД ИЕРАРХИЕЙ:")
+        st.write(f"  строк: {len(st.session_state.cleaned_data['полевые_проекты'])}")
+        if not st.session_state.cleaned_data['полевые_проекты'].empty:
+            if 'Источник' in st.session_state.cleaned_data['полевые_проекты'].columns:
+                st.write(f"  Источники: {st.session_state.cleaned_data['полевые_проекты']['Источник'].unique()}")
+            if 'Полевой' in st.session_state.cleaned_data['полевые_проекты'].columns:
+                st.write(f"  Полевой == 1: {(st.session_state.cleaned_data['полевые_проекты']['Полевой'] == 1).sum()}")
+        st.write("---")
+        
         base_data = visit_calculator.extract_hierarchical_data(
             st.session_state.cleaned_data['полевые_проекты'],
             st.session_state.cleaned_data['сервизория'],
             st.session_state.cleaned_data.get('сервизория_original')
         )
+        
+        # ========== ВЫГРУЗКА base_data ==========
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            base_data.to_excel(writer, sheet_name='base_data', index=False)
+        
+        st.download_button(
+            label="📥 Скачать base_data (иерархия)",
+            data=output.getvalue(),
+            file_name=f"base_data_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            key="download_base_data"
+        )
+        # ===========================================
 
         # st.write(f"🔍 КОНЕЦ ИЕРАРХИИ: {tm.time() - start_hier:.2f} сек (время выполнения)")
         # st.write(f"🔍 ВСЕГО СТРОК В ИЕРАРХИИ: {len(base_data)}")
@@ -659,28 +701,23 @@ def process_all_data(settings_manager=None, force_recalc=False):
         st.session_state.visit_report['base_data'] = base_data
         st.session_state.visit_report['timestamp'] = datetime.now().isoformat()
 
-        # # === ВЫГРУЗКА ИЕРАРХИИ В EXCEL (ВСЕ ПРОЕКТЫ) ===
-        # if base_data is not None and not base_data.empty:
-        #     try:
-        #         output = BytesIO()
-        #         with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        #             base_data.to_excel(writer, sheet_name='Иерархия_все_проекты', index=False)
-                
-        #         st.download_button(
-        #             label="📥 Скачать иерархию (все проекты)",
-        #             data=output.getvalue(),
-        #             file_name=f"иерархия_все_проекты_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
-        #             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        #             type="secondary",
-        #             key="download_hierarchy_all"
-        #         )
-        #     except Exception as e:
-        #         st.warning(f"⚠️ Ошибка при выгрузке иерархии: {e}")
-        # # =======================================================
-
         st.session_state.debug_times.append(f"[DEBUG] Иерархия: {time.time() - start:.2f} сек")
         start = time.time()
+
+        # ========== ДИАГНОСТИКА ПЕРЕД РАСЧЕТОМ ==========
+        st.write("### 🔍 ДИАГНОСТИКА В process_all_data")
+        st.write(f"1. plan_calc_params: {st.session_state.plan_calc_params is not None}")
+        if st.session_state.plan_calc_params:
+            st.write(f"   - start_date: {st.session_state.plan_calc_params.get('start_date')}")
+            st.write(f"   - end_date: {st.session_state.plan_calc_params.get('end_date')}")
+        st.write(f"2. base_data: {base_data is not None}")
+        if base_data is not None:
+            st.write(f"   - empty: {base_data.empty}")
+            st.write(f"   - len: {len(base_data)}")
+        st.markdown("---")
+        # ==============================================
         
+
         # Расчет план/факт
         if st.session_state.plan_calc_params and not base_data.empty:
             params = st.session_state.plan_calc_params
@@ -699,26 +736,23 @@ def process_all_data(settings_manager=None, force_recalc=False):
                     region_coeff_manager = get_region_coefficient_manager()
                     region_coeffs = region_coeff_manager.load_coefficients()
                     plan_result = visit_calculator.add_plan_payment(plan_result, bdr_df, region_coeffs)
+
+            # ✅ ВЫГРУЗКА: plan_result
+            if plan_result is not None and not plan_result.empty:
+                output = BytesIO()
+                with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                    plan_result.to_excel(writer, sheet_name='plan_result', index=False)
+                st.download_button(
+                    label="📥 Скачать plan_result",
+                    data=output.getvalue(),
+                    file_name=f"plan_result_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    key="download_plan_result"
+                )
+            else:
+                st.warning("⚠️ plan_result ПУСТОЙ!")
             # ===================================
 
-            # # === ВЫГРУЗКА ПЛАНА (plan_result) ===
-            # if plan_result is not None and not plan_result.empty:
-            #     try:
-            #         output = BytesIO()
-            #         with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            #             plan_result.to_excel(writer, sheet_name='План', index=False)
-                    
-            #         st.download_button(
-            #             label="📥 Скачать план (plan_result)",
-            #             data=output.getvalue(),
-            #             file_name=f"план_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
-            #             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            #             type="secondary",
-            #             key="download_plan"
-            #         )
-            #     except Exception as e:
-            #         st.warning(f"⚠️ Ошибка при выгрузке плана: {e}")
-            # # ===========================================
             
             st.session_state.debug_times.append(f"[DEBUG] План: {time.time() - start:.2f} сек")
             start = time.time()
@@ -728,6 +762,22 @@ def process_all_data(settings_manager=None, force_recalc=False):
                     plan_result, source_df, params, status_filter='completed'
                 )
                 
+                # ✅ ВЫГРУЗКА: fact_result
+                if fact_result is not None and not fact_result.empty:
+                    output = BytesIO()
+                    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                        fact_result.to_excel(writer, sheet_name='fact_result', index=False)
+                    st.download_button(
+                        label="📥 Скачать fact_result",
+                        data=output.getvalue(),
+                        file_name=f"fact_result_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        key="download_fact_result"
+                    )
+                else:
+                    st.warning("⚠️ fact_result ПУСТОЙ!")
+
+
                 # Факт по порученным
                 assigned_result = visit_calculator.calculate_hierarchical_fact_on_date(
                     plan_result, source_df, params, status_filter='assigned'
@@ -757,8 +807,6 @@ def process_all_data(settings_manager=None, force_recalc=False):
                 
                 st.session_state.visit_report['calculated_data'] = final_result
                 
-
-            
                 st.session_state.debug_times.append(f"[DEBUG] Метрики: {time.time() - start:.2f} сек")
                 
         st.session_state.debug_times.append(f"[DEBUG] ВСЕГО: {time.time() - start_total:.2f} сек")
@@ -860,15 +908,19 @@ with tab1:
         st.session_state.show_messages = False
         
     st.title("📤 Загрузка исходных данных")
-    st.markdown("Загрузите необходимые Excel файлы")
+    st.markdown("""
+    **Обязательные файлы:**
+    - 📅 **Проекты Сервизория** — всегда обязателен
+    - 📊 **Хотя бы один источник визитов:** Checker, CXWAY, Easymerch или Optima
+    """)
     
     # Размещаем загрузчики БЕЗ формы (чтобы они обновляли session_state сразу)
     col1, col2, col3, col4, col5, col6 = st.columns(6)
 
     with col1:
-        st.subheader("1. 📋 Портал (Массив.xlsx)")
+        st.subheader("1. 📋 Checker")
         portal_file = st.file_uploader(
-            "Загрузите файл Массив.xlsx",
+            "Загрузите файл Checker.xlsx",
             type=['xlsx', 'xls'],
             key="portal_uploader",
             label_visibility="collapsed"
@@ -935,11 +987,18 @@ with tab1:
     # КНОПКА РАССЧИТАТЬ (вне формы)
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        # Проверяем наличие файлов (они уже в session_state)
-        portal_exists = st.session_state.get('portal_uploader') is not None
+        # Проверяем наличие файлов
         projects_exists = st.session_state.get('projects_uploader') is not None
         
-        if portal_exists and projects_exists:
+        # Проверяем наличие ХОТЯ БЫ одного из источников визитов
+        portal_exists = st.session_state.get('portal_uploader') is not None
+        cxway_exists = st.session_state.get('cxway_uploader') is not None
+        easymerch_exists = st.session_state.get('easymerch_uploader') is not None
+        optima_exists = st.session_state.get('optima_uploader') is not None
+        
+        has_visits_source = portal_exists or cxway_exists or easymerch_exists or optima_exists
+        
+        if projects_exists and has_visits_source:
             if st.button("🚀 РАССЧИТАТЬ ПЛАН/ФАКТ", type="primary", width='stretch'):
                 with st.spinner("📥 Загрузка файлов и обработка данных..."):
                     
@@ -952,13 +1011,17 @@ with tab1:
                     optima_file_obj = st.session_state.get('optima_uploader')
                     prodata_file_obj = st.session_state.get('prodata_uploader')
                     
-                    portal_df = load_excel(portal_file_obj, "портал")
+                    portal_df = load_excel(portal_file_obj, "портал") if portal_file_obj else None
                     projects_df = load_excel(projects_file_obj, "проекты")
                     bdr_df = load_excel(bdr_file_obj, "bdr") if bdr_file_obj else None
-                    cxway_df = load_excel(cxway_file_obj, "cxway")
-                    easymerch_df = load_excel(easymerch_file_obj, "easymerch")
-                    optima_df = load_excel(optima_file_obj, "optima")
-                    prodata_df = load_excel(prodata_file_obj, "prodata")
+                    cxway_df = load_excel(cxway_file_obj, "cxway") if cxway_file_obj else None
+                    easymerch_df = load_excel(easymerch_file_obj, "easymerch") if easymerch_file_obj else None
+                    optima_df = load_excel(optima_file_obj, "optima") if optima_file_obj else None
+                    prodata_df = load_excel(prodata_file_obj, "prodata") if prodata_file_obj else None
+                    
+                    # ✅ ОЧИЩАЕМ uploaded_files ПЕРЕД СОХРАНЕНИЕМ
+                    st.session_state.uploaded_files = {}
+                    st.session_state.cleaned_data = {} 
                     
                     # 2. СОХРАНЯЕМ В SESSION_STATE.uploaded_files
                     if portal_df is not None:
@@ -986,9 +1049,9 @@ with tab1:
                         settings_manager = get_settings_manager()
                         st.session_state.settings_manager = settings_manager
                     
-                    success = process_all_data(settings_manager)
+                    success = process_all_data(settings_manager, force_recalc=True)
                     
-                    if success:
+                    if success:         
                         # Сохраняем сообщения в память
                         st.session_state.calculation_messages = st.session_state.debug_times.copy()
                         st.session_state.show_messages = True 
@@ -996,12 +1059,68 @@ with tab1:
                         # st.rerun()
                     else:
                         st.error("❌ Ошибка при расчете")
+                        # ========== ОТЛАДКА ==========
+                        if 'last_error' in st.session_state:
+                            st.markdown("---")
+                            st.subheader("🐛 Детали ошибки")
+                            
+                            col1, col2 = st.columns(2)
+                            with col1:
+                                st.warning(f"**Шаг:** {st.session_state.last_error.get('step', 'неизвестен')}")
+                            with col2:
+                                st.error(f"**Ошибка:** {st.session_state.last_error.get('error', 'неизвестна')}")
+                            
+                            with st.expander("📋 Полный traceback (для разработчика)", expanded=True):
+                                st.code(st.session_state.last_error.get('traceback', 'Нет данных'), language="python")
+                            
+                            st.markdown("---")
+                            st.info("💡 Проверьте traceback выше, чтобы понять, где именно произошла ошибка.")
+                        else:
+                            st.info("ℹ️ Нет детальной информации об ошибке.")
+                        
+                        # Показываем, какие файлы загружены
+                        st.subheader("📁 Загруженные файлы")
+                        if st.session_state.uploaded_files:
+                            st.write(list(st.session_state.uploaded_files.keys()))
+                        else:
+                            st.write("Нет загруженных файлов")
+                        # ==============================
         else:
-            st.info("📌 Загрузите оба основных файла для расчета")
+            if not projects_exists:
+                st.warning("📌 Загрузите файл 'Проекты Сервизория' (обязательно)")
+            elif not has_visits_source:
+                st.warning("📌 Загрузите хотя бы один источник визитов: Checker, CXWAY, Easymerch или Optima")
             st.button("🚀 РАССЧИТАТЬ ПЛАН/ФАКТ", type="primary", width='stretch', disabled=True)
             
 with tab2:
     st.title("📈 Отчеты по полевым визитам")
+    # ========== ДИАГНОСТИКА ==========
+    st.write("### 🔍 Диагностика перед отчетами")
+    
+    # 1. Проверяем data_calculated
+    st.write(f"1. data_calculated: {st.session_state.get('data_calculated', False)}")
+    
+    # 2. Проверяем visit_report
+    st.write(f"2. visit_report keys: {list(st.session_state.visit_report.keys()) if 'visit_report' in st.session_state else 'НЕТ visit_report'}")
+    
+    # 3. Проверяем calculated_data
+    if 'calculated_data' in st.session_state.visit_report:
+        calculated_data = st.session_state.visit_report['calculated_data']
+        st.write(f"3. calculated_data существует: {calculated_data is not None}")
+        if calculated_data is not None:
+            st.write(f"   - Тип: {type(calculated_data)}")
+            st.write(f"   - Пустой: {calculated_data.empty if hasattr(calculated_data, 'empty') else 'N/A'}")
+            st.write(f"   - Размер: {len(calculated_data) if hasattr(calculated_data, '__len__') else 'N/A'}")
+            if hasattr(calculated_data, 'columns'):
+                st.write(f"   - Колонки: {list(calculated_data.columns)}")
+        else:
+            st.write("   ❌ calculated_data = None")
+    else:
+        st.write("❌ calculated_data НЕТ в visit_report")
+    
+    st.markdown("---")
+    # ========== КОНЕЦ ДИАГНОСТИКИ ==========
+    
 
     if not st.session_state.get('data_calculated', False):
         st.info("📌 Сначала выполните расчет на вкладке 'Загрузка данных'")
@@ -1009,70 +1128,74 @@ with tab2:
     else:
         tab_projects, tab_regions, tab_dsm, tab_dynamics = st.tabs(["📊 ПФ проекты", "🗺️ Регионы", "👥 DSM", "📈 Динамика"])
         
-        with tab_projects:
-            data = st.session_state.visit_report['calculated_data']
-            dataviz.create_planfact_tab(data, None)
+        # Проверяем, есть ли данные для отчета
+        if 'calculated_data' in st.session_state.visit_report and st.session_state.visit_report['calculated_data'] is not None:
+            calculated_data = st.session_state.visit_report['calculated_data']
             
-            prodata_df = st.session_state.cleaned_data.get('prodata_processed')
-            if prodata_df is not None and not prodata_df.empty:
-                dataviz.create_prodata_table(prodata_df)
-        
-        with tab_regions:
-            data = st.session_state.visit_report['calculated_data']
-            dataviz.create_region_tab(data, None)
-        
-        with tab_dsm:
-            data = st.session_state.visit_report['calculated_data']
-            dataviz.create_dsm_tab(data, None)
-        
-        with tab_dynamics:
-            visits_for_dynamics = st.session_state.cleaned_data.get('полевые_проекты')
+            with tab_projects:
+                dataviz.create_planfact_tab(calculated_data, None)
+                
+                prodata_df = st.session_state.cleaned_data.get('prodata_processed')
+                if prodata_df is not None and not prodata_df.empty:
+                    dataviz.create_prodata_table(prodata_df)
             
-            if visits_for_dynamics is not None and not visits_for_dynamics.empty:
-                # Исключаем ПроДата из динамики
-                if 'Источник' in visits_for_dynamics.columns:
-                    visits_for_dynamics = visits_for_dynamics[visits_for_dynamics['Источник'] != 'Мониторинги']
+            with tab_regions:
+                dataviz.create_region_tab(calculated_data, None)
+            
+            with tab_dsm:
+                dataviz.create_dsm_tab(calculated_data, None)
+            
+            with tab_dynamics:
+                visits_for_dynamics = st.session_state.cleaned_data.get('полевые_проекты')
                 
-                if 'RS' not in visits_for_dynamics.columns and 'ЭМ' in visits_for_dynamics.columns:
-                    visits_for_dynamics = visits_for_dynamics.rename(columns={'ЭМ': 'RS'})
-                
-                dataviz.create_dynamics_tab(
-                    st.session_state.visit_report['calculated_data'],
-                    visits_for_dynamics,
-                    st.session_state.plan_calc_params
-                )
-            else:
-                st.warning("⚠️ Нет данных для динамики")
+                if visits_for_dynamics is not None and not visits_for_dynamics.empty:
+                    # Исключаем ПроДата из динамики
+                    if 'Источник' in visits_for_dynamics.columns:
+                        visits_for_dynamics = visits_for_dynamics[visits_for_dynamics['Источник'] != 'Мониторинги']
+                    
+                    if 'RS' not in visits_for_dynamics.columns and 'ЭМ' in visits_for_dynamics.columns:
+                        visits_for_dynamics = visits_for_dynamics.rename(columns={'ЭМ': 'RS'})
+                    
+                    dataviz.create_dynamics_tab(
+                        calculated_data,
+                        visits_for_dynamics,
+                        st.session_state.plan_calc_params
+                    )
+                else:
+                    st.warning("⚠️ Нет данных для динамики")
+        else:
+            # Если данных нет — показываем сообщение
+            st.info("📊 Нет данных для отображения. Выполните расчет на вкладке 'Загрузка данных'.")
 
-# # ============================================
-# # ВЫГРУЗКА ПОЛЕВЫХ ПРОЕКТОВ
-# # ============================================
-# if st.session_state.cleaned_data.get('полевые_проекты') is not None:
-#     st.markdown("---")
-#     st.subheader("📥 Выгрузка данных")
+# ============================================
+# ВЫГРУЗКА ПОЛЕВЫХ ПРОЕКТОВ
+# ============================================
+if st.session_state.cleaned_data.get('полевые_проекты') is not None:
+    st.markdown("---")
+    st.subheader("📥 Выгрузка данных")
     
-#     field_projects_df = st.session_state.cleaned_data['полевые_проекты']
+    field_projects_df = st.session_state.cleaned_data['полевые_проекты']
     
     
-#     # Исключаем ПроДата из выгрузки
-#     if 'Источник' in field_projects_df.columns:
-#         field_projects_df = field_projects_df[field_projects_df['Источник'] != 'Мониторинги']
+    # Исключаем ПроДата из выгрузки
+    if 'Источник' in field_projects_df.columns:
+        field_projects_df = field_projects_df[field_projects_df['Источник'] != 'Мониторинги']
     
-#     if not field_projects_df.empty:
-#         output = BytesIO()
-#         with pd.ExcelWriter(output, engine='openpyxl') as writer:
-#             field_projects_df.to_excel(writer, sheet_name='Полевые_проекты', index=False)
+    if not field_projects_df.empty:
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            field_projects_df.to_excel(writer, sheet_name='Полевые_проекты', index=False)
         
-#         st.download_button(
-#             label="📥 Скачать все полевые проекты",
-#             data=output.getvalue(),
-#             file_name=f"полевые_проекты_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
-#             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-#             type="primary",
-#             width='stretch'
-#         )
-#     else:
-#         st.info("Нет данных для выгрузки")
+        st.download_button(
+            label="📥 Скачать все полевые проекты",
+            data=output.getvalue(),
+            file_name=f"полевые_проекты_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            type="primary",
+            width='stretch'
+        )
+    else:
+        st.info("Нет данных для выгрузки")
 
 # # ============================================
 # # ВЫГРУЗКА НЕПОЛЕВЫХ ПРОЕКТОВ
@@ -1176,7 +1299,11 @@ with tab3:
         # Получаем проекты из расчета (из session_state после process_all_data)
         if 'cleaned_data' in st.session_state and 'полевые_проекты' in st.session_state.cleaned_data:
             field_df = st.session_state.cleaned_data['полевые_проекты'].copy()
-            field_df = field_df[field_df['Полевой'] == 1]
+            # Проверяем, есть ли колонка 'Полевой'
+            if not field_df.empty and 'Полевой' in field_df.columns:
+                field_df = field_df[field_df['Полевой'] == 1]
+            else:
+                field_df = pd.DataFrame()
             
             # 🔥 ПРИМЕНЯЕМ НАСТРОЙКИ 🔥
             if field_df is not None and not field_df.empty:
@@ -1290,7 +1417,12 @@ with tab3:
         # Здесь будут неполевые проекты
         if 'cleaned_data' in st.session_state and 'неполевые_проекты' in st.session_state.cleaned_data:
             non_field_df = st.session_state.cleaned_data['неполевые_проекты'].copy()
-            non_field_df = non_field_df[non_field_df['Полевой'] == 0]
+            
+            # Проверяем, есть ли колонка 'Полевой'
+            if not non_field_df.empty and 'Полевой' in non_field_df.columns:
+                non_field_df = non_field_df[non_field_df['Полевой'] == 0]
+            else:
+                non_field_df = pd.DataFrame()
             
             if non_field_df is not None and not non_field_df.empty:
                 
@@ -1520,7 +1652,11 @@ with tab3:
     # Выбираем проект для корректировки
     if 'cleaned_data' in st.session_state and 'полевые_проекты' in st.session_state.cleaned_data:
         field_df = st.session_state.cleaned_data['полевые_проекты'].copy()
-        field_df = field_df[field_df['Полевой'] == 1]
+        # Проверяем, есть ли колонка 'Полевой'
+        if not field_df.empty and 'Полевой' in field_df.columns:
+            field_df = field_df[field_df['Полевой'] == 1]
+        else:
+            field_df = pd.DataFrame()
         
         if not field_df.empty:
             # Кэшируем уникальные проекты для корректировки
@@ -1755,7 +1891,7 @@ with tab3:
     if not current_plan.empty:
         with st.expander("📋 Текущее распределение плана", expanded=False):
             preview_df = preview_multon_plan(current_plan)
-            st.dataframe(preview_df, width='stretch', hide_index=True)
+            st.dataframe(preview_df, use_container_width=True, hide_index=True)
             
             col1, col2 = st.columns(2)
             with col1:
@@ -1785,7 +1921,7 @@ with tab3:
             # Показываем предпросмотр
             st.markdown("### 📋 Предпросмотр загружаемых данных")
             preview_df = preview_multon_plan(parsed_df)
-            st.dataframe(preview_df, width='stretch', hide_index=True)
+            st.dataframe(preview_df, use_container_width=True, hide_index=True)
             
             # Группировка по проектам для статистики
             st.markdown("### 📊 Статистика")
@@ -1800,7 +1936,7 @@ with tab3:
             # Кнопка сохранения
             col1, col2, col3 = st.columns([1, 2, 1])
             with col2:
-                if st.button("💾 Сохранить распределение", type="primary", width='stretch'):
+                if st.button("💾 Сохранить распределение", type="primary", use_container_width=True):
                     success, msg = multon_manager.save_plan(parsed_df)
                     if success:
                         st.success(msg)
@@ -1831,7 +1967,7 @@ with tab3:
     if not current_dilers_df.empty or not current_pronto_df.empty:
         with st.expander("📋 Текущее распределение плана Мультибренд 2024", expanded=False):
             preview_df = preview_multibrand_plan(current_dilers_df, current_pronto_df)
-            st.dataframe(preview_df, width='stretch', hide_index=True)
+            st.dataframe(preview_df, use_container_width=True, hide_index=True)
             
             col1, col2 = st.columns(2)
             with col1:
@@ -1861,7 +1997,7 @@ with tab3:
             # Показываем предпросмотр
             st.markdown("### 📋 Предпросмотр загружаемых данных")
             preview_df = preview_multibrand_plan(dilers_df, pronto_df)
-            st.dataframe(preview_df, width='stretch', hide_index=True)
+            st.dataframe(preview_df, use_container_width=True, hide_index=True)
             
             # Статистика
             st.markdown("### 📊 Статистика")
@@ -1876,7 +2012,7 @@ with tab3:
             # Кнопка сохранения
             col1, col2, col3 = st.columns([1, 2, 1])
             with col2:
-                if st.button("💾 Сохранить распределение", type="primary", width='stretch', key="save_multibrand_plan"):
+                if st.button("💾 Сохранить распределение", type="primary", use_container_width=True, key="save_multibrand_plan"):
                     success, msg = multibrand_manager.save_plan(dilers_df, pronto_df)
                     if success:
                         st.success(msg)
@@ -1907,7 +2043,7 @@ with tab3:
     if current_region_mapping or current_moscow_mapping or current_spb_mapping:
         with st.expander("📋 Текущее распределение RS", expanded=False):
             preview_df = preview_optima_rs_mapping(current_region_mapping, current_moscow_mapping, current_spb_mapping)
-            st.dataframe(preview_df, width='stretch', hide_index=True)
+            st.dataframe(preview_df, use_container_width=True, hide_index=True)
             
             col1, col2 = st.columns(2)
             with col1:
@@ -1937,7 +2073,7 @@ with tab3:
             # Показываем предпросмотр
             st.markdown("### 📋 Предпросмотр загружаемых данных")
             preview_df = preview_optima_rs_mapping(region_mapping, moscow_mapping, spb_mapping)
-            st.dataframe(preview_df, width='stretch', hide_index=True)
+            st.dataframe(preview_df, use_container_width=True, hide_index=True)
             
             # Статистика
             st.markdown("### 📊 Статистика")
@@ -1952,7 +2088,7 @@ with tab3:
             # Кнопка сохранения
             col1, col2, col3 = st.columns([1, 2, 1])
             with col2:
-                if st.button("💾 Сохранить распределение", type="primary", width='stretch', key="save_optima_rs"):
+                if st.button("💾 Сохранить распределение", type="primary", use_container_width=True, key="save_optima_rs"):
                     success, msg = optima_rs_manager.save_distribution(region_mapping, moscow_mapping, spb_mapping)
                     if success:
                         st.success(msg)
@@ -2012,7 +2148,7 @@ with tab3:
                 })
             
             preview_df = pd.DataFrame(preview_data)
-            st.dataframe(preview_df, width='stretch', hide_index=True)
+            st.dataframe(preview_df, use_container_width=True, hide_index=True)
             
             col1, col2 = st.columns(2)
             with col1:
@@ -2044,7 +2180,7 @@ with tab3:
             # Показываем предпросмотр
             st.markdown("### 📋 Предпросмотр загружаемых данных")
             preview_df = preview_region_coefficients(coefficients_dict)
-            st.dataframe(preview_df, width='stretch', hide_index=True)
+            st.dataframe(preview_df, use_container_width=True, hide_index=True)
             
             # Статистика
             st.markdown("### 📊 Статистика")
@@ -2058,7 +2194,7 @@ with tab3:
             # Кнопка сохранения
             col1, col2, col3 = st.columns([1, 2, 1])
             with col2:
-                if st.button("💾 Сохранить коэффициенты", type="primary", width='stretch', key="save_region_coefficients"):
+                if st.button("💾 Сохранить коэффициенты", type="primary", use_container_width=True, key="save_region_coefficients"):
                     success, msg = region_coeff_manager.save_coefficients(coefficients_dict)
                     if success:
                         st.success(msg)
