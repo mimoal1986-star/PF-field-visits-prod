@@ -664,37 +664,13 @@ def process_all_data(settings_manager=None, force_recalc=False):
         import time as tm
         start_hier = tm.time()
         # st.write(f"🔍 НАЧАЛО ИЕРАРХИИ: {tm.time() - start_total:.2f} сек от старта")
-        
-        # ✅ ДИАГНОСТИКА ПЕРЕД ИЕРАРХИЕЙ
-        st.write(f"📊 ПОЛЕВЫЕ_ПРОЕКТЫ ПЕРЕД ИЕРАРХИЕЙ:")
-        st.write(f"  строк: {len(st.session_state.cleaned_data['полевые_проекты'])}")
-        if not st.session_state.cleaned_data['полевые_проекты'].empty:
-            if 'Источник' in st.session_state.cleaned_data['полевые_проекты'].columns:
-                st.write(f"  Источники: {st.session_state.cleaned_data['полевые_проекты']['Источник'].unique()}")
-            if 'Полевой' in st.session_state.cleaned_data['полевые_проекты'].columns:
-                st.write(f"  Полевой == 1: {(st.session_state.cleaned_data['полевые_проекты']['Полевой'] == 1).sum()}")
-        st.write("---")
-        
+                
         base_data = visit_calculator.extract_hierarchical_data(
             st.session_state.cleaned_data['полевые_проекты'],
             st.session_state.cleaned_data['сервизория'],
             st.session_state.cleaned_data.get('сервизория_original')
         )
         
-        # ========== ВЫГРУЗКА base_data ==========
-        output = BytesIO()
-        with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            base_data.to_excel(writer, sheet_name='base_data', index=False)
-        
-        st.download_button(
-            label="📥 Скачать base_data (иерархия)",
-            data=output.getvalue(),
-            file_name=f"base_data_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            key="download_base_data"
-        )
-        # ===========================================
-
         # st.write(f"🔍 КОНЕЦ ИЕРАРХИИ: {tm.time() - start_hier:.2f} сек (время выполнения)")
         # st.write(f"🔍 ВСЕГО СТРОК В ИЕРАРХИИ: {len(base_data)}")
         
@@ -703,19 +679,6 @@ def process_all_data(settings_manager=None, force_recalc=False):
 
         st.session_state.debug_times.append(f"[DEBUG] Иерархия: {time.time() - start:.2f} сек")
         start = time.time()
-
-        # ========== ДИАГНОСТИКА ПЕРЕД РАСЧЕТОМ ==========
-        st.write("### 🔍 ДИАГНОСТИКА В process_all_data")
-        st.write(f"1. plan_calc_params: {st.session_state.plan_calc_params is not None}")
-        if st.session_state.plan_calc_params:
-            st.write(f"   - start_date: {st.session_state.plan_calc_params.get('start_date')}")
-            st.write(f"   - end_date: {st.session_state.plan_calc_params.get('end_date')}")
-        st.write(f"2. base_data: {base_data is not None}")
-        if base_data is not None:
-            st.write(f"   - empty: {base_data.empty}")
-            st.write(f"   - len: {len(base_data)}")
-        st.markdown("---")
-        # ==============================================
         
 
         # Расчет план/факт
@@ -1093,34 +1056,7 @@ with tab1:
             st.button("🚀 РАССЧИТАТЬ ПЛАН/ФАКТ", type="primary", width='stretch', disabled=True)
             
 with tab2:
-    st.title("📈 Отчеты по полевым визитам")
-    # ========== ДИАГНОСТИКА ==========
-    st.write("### 🔍 Диагностика перед отчетами")
-    
-    # 1. Проверяем data_calculated
-    st.write(f"1. data_calculated: {st.session_state.get('data_calculated', False)}")
-    
-    # 2. Проверяем visit_report
-    st.write(f"2. visit_report keys: {list(st.session_state.visit_report.keys()) if 'visit_report' in st.session_state else 'НЕТ visit_report'}")
-    
-    # 3. Проверяем calculated_data
-    if 'calculated_data' in st.session_state.visit_report:
-        calculated_data = st.session_state.visit_report['calculated_data']
-        st.write(f"3. calculated_data существует: {calculated_data is not None}")
-        if calculated_data is not None:
-            st.write(f"   - Тип: {type(calculated_data)}")
-            st.write(f"   - Пустой: {calculated_data.empty if hasattr(calculated_data, 'empty') else 'N/A'}")
-            st.write(f"   - Размер: {len(calculated_data) if hasattr(calculated_data, '__len__') else 'N/A'}")
-            if hasattr(calculated_data, 'columns'):
-                st.write(f"   - Колонки: {list(calculated_data.columns)}")
-        else:
-            st.write("   ❌ calculated_data = None")
-    else:
-        st.write("❌ calculated_data НЕТ в visit_report")
-    
-    st.markdown("---")
-    # ========== КОНЕЦ ДИАГНОСТИКИ ==========
-    
+    st.title("📈 Отчеты по полевым визитам")    
 
     if not st.session_state.get('data_calculated', False):
         st.info("📌 Сначала выполните расчет на вкладке 'Загрузка данных'")
@@ -1167,35 +1103,35 @@ with tab2:
             # Если данных нет — показываем сообщение
             st.info("📊 Нет данных для отображения. Выполните расчет на вкладке 'Загрузка данных'.")
 
-# ============================================
-# ВЫГРУЗКА ПОЛЕВЫХ ПРОЕКТОВ
-# ============================================
-if st.session_state.cleaned_data.get('полевые_проекты') is not None:
-    st.markdown("---")
-    st.subheader("📥 Выгрузка данных")
+# # ============================================
+# # ВЫГРУЗКА ПОЛЕВЫХ ПРОЕКТОВ
+# # ============================================
+# if st.session_state.cleaned_data.get('полевые_проекты') is not None:
+#     st.markdown("---")
+#     st.subheader("📥 Выгрузка данных")
     
-    field_projects_df = st.session_state.cleaned_data['полевые_проекты']
+#     field_projects_df = st.session_state.cleaned_data['полевые_проекты']
     
     
-    # Исключаем ПроДата из выгрузки
-    if 'Источник' in field_projects_df.columns:
-        field_projects_df = field_projects_df[field_projects_df['Источник'] != 'Мониторинги']
+#     # Исключаем ПроДата из выгрузки
+#     if 'Источник' in field_projects_df.columns:
+#         field_projects_df = field_projects_df[field_projects_df['Источник'] != 'Мониторинги']
     
-    if not field_projects_df.empty:
-        output = BytesIO()
-        with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            field_projects_df.to_excel(writer, sheet_name='Полевые_проекты', index=False)
+#     if not field_projects_df.empty:
+#         output = BytesIO()
+#         with pd.ExcelWriter(output, engine='openpyxl') as writer:
+#             field_projects_df.to_excel(writer, sheet_name='Полевые_проекты', index=False)
         
-        st.download_button(
-            label="📥 Скачать все полевые проекты",
-            data=output.getvalue(),
-            file_name=f"полевые_проекты_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            type="primary",
-            width='stretch'
-        )
-    else:
-        st.info("Нет данных для выгрузки")
+#         st.download_button(
+#             label="📥 Скачать все полевые проекты",
+#             data=output.getvalue(),
+#             file_name=f"полевые_проекты_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
+#             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+#             type="primary",
+#             width='stretch'
+#         )
+#     else:
+#         st.info("Нет данных для выгрузки")
 
 # # ============================================
 # # ВЫГРУЗКА НЕПОЛЕВЫХ ПРОЕКТОВ
