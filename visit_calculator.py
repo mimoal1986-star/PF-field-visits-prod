@@ -159,17 +159,51 @@ class VisitCalculator:
                 'Полевой': visits_df['Полевой']
             })
             # st.write(f"[DETAIL] Создание DataFrame: {time.time() - start:.2f} сек")
+
+            # ============================================
+            # ✅ ДИАГНОСТИКА ПОСЛЕ СОЗДАНИЯ hierarchy
+            # ============================================
+            st.write(f"📊 extract_hierarchical_data (после создания hierarchy):")
+            st.write(f"  hierarchy строк: {len(hierarchy)}")
+            if not hierarchy.empty:
+                if 'ПО' in hierarchy.columns:
+                    st.write(f"  ПО: {hierarchy['ПО'].unique()}")
+                if 'Полевой' in hierarchy.columns:
+                    st.write(f"  Полевой == 1: {(hierarchy['Полевой'] == 1).sum()}")
+                    st.write(f"  Полевой == 0: {(hierarchy['Полевой'] == 0).sum()}")
+                    st.write(f"  Полевой isna: {hierarchy['Полевой'].isna().sum()}")
+            st.write("---")
+            # ============================================
             
             # ТОЛЬКО ПОЛЕВЫЕ ПРОЕКТЫ
             start = time.time()
             hierarchy = hierarchy[hierarchy['Полевой'] == 1]
             hierarchy = hierarchy.drop('Полевой', axis=1)
             # st.write(f"[DETAIL] Фильтр полевых: {time.time() - start:.2f} сек")
+
+            # ============================================
+            # ✅ ДИАГНОСТИКА ПОСЛЕ ФИЛЬТРА
+            # ============================================
+            st.write(f"📊 extract_hierarchical_data (после фильтра Полевой == 1):")
+            st.write(f"  hierarchy строк: {len(hierarchy)}")
+            if not hierarchy.empty and 'ПО' in hierarchy.columns:
+                st.write(f"  ПО: {hierarchy['ПО'].unique()}")
+            st.write("---")
+            # ============================================
             
             # Удаляем дубликаты
             start = time.time()
             hierarchy = hierarchy.drop_duplicates().reset_index(drop=True)
             # st.write(f"[DETAIL] Удаление дубликатов: {time.time() - start:.2f} сек")
+            # ============================================
+            # ✅ ДИАГНОСТИКА ПОСЛЕ drop_duplicates
+            # ============================================
+            st.write(f"📊 extract_hierarchical_data (после drop_duplicates):")
+            st.write(f"  hierarchy строк: {len(hierarchy)}")
+            if not hierarchy.empty and 'ПО' in hierarchy.columns:
+                st.write(f"  ПО: {hierarchy['ПО'].unique()}")
+            st.write("---")
+            # ============================================
             
             # Даты - по умолчанию пустые
             hierarchy['Дата старта'] = pd.NaT
@@ -410,6 +444,276 @@ class VisitCalculator:
     def calculate_hierarchical_plan_on_date(self, hierarchy_df, visits_df, calc_params, google_df=None, optima_df=None):
         
         coefficients = calc_params.get('coefficients', [0.25, 0.25, 0.25, 0.25])
+    
+        # ============================================================
+        # 🔥 ДИАГНОСТИКА: поиск конкретного проекта
+        # ============================================================
+        
+        TARGET_PROJECT = "RU00.381.02.03SVZ25"
+        TARGET_REGION = "TT"
+        TARGET_ASM = "Воронин Евгений"
+        
+        st.write("=" * 80)
+        st.write("🔍 ДИАГНОСТИКА ПРОЕКТА:", TARGET_PROJECT)
+        st.write("=" * 80)
+        
+        # 1. Проверяем hierarchy_df
+        st.write("### 1. Иерархия (hierarchy_df)")
+        
+        # Ищем проект в иерархии
+        hierarchy_mask = (
+            (hierarchy_df['Проект'] == TARGET_PROJECT) &
+            (hierarchy_df['Регион'] == TARGET_REGION) &
+            (hierarchy_df['ASM'] == TARGET_ASM)
+        )
+        
+        hierarchy_matches = hierarchy_df[hierarchy_mask]
+        st.write(f"Найдено в иерархии: {len(hierarchy_matches)} строк")
+        
+        if not hierarchy_matches.empty:
+            st.write("Первая строка:")
+            st.dataframe(hierarchy_matches.head(1))
+            
+            # Показываем все значения для первой строки
+            row = hierarchy_matches.iloc[0]
+            st.write("Детали:")
+            st.write(f"  - Проект: '{row['Проект']}'")
+            st.write(f"  - Клиент: '{row['Клиент']}'")
+            st.write(f"  - Волна: '{row['Волна']}'")
+            st.write(f"  - Регион: '{row['Регион']}'")
+            st.write(f"  - ASM: '{row['ASM']}'")
+            st.write(f"  - RS: '{row['RS']}'")
+            st.write(f"  - ПО: '{row['ПО']}'")
+            st.write(f"  - Дата старта: {row['Дата старта']}")
+            st.write(f"  - Дата финиша: {row['Дата финиша']}")
+            st.write(f"  - Длительность: {row['Длительность']}")
+        else:
+            st.error(f"❌ Проект {TARGET_PROJECT} с регионом {TARGET_REGION} и ASM {TARGET_ASM} НЕ НАЙДЕН в иерархии!")
+            st.write("Доступные проекты в иерархии:")
+            st.write(hierarchy_df[['Проект', 'Регион', 'ASM']].drop_duplicates().head(10))
+        
+        st.write("---")
+        
+        # 2. Проверяем visits_df (project_wave_region_plans)
+        st.write("### 2. Данные визитов (visits_df / project_wave_region_plans)")
+        
+        # Ищем в visits_df
+        visits_mask = (
+            (visits_df['Код анкеты'] == TARGET_PROJECT) &
+            (visits_df['Регион short'] == TARGET_REGION) &
+            (visits_df['АСС'] == TARGET_ASM)
+        )
+        
+        visits_matches = visits_df[visits_mask]
+        st.write(f"Найдено в visits_df: {len(visits_matches)} строк")
+        
+        if not visits_matches.empty:
+            st.write("Первая строка:")
+            st.dataframe(visits_matches.head(1))
+            
+            row = visits_matches.iloc[0]
+            st.write("Детали:")
+            st.write(f"  - Код анкеты: '{row['Код анкеты']}'")
+            st.write(f"  - Имя клиента: '{row['Имя клиента']}'")
+            st.write(f"  - Название проекта: '{row['Название проекта']}'")
+            st.write(f"  - Регион short: '{row['Регион short']}'")
+            st.write(f"  - АСС: '{row['АСС']}'")
+            st.write(f"  - ЭМ: '{row['ЭМ']}'")
+            st.write(f"  - ПО: '{row['ПО']}'")
+            
+            # Строим ключ для project_wave_region_plans
+            plan_key = (row['Имя клиента'], row['Код анкеты'], row['Название проекта'], row['Регион short'])
+            st.write(f"  - Ключ для project_wave_region_plans: {plan_key}")
+            
+            # Проверяем project_wave_region_plans
+            # (этот словарь должен быть создан ДО основного цикла)
+            # Вставляем проверку здесь, но словарь создается позже,
+            # поэтому мы проверим его в основном цикле
+        else:
+            st.error(f"❌ Проект {TARGET_PROJECT} с регионом {TARGET_REGION} и ASM {TARGET_ASM} НЕ НАЙДЕН в visits_df!")
+            st.write("Доступные проекты в visits_df:")
+            st.write(visits_df[['Код анкеты', 'Регион short', 'АСС']].drop_duplicates().head(10))
+        
+        st.write("---")
+        
+        # 3. Проверяем JSON (Multon план)
+        st.write("### 3. JSON-файл (Multon план)")
+        
+        from github_settings import get_multon_plan_manager
+        multon_manager = get_multon_plan_manager()
+        plan_df = multon_manager.load_plan()
+        
+        st.write(f"JSON загружен: {not plan_df.empty}, строк: {len(plan_df)}")
+        
+        if not plan_df.empty:
+            # Ищем в JSON
+            json_mask = (
+                (plan_df['project_code'] == TARGET_PROJECT) &
+                (plan_df['region'] == TARGET_REGION) &
+                (plan_df['rs'] == TARGET_ASM)
+            )
+            json_matches = plan_df[json_mask]
+            st.write(f"Найдено в JSON: {len(json_matches)} строк")
+            
+            if not json_matches.empty:
+                st.write("Строка из JSON:")
+                st.dataframe(json_matches)
+                st.write(f"  - plan: {json_matches.iloc[0]['plan']}")
+            else:
+                st.error(f"❌ Проект {TARGET_PROJECT} с регионом {TARGET_REGION} и RS {TARGET_ASM} НЕ НАЙДЕН в JSON!")
+                st.write("Доступные проекты в JSON:")
+                st.write(plan_df[['project_code', 'region', 'rs']].drop_duplicates().head(10))
+        else:
+            st.error("❌ JSON пустой или не загрузился!")
+        
+        st.write("---")
+        
+        # 4. Проверяем project_wave_region_plans (создается в коде)
+        st.write("### 4. project_wave_region_plans (из visits_df)")
+        
+        # Этот словарь создается в коде ДО основного цикла.
+        # Мы не можем его получить здесь, поэтому создадим его заново для диагностики.
+        
+        # Определяем колонки для группировки (как в коде)
+        project_wave_region_plans = visits_df.groupby([
+            'Имя клиента',
+            'Код анкеты',
+            'Название проекта',
+            'Регион short'
+        ]).size().to_dict()
+        
+        st.write(f"Всего ключей в project_wave_region_plans: {len(project_wave_region_plans)}")
+        
+        # Ищем наш ключ
+        # Берем из visits_matches первую строку
+        if not visits_matches.empty:
+            row = visits_matches.iloc[0]
+            test_key = (row['Имя клиента'], row['Код анкеты'], row['Название проекта'], row['Регион short'])
+            st.write(f"Проверяем ключ: {test_key}")
+            
+            if test_key in project_wave_region_plans:
+                st.success(f"✅ Ключ НАЙДЕН в project_wave_region_plans! Значение: {project_wave_region_plans[test_key]}")
+            else:
+                st.error(f"❌ Ключ НЕ НАЙДЕН в project_wave_region_plans!")
+                
+                # Показываем похожие ключи
+                st.write("Похожие ключи (первые 5):")
+                similar_keys = [k for k in project_wave_region_plans.keys() if TARGET_PROJECT in k[1]]
+                for k in similar_keys[:5]:
+                    st.write(f"  - {k}: {project_wave_region_plans[k]}")
+        
+        st.write("=" * 80)
+        st.write("### 5. СИМУЛЯЦИЯ ОСНОВНОГО ЦИКЛА")
+        st.write("=" * 80)
+        
+        # ============================================================
+        # СИМУЛЯЦИЯ ОСНОВНОГО ЦИКЛА ДЛЯ КОНКРЕТНОГО ПРОЕКТА
+        # ============================================================
+        
+        # Находим строку в иерархии
+        if not hierarchy_matches.empty:
+            row = hierarchy_matches.iloc[0]
+            
+            st.write("### Шаг 5.1: Исходные данные из иерархии")
+            st.write(f"  - project_code: '{row['Проект']}'")
+            st.write(f"  - client: '{row['Клиент']}'")
+            st.write(f"  - wave_name: '{row['Волна']}'")
+            st.write(f"  - region: '{row['Регион']}'")
+            st.write(f"  - asm: '{row['ASM']}'")
+            st.write(f"  - rs: '{row['RS']}'")
+            st.write(f"  - po: '{row['ПО']}'")
+            
+            st.write("### Шаг 5.2: Определение источника (ПО)")
+            po = row['ПО']
+            client = row['Клиент']
+            project_code = row['Проект']
+            wave_name = row['Волна']
+            region = row['Регион']
+            asm = row['ASM']
+            
+            st.write(f"  - po == 'ПО клиента'? {po == 'ПО клиента'}")
+            st.write(f"  - client == 'Мултон'? {client == 'Мултон'}")
+            
+            if po == 'ПО клиента' and client == 'Мултон':
+                st.write("### Шаг 5.3: ВЕТКА JSON (Мултон)")
+                
+                # Загружаем JSON еще раз
+                plan_df = multon_manager.load_plan()
+                
+                if plan_df.empty:
+                    st.error("❌ JSON пустой! total_plan = 0")
+                    total_plan = 0
+                else:
+                    # Ищем в JSON
+                    json_mask = (plan_df['project_code'] == project_code) & \
+                                (plan_df['region'] == region) & \
+                                (plan_df['rs'] == asm)
+                    json_matches = plan_df[json_mask]
+                    
+                    st.write(f"  - Поиск в JSON по (project_code='{project_code}', region='{region}', rs='{asm}')")
+                    st.write(f"  - Найдено: {len(json_matches)} строк")
+                    
+                    if not json_matches.empty:
+                        total_plan = json_matches.iloc[0]['plan']
+                        st.success(f"✅ total_plan = {total_plan}")
+                    else:
+                        st.error("❌ Не найдено в JSON! total_plan = 0")
+                        total_plan = 0
+                        
+                        # Показываем, что есть в JSON для этого проекта
+                        st.write("Доступные записи в JSON для этого проекта:")
+                        project_json = plan_df[plan_df['project_code'] == project_code]
+                        if not project_json.empty:
+                            st.dataframe(project_json)
+                        else:
+                            st.write("Нет записей для этого проекта в JSON")
+            else:
+                st.write("### Шаг 5.3: ВЕТКА project_wave_region_plans (обычный расчет)")
+                
+                plan_key = (client, project_code, wave_name, region)
+                st.write(f"  - plan_key: {plan_key}")
+                
+                if plan_key in project_wave_region_plans:
+                    total_plan = project_wave_region_plans[plan_key]
+                    st.success(f"✅ total_plan = {total_plan}")
+                else:
+                    st.error(f"❌ Ключ не найден в project_wave_region_plans! total_plan = 0")
+                    
+                    # Показываем похожие ключи
+                    st.write("Похожие ключи:")
+                    similar = [k for k in project_wave_region_plans.keys() if k[0] == client]
+                    for k in similar[:5]:
+                        st.write(f"  - {k}: {project_wave_region_plans[k]}")
+            
+            st.write("---")
+            st.write(f"### Шаг 5.4: ИТОГОВЫЙ total_plan = {total_plan}")
+            
+            if total_plan > 0:
+                st.success("✅ Проект будет включен в план!")
+            else:
+                st.error("❌ total_plan = 0 → проект НЕ БУДЕТ включен в план!")
+        
+        st.write("=" * 80)
+        st.write("🔍 ДИАГНОСТИКА ЗАВЕРШЕНА")
+        st.write("=" * 80)
+        
+        # ============================================================
+        # КОНЕЦ ДИАГНОСТИКИ
+        # ============================================================
+    
+
+        # ============================================
+        # ✅ ДИАГНОСТИКА
+        # ============================================
+        st.write(f"📊 calculate_hierarchical_plan_on_date:")
+        st.write(f"  hierarchy_df строк: {len(hierarchy_df)}")
+        st.write(f"  visits_df строк: {len(visits_df)}")
+        if not visits_df.empty and 'Источник' in visits_df.columns:
+            st.write(f"  Источники в visits_df: {visits_df['Источник'].unique()}")
+        if not hierarchy_df.empty and 'ПО' in hierarchy_df.columns:
+            st.write(f"  ПО в hierarchy_df: {hierarchy_df['ПО'].unique()}")
+        st.write("---")
+        # ============================================
         
         try:
             if hierarchy_df.empty or visits_df.empty:
@@ -423,21 +727,21 @@ class VisitCalculator:
             # 1. ПРЕДВАРИТЕЛЬНЫЙ РАСЧЕТ ВСЕХ НУЖНЫХ ДАННЫХ
             # ============================================
             
-            # КВОТЫ МУЛТОН
-            multon_quotas = {}
-            if google_df is not None and not google_df.empty:
-                project_col = 'Проекты в  https://ru.checker-soft.com'
-                code_col = 'Код проекта RU00.000.00.01SVZ24'
-                kvota_col = 'Квота'
-                if all(col in google_df.columns for col in [project_col, code_col, kvota_col]):
-                    multon_mask = google_df[project_col].astype(str).str.strip() == 'Мултон'
-                    for _, row in google_df[multon_mask].iterrows():
-                        code = str(row.get(code_col, '')).strip()
-                        if code and code not in ['', 'nan', 'None', 'null']:
-                            try:
-                                multon_quotas[code] = float(row.get(kvota_col, 0))
-                            except:
-                                pass
+            # # КВОТЫ МУЛТОН
+            # multon_quotas = {}
+            # if google_df is not None and not google_df.empty:
+            #     project_col = 'Проекты в  https://ru.checker-soft.com'
+            #     code_col = 'Код проекта RU00.000.00.01SVZ24'
+            #     kvota_col = 'Квота'
+            #     if all(col in google_df.columns for col in [project_col, code_col, kvota_col]):
+            #         multon_mask = google_df[project_col].astype(str).str.strip() == 'Мултон'
+            #         for _, row in google_df[multon_mask].iterrows():
+            #             code = str(row.get(code_col, '')).strip()
+            #             if code and code not in ['', 'nan', 'None', 'null']:
+            #                 try:
+            #                     multon_quotas[code] = float(row.get(kvota_col, 0))
+            #                 except:
+            #                     pass
             
             
             # КВОТЫ ПРОДАТА
@@ -571,6 +875,41 @@ class VisitCalculator:
                 po = row['ПО']
                 client = row['Клиент']
                 region = row['Регион']
+
+                # ============================================================
+                # ДИАГНОСТИКА: ВХОД В ЦИКЛ
+                # ============================================================
+                project_code = row['Проект']
+                po = row['ПО']
+                client = row['Клиент']
+                region = row['Регион']
+                asm = row['ASM']
+                start_date = row['Дата старта']
+                finish_date = row['Дата финиша']
+                duration = row['Длительность']
+                
+                is_target = (project_code == TARGET_PROJECT and 
+                             region == TARGET_REGION and 
+                             asm == TARGET_ASM)
+                
+                if is_target:
+                    st.write("=" * 80)
+                    st.write("🔍 ВХОД В ОСНОВНОЙ ЦИКЛ ДЛЯ ЦЕЛЕВОГО ПРОЕКТА!")
+                    st.write(f"  - project_code: '{project_code}'")
+                    st.write(f"  - region: '{region}'")
+                    st.write(f"  - asm: '{asm}'")
+                    st.write(f"  - po: '{po}'")
+                    st.write(f"  - client: '{client}'")
+                    st.write(f"  - start_date: {start_date}")
+                    st.write(f"  - finish_date: {finish_date}")
+                    st.write(f"  - duration: {duration}")
+                    st.write("=" * 80)
+                # ============================================================
+               
+                if po == 'ПО клиента' and client == 'Мултон':
+                    if project_code not in multon_regions:
+                        multon_regions[project_code] = set()
+                    multon_regions[project_code].add(region)
                 
                 if po == 'ПО клиента' and client == 'Мултон':
                     if project_code not in multon_regions:
@@ -648,19 +987,52 @@ class VisitCalculator:
                 finish_date = row['Дата финиша']
                 duration = row['Длительность']
                 
+
                 if pd.isna(start_date) or pd.isna(finish_date) or duration <= 0:
+                    #ДИАГНОСТИКА
+                    if is_target:
+                        st.error("❌ ПРОПУСК #1: start_date isna, finish_date isna или duration <= 0")
+                        st.write(f"  - start_date isna: {pd.isna(start_date)}")
+                        st.write(f"  - finish_date isna: {pd.isna(finish_date)}")
+                        st.write(f"  - duration <= 0: {duration <= 0}")
+                        st.write("=" * 80)
+                     #ДИАГНОСТИКА   
                     continue
                 
                 if end_period < start_date.date() or start_period > finish_date.date():
+                    #ДИАГНОСТИКА
+                    if is_target:
+                        st.error("❌ ПРОПУСК #2: Нет пересечения с отчетным периодом")
+                        st.write(f"  - end_period: {end_period}")
+                        st.write(f"  - start_date: {start_date.date()}")
+                        st.write(f"  - start_period: {start_period}")
+                        st.write(f"  - finish_date: {finish_date.date()}")
+                        st.write("=" * 80)
+                    #ДИАГНОСТИКА
                     continue
                 
                 period_start = max(start_period, start_date.date())
                 period_end = min(end_period, finish_date.date())
                 days_in_period = max(0, (period_end - period_start).days + 1)
+                #ДИАГНОСТИКА
+                if days_in_period == 0:
+                    if is_target:
+                        st.error("❌ ПРОПУСК #3: days_in_period == 0")
+                        st.write(f"  - period_start: {period_start}")
+                        st.write(f"  - period_end: {period_end}")
+                        st.write(f"  - days_in_period: {days_in_period}")
+                        st.write("=" * 80)
+                    continue
+                
+                if is_target:
+                    st.success("✅ ПРОЕКТ ПРОШЕЛ ПРОВЕРКИ ДАТ! Дальше проверяем total_plan...")
+                    st.write(f"  - period_start: {period_start}")
+                    st.write(f"  - period_end: {period_end}")
+                    st.write(f"  - days_in_period: {days_in_period}")
+                #ДИАГНОСТИКА
 
                 
-                # ============================================
-                # РАСЧЕТ КОЭФФИЦИЕНТА МЕСЯЦА
+                # РАСЧЕТ КОЭФФИЦИЕНТА МЕСЯЦА (НОВАЯ ЛОГИКА)
                 # ============================================
                 start_date_google = row.get('Дата старта_гугл', None)
                 finish_date_google = row.get('Дата финиша_гугл', None)
@@ -670,7 +1042,7 @@ class VisitCalculator:
                 if pd.isna(finish_date_google):
                     finish_date_google = finish_date
                 
-                # Приводим все к Timestamp (чтобы можно было сравнивать)
+                # Приводим все к Timestamp
                 if hasattr(start_date_google, 'date'):
                     start_ts = pd.Timestamp(start_date_google.date())
                 elif hasattr(start_date_google, 'year'):
@@ -685,20 +1057,75 @@ class VisitCalculator:
                 else:
                     finish_ts = pd.Timestamp(finish_date.date())
                 
-                # Границы текущего месяца (как Timestamp)
+                # Границы текущего месяца
                 month_start_ts = pd.Timestamp(calc_params['start_date'])
                 month_end_ts = month_start_ts + pd.offsets.MonthEnd(1)
                 
-                # Рабочие дни проекта в текущем месяце (числитель)
-                project_start_in_month = max(start_ts, month_start_ts)
-                project_end_in_month = min(finish_ts, month_end_ts)
-                working_days_in_month = self._get_working_days_in_range(project_start_in_month, project_end_in_month)
+                # ============================================
+                # ОПРЕДЕЛЯЕМ СЦЕНАРИЙ
+                # ============================================
                 
-                # Общие рабочие дни проекта (знаменатель)
-                total_working_days = self._get_working_days_in_range(start_ts, finish_ts)
+                # Приводим к date для корректного сравнения (если нужно)
+                start_date_clean = start_ts.date() if hasattr(start_ts, 'date') else start_ts
+                finish_date_clean = finish_ts.date() if hasattr(finish_ts, 'date') else finish_ts
+                month_start_clean = month_start_ts.date() if hasattr(month_start_ts, 'date') else month_start_ts
+                month_end_clean = month_end_ts.date() if hasattr(month_end_ts, 'date') else month_end_ts
                 
-                if total_working_days > 0:
-                    month_coefficient = working_days_in_month / total_working_days
+                # Флаги для определения сценария
+                project_starts_in_month = start_date_clean >= month_start_clean
+                project_ends_in_month = finish_date_clean <= month_end_clean
+                project_continues_after_month = finish_date_clean > month_end_clean
+                project_started_before_month = start_date_clean < month_start_clean
+                
+                # ============================================
+                # СЦЕНАРИЙ 1: Проект начался в этом месяце
+                # ============================================
+                if project_starts_in_month and project_continues_after_month:
+                    # Текущая логика: знаменатель = весь проект
+                    project_start_in_month = max(start_ts, month_start_ts)
+                    project_end_in_month = min(finish_ts, month_end_ts)
+                    working_days_in_month = self._get_working_days_in_range(
+                        project_start_in_month, 
+                        project_end_in_month
+                    )
+                    total_working_days = self._get_working_days_in_range(start_ts, finish_ts)
+                    
+                    if total_working_days > 0:
+                        month_coefficient = working_days_in_month / total_working_days
+                    else:
+                        month_coefficient = 1.0
+                
+                # ============================================
+                # СЦЕНАРИЙ 2: Проект начался ДО месяца и продолжается ПОСЛЕ месяца
+                # ============================================
+                elif project_started_before_month and project_continues_after_month:
+                    # НОВАЯ ЛОГИКА: знаменатель = рабочие дни от начала проекта до конца месяца
+                    project_start_in_month = max(start_ts, month_start_ts)
+                    project_end_in_month = min(finish_ts, month_end_ts)
+                    
+                    working_days_in_month = self._get_working_days_in_range(
+                        project_start_in_month, 
+                        project_end_in_month
+                    )
+                    
+                    # 🔥 КЛЮЧЕВОЕ ОТЛИЧИЕ: знаменатель до конца месяца, а не до конца проекта
+                    total_working_days = self._get_working_days_in_range(start_ts, month_end_ts)
+                    
+                    if total_working_days > 0:
+                        month_coefficient = working_days_in_month / total_working_days
+                    else:
+                        month_coefficient = 1.0
+                
+                # ============================================
+                # СЦЕНАРИЙ 3: Проект начался ДО месяца и заканчивается В месяце
+                # ============================================
+                elif project_started_before_month and project_ends_in_month:
+                    # Коэффициент = 1 (весь план проекта должен быть выполнен в этом месяце)
+                    month_coefficient = 1.0
+                
+                # ============================================
+                # DEFAULT: если ни одно условие не подошло
+                # ============================================
                 else:
                     month_coefficient = 1.0
                 # ============================================
@@ -729,88 +1156,94 @@ class VisitCalculator:
                     if po == 'ПО клиента' and client == 'Мултон':
                         # Проверяем, загружен ли Easymerch
                         if 'easymerch' not in st.session_state.uploaded_files:
+                            if is_target:
+                                st.error("❌ ПРОПУСК #4a: Easymerch не загружен")
+                                st.write("=" * 80)
                             continue
-                    
+                            
                         # Загружаем распределение плана из JSON
                         from github_settings import get_multon_plan_manager
                         multon_manager = get_multon_plan_manager()
                         plan_df = multon_manager.load_plan()
-                    
+                        
+                        if is_target:
+                            st.write(f"  - JSON загружен: {not plan_df.empty}, строк: {len(plan_df)}")
+                        
                         if plan_df.empty:
                             total_plan = 0
+                            if is_target:
+                                st.error("❌ JSON пустой!")
                         else:
                             mask = (plan_df['project_code'] == project_code) & \
                                    (plan_df['region'] == region) & \
                                    (plan_df['rs'] == row['ASM'])
-                    
+                            
+                            if is_target:
+                                st.write(f"  - Поиск в JSON: project_code='{project_code}', region='{region}', rs='{row['ASM']}'")
+                                st.write(f"  - Найдено: {mask.any()}")
+                            
                             if mask.any():
                                 total_plan = plan_df.loc[mask, 'plan'].iloc[0]
+                                if is_target:
+                                    st.write(f"  - total_plan из JSON: {total_plan}")
                             else:
                                 total_plan = 0
-                    
+                                if is_target:
+                                    st.warning("⚠️ Не найдено в JSON!")
+                        
                         asm_from_plan = row['ASM']
                         rs_from_plan = row['RS']
                         skip_plan_correction = False
-                    
-                        if total_plan <= 0:
-                            continue
-                    
-                        # ✅ НОВАЯ ЛОГИКА: переходящий проект только если start_date >= start_period
-                        # ✅ НОВАЯ ЛОГИКА: используем оригинальную дату из Google
-                        start_date_google = row.get('Дата старта_гугл', None)
-                        if pd.isna(start_date_google):
-                            start_date_google = start_date  # fallback
-                        start_date_google_date = start_date_google.date() if hasattr(start_date_google, 'date') else start_date_google
-                        start_period_date = start_period.date() if hasattr(start_period, 'date') else start_period
                         
-                        if start_date_google_date >= start_period_date:
-                            # Проект начался внутри отчетного периода → переходящий (разбивка по этапам)
-                            rs_plan_on_date, rs_daily_plan = self.calculate_plan_with_stages(
-                                total_plan,
-                                duration,
-                                coefficients,
-                                start_date,
-                                finish_date,
-                                period_start,
-                                period_end
-                            )
-                        else:
-                            # Проект начался ДО отчетного периода → обычный (план = total_plan)
-                            period_days = (period_end - period_start).days + 1
-                            rs_plan_on_date = total_plan
-                            rs_daily_plan = total_plan / period_days if period_days > 0 else 0
+                        if total_plan <= 0:
+                            if is_target:
+                                st.error("❌ ПРОПУСК #4: total_plan <= 0 (Мултон)")
+                                st.write("=" * 80)
+                            continue
+                        
+                        # 🔥 РАСЧЕТ ПЛАНА НА ДАТУ ДЛЯ МУЛТОН
+                        rs_plan_on_date, rs_daily_plan = self.calculate_plan_with_stages(
+                            total_plan,
+                            duration,
+                            coefficients,
+                            start_date,
+                            finish_date,
+                            period_start,
+                            period_end
+                        )
                     
                     elif client == 'Мультибренд 2024' and po == 'CXWAY':
                         # Проверяем, загружен ли CXWAY
                         if 'cxway' not in st.session_state.uploaded_files:
                             continue
-                    
+                        
                         # 1. Определяем тип волны по названию (после последнего '_')
                         wave_parts = wave_name.split('_')
                         if len(wave_parts) >= 2:
                             wave_type = '_'.join(wave_parts[1:])
                         else:
                             wave_type = wave_name
-                    
+                        
                         # 2. Определяем план в зависимости от типа волны
                         asm_from_plan = row['ASM']
                         rs_from_plan = row['RS']
                         skip_plan_correction = False
-                    
+                        
                         if wave_type == 'Нерезультативные_Пронто_Дилеры':
                             total_plan = 0
                             skip_plan_correction = True
-                            # Пропускаем этот проект
                             continue
-                    
+                            
                         elif wave_type == 'Дилеры':
+                            # ИСПРАВЛЕНО: region_code → region_short
                             plan_row = multibrand_dilers_df[multibrand_dilers_df['region_short'] == region]
                             if not plan_row.empty:
                                 total_plan = plan_row.iloc[0]['plan']
                             else:
                                 total_plan = 0
-                    
+                            
                         elif wave_type == 'Пронто' or wave_type == 'Пронто М':
+                            # Поиск по короткому коду региона и типу волны
                             if 'wave_type' in multibrand_pronto_df.columns:
                                 plan_row = multibrand_pronto_df[
                                     (multibrand_pronto_df['region_short'] == region) &
@@ -818,42 +1251,28 @@ class VisitCalculator:
                                 ]
                             else:
                                 plan_row = multibrand_pronto_df[multibrand_pronto_df['region_short'] == region]
-                    
+                            
                             if not plan_row.empty:
                                 total_plan = plan_row.iloc[0]['plan']
                             else:
                                 total_plan = 0
-                    
+                            
                         else:
                             total_plan = 0
-                    
+                        
                         if total_plan <= 0 and not skip_plan_correction:
                             continue
-                    
-                        # ✅ НОВАЯ ЛОГИКА: переходящий проект только если start_date >= start_period
-                        # ✅ НОВАЯ ЛОГИКА: используем оригинальную дату из Google
-                        start_date_google = row.get('Дата старта_гугл', None)
-                        if pd.isna(start_date_google):
-                            start_date_google = start_date  # fallback
-                        start_date_google_date = start_date_google.date() if hasattr(start_date_google, 'date') else start_date_google
-                        start_period_date = start_period.date() if hasattr(start_period, 'date') else start_period
                         
-                        if start_date_google_date >= start_period_date:
-                            # Проект начался внутри отчетного периода → переходящий (разбивка по этапам)
-                            rs_plan_on_date, rs_daily_plan = self.calculate_plan_with_stages(
-                                total_plan,
-                                duration,
-                                coefficients,
-                                start_date,
-                                finish_date,
-                                period_start,
-                                period_end
-                            )
-                        else:
-                            # Проект начался ДО отчетного периода → обычный (план = total_plan)
-                            period_days = (period_end - period_start).days + 1
-                            rs_plan_on_date = total_plan
-                            rs_daily_plan = total_plan / period_days if period_days > 0 else 0
+                        # Рассчитываем план на дату с учетом этапов
+                        rs_plan_on_date, rs_daily_plan = self.calculate_plan_with_stages(
+                            total_plan,
+                            duration,
+                            coefficients,
+                            start_date,
+                            finish_date,
+                            period_start,
+                            period_end
+                        )
     
                     else:  # Чеккер, CXWAY (другие), Easymerch, Optima
                         client_name = row['Клиент']
@@ -863,49 +1282,70 @@ class VisitCalculator:
                         asm_from_plan = row['ASM']
                         rs_from_plan = rs_name
                         skip_plan_correction = False
-                    
+                        
                         if total_plan <= 0:
                             continue
-                    
+                        
                         # ПРИМЕНЯЕМ КОЭФФИЦИЕНТ МЕСЯЦА
                         total_plan = round(total_plan * month_coefficient, 1)
-                    
+                        
                         # Распределяем план по RS с помощью весов
                         weight_key = (client_name, project_code, wave_name, region, rs_name)
                         weight = rs_weights_for_plan.get(weight_key, 0)
-                    
+                        
                         if weight > 0:
                             total_plan = round(total_plan * weight, 1)
-                    
-                        # ✅ Если после всех расчетов план стал 0 — пропускаем
+                        
+                        # ✅ ДОБАВЛЯЕМ ПРОВЕРКУ!
                         if total_plan <= 0:
                             continue
+                        
+                        # Рассчитываем план на дату с учетом этапов
+                        rs_plan_on_date, rs_daily_plan = self.calculate_plan_with_stages(
+                            total_plan,
+                            duration,
+                            coefficients,
+                            start_date,
+                            finish_date,
+                            period_start,
+                            period_end
+                        )
+
+                # ============================================================
+                # 🔥 ДИАГНОСТИКА В ОСНОВНОМ ЦИКЛЕ (для целевого проекта)
+                # ============================================================
+                if project_code == TARGET_PROJECT and region == TARGET_REGION and asm == TARGET_ASM:
+                    st.write("=" * 80)
+                    st.write("🔍 ОСНОВНОЙ ЦИКЛ: ДОСТИГЛИ ЦЕЛЕВОГО ПРОЕКТА!")
+                    st.write(f"  - total_plan = {total_plan}")
+                    st.write(f"  - duration = {duration}")
+                    st.write(f"  - start_date = {start_date}")
+                    st.write(f"  - finish_date = {finish_date}")
+                    st.write(f"  - period_start = {period_start}")
+                    st.write(f"  - period_end = {period_end}")
+                    st.write(f"  - days_in_period = {days_in_period}")
+                    st.write(f"  - coefficients = {coefficients}")
                     
-                        # ✅ НОВАЯ ЛОГИКА: переходящий проект только если start_date >= start_period
-                        # ✅ НОВАЯ ЛОГИКА: используем оригинальную дату из Google
-                        start_date_google = row.get('Дата старта_гугл', None)
-                        if pd.isna(start_date_google):
-                            start_date_google = start_date  # fallback
-                        start_date_google_date = start_date_google.date() if hasattr(start_date_google, 'date') else start_date_google
-                        start_period_date = start_period.date() if hasattr(start_period, 'date') else start_period
-                        
-                        if start_date_google_date >= start_period_date:
-                            # Проект начался внутри отчетного периода → переходящий (разбивка по этапам)
-                            rs_plan_on_date, rs_daily_plan = self.calculate_plan_with_stages(
-                                total_plan,
-                                duration,
-                                coefficients,
-                                start_date,
-                                finish_date,
-                                period_start,
-                                period_end
-                            )
-                        else:
-                            # Проект начался ДО отчетного периода → обычный (план = total_plan)
-                            period_days = (period_end - period_start).days + 1
-                            rs_plan_on_date = total_plan
-                            rs_daily_plan = total_plan / period_days if period_days > 0 else 0
-                        
+                    # Проверка calculate_plan_with_stages
+                    rs_plan_on_date, rs_daily_plan = self.calculate_plan_with_stages(
+                        total_plan, duration, coefficients, start_date, finish_date, period_start, period_end
+                    )
+                    st.write(f"  - rs_plan_on_date = {rs_plan_on_date}")
+                    st.write(f"  - rs_daily_plan = {rs_daily_plan}")
+                    
+                    if rs_plan_on_date <= 0:
+                        st.error("❌ rs_plan_on_date = 0! Проект НЕ БУДЕТ добавлен в results!")
+                    else:
+                        st.success("✅ rs_plan_on_date > 0! Проект будет добавлен в results!")
+                    st.write("=" * 80)
+                # ============================================================
+                
+                #ДИАГНОСТИКА
+                if is_target:
+                    st.success("✅ ПРОЕКТ ПРОШЕЛ ВСЕ ПРОВЕРКИ! Будет добавлен в results!")
+                    st.write("=" * 80)
+                #ДИАГНОСТИКА
+
                 results.append({
                     'Проект': project_code,
                     'Клиент': row['Клиент'],
@@ -997,6 +1437,7 @@ class VisitCalculator:
                 # Обновляем results
                 results = results_df.to_dict('records')
             if not results:
+                st.warning("⚠️ calculate_hierarchical_plan_on_date: НЕТ РЕЗУЛЬТАТОВ!")
                 return pd.DataFrame()
             return pd.DataFrame(results)
         
@@ -1480,6 +1921,5 @@ class VisitCalculator:
         
 # Глобальный экземпляр
 visit_calculator = VisitCalculator()
-
 
 
