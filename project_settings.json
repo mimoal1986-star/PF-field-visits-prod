@@ -2285,6 +2285,15 @@
       "fio_om": "",
       "added_at": "2026-07-09T11:46:21.547303",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ГЛАВСТРОЙ",
+      "wave_name": "2026.07_Береговой",
+      "project_code": "RU00.343.06.02SVZ25",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-07-20T11:46:47.144943",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -4811,8 +4820,16 @@
       "project_code": "RU00.177.05.04SVZ25",
       "timestamp": "2026-07-09T11:46:21.547379",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ГЛАВСТРОЙ",
+      "wave_name": "2026.07_Береговой",
+      "project_code": "RU00.343.06.02SVZ25",
+      "timestamp": "2026-07-20T11:46:47.145024",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-07-09T11:46:21.547387",
+  "last_updated": "2026-07-20T11:46:47.145029",
   "version": "1.0"
 }
