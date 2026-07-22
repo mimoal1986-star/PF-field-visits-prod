@@ -803,6 +803,7 @@ class VisitCalculator:
                             period_start,
                             period_end
                         )
+                        
                     
                     elif client == 'Мультибренд 2024' and po == 'CXWAY':
                         # Проверяем, загружен ли CXWAY
@@ -902,6 +903,18 @@ class VisitCalculator:
                             period_start,
                             period_end
                         )
+
+                # ============================================================
+                # ⚠️ КОСТЫЛЬ: Корректировка для "Тамбовский бекон"
+                # ============================================================
+                if client == "Тамбовский бекон":
+                    # Делим план проекта и план на дату на 9
+                    total_plan = total_plan / 9
+                    rs_plan_on_date = rs_plan_on_date / 9
+                    # Если rs_daily_plan существует — тоже делим
+                    if 'rs_daily_plan' in locals():
+                        rs_daily_plan = rs_daily_plan / 9
+                # ============================================================
 
                 results.append({
                     'Проект': project_code,
