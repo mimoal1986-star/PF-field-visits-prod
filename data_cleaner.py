@@ -302,17 +302,17 @@ class DataCleaner:
         if status_col:
             df_clean = df_clean[df_clean[status_col].astype(str).str.strip() != 'Удалено']
         
-        # Удалить строки где Дата визита < первый день месяца
-        date_col = self._find_column(df_clean, ['Дата визита', 'Date of Visit'])
-        if date_col:
-            if 'plan_calc_params' in st.session_state:
-                first_day = pd.Timestamp(st.session_state['plan_calc_params']['start_date'])
-            else:
-                today = datetime.now()
-                first_day = pd.Timestamp(year=today.year, month=today.month, day=1)
+        # # Удалить строки где Дата визита < первый день месяца
+        # date_col = self._find_column(df_clean, ['Дата визита', 'Date of Visit'])
+        # if date_col:
+        #     if 'plan_calc_params' in st.session_state:
+        #         first_day = pd.Timestamp(st.session_state['plan_calc_params']['start_date'])
+        #     else:
+        #         today = datetime.now()
+        #         first_day = pd.Timestamp(year=today.year, month=today.month, day=1)
             
-            df_clean[date_col] = pd.to_datetime(df_clean[date_col], errors='coerce', dayfirst=True)
-            df_clean = df_clean[pd.isna(df_clean[date_col]) | (df_clean[date_col] >= first_day)]
+        #     df_clean[date_col] = pd.to_datetime(df_clean[date_col], errors='coerce', dayfirst=True)
+        #     df_clean = df_clean[pd.isna(df_clean[date_col]) | (df_clean[date_col] >= first_day)]
         
         
         # === Удалить нули в датах ===
