@@ -1083,6 +1083,15 @@ class VisitCalculator:
         groupby_cols = existing_group_cols + ['Дата']
         result = df.groupby(groupby_cols).size().reset_index(name='Факт')
         
+        # ============================================================
+        # ⚠️ КОСТЫЛЬ: Корректировка динамики для "Тамбовский бекон"
+        # ============================================================
+        if 'Имя клиента' in result.columns:
+            result.loc[result['Имя клиента'] == "Тамбовский бекон", 'Факт'] = (
+                result.loc[result['Имя клиента'] == "Тамбовский бекон", 'Факт'] / 9
+            ).round(1)
+        # ============================================================
+        
         return result
     
     def calculate_hierarchical_fact_on_date(self, plan_df, visits_df, calc_params, status_filter='completed'):
@@ -1214,12 +1223,24 @@ class VisitCalculator:
                 client_name = str(row['Клиент']).strip()
                 asm = str(row['ASM']).strip()
                 key = (client_name, project, wave, region, asm, rs)
-                result_df.at[idx, f'Факт проекта{suffix}, шт.'] = rs_facts_total.get(key, 0)
-                result_df.at[idx, f'Факт на дату{suffix}, шт.'] = rs_facts_period.get(key, 0)
-                if suffix == '':
-                    result_df.at[idx, 'Оплата факт'] = payment_sum.get(key, 0)
+                # ============================================================
+                # ⚠️ КОСТЫЛЬ: Корректировка для "Тамбовский бекон"
+                # ============================================================
+                if client_name == "Тамбовский бекон":
+                    result_df.at[idx, f'Факт проекта{suffix}, шт.'] = rs_facts_total.get(key, 0) / 9
+                    result_df.at[idx, f'Факт на дату{suffix}, шт.'] = rs_facts_period.get(key, 0) / 9
+                    if suffix == '':
+                        result_df.at[idx, 'Оплата факт'] = payment_sum.get(key, 0) / 9
+                    else:
+                        result_df.at[idx, f'Оплата{suffix}'] = payment_sum.get(key, 0) / 9
                 else:
-                    result_df.at[idx, f'Оплата{suffix}'] = payment_sum.get(key, 0)
+                    result_df.at[idx, f'Факт проекта{suffix}, шт.'] = rs_facts_total.get(key, 0)
+                    result_df.at[idx, f'Факт на дату{suffix}, шт.'] = rs_facts_period.get(key, 0)
+                    if suffix == '':
+                        result_df.at[idx, 'Оплата факт'] = payment_sum.get(key, 0)
+                    else:
+                        result_df.at[idx, f'Оплата{suffix}'] = payment_sum.get(key, 0)
+                # ============================================================
             
             return result_df
             
