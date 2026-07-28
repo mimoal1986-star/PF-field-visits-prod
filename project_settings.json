@@ -2303,6 +2303,33 @@
       "fio_om": "",
       "added_at": "2026-07-22T08:46:33.713665",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ГЛАВСТРОЙ",
+      "wave_name": "2026.07_ЖК Баланс",
+      "project_code": "RU00.342.06.01SVZ25",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-07-28T09:35:50.957415",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Эконика",
+      "wave_name": "Эконика_2026.08_ВИП",
+      "project_code": "Мультикод_.306",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-07-28T09:35:50.957619",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Тайный пассажир",
+      "wave_name": "Опросы АФЛ 07.2026",
+      "project_code": "RU00.265.15.10SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-07-28T09:35:50.957751",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -4845,8 +4872,32 @@
       "project_code": "RU00.116.01.02SVZ24",
       "timestamp": "2026-07-22T08:46:33.713734",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ГЛАВСТРОЙ",
+      "wave_name": "2026.07_ЖК Баланс",
+      "project_code": "RU00.342.06.01SVZ25",
+      "timestamp": "2026-07-28T09:35:50.957504",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Эконика",
+      "wave_name": "Эконика_2026.08_ВИП",
+      "project_code": "Мультикод_.306",
+      "timestamp": "2026-07-28T09:35:50.957668",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Тайный пассажир",
+      "wave_name": "Опросы АФЛ 07.2026",
+      "project_code": "RU00.265.15.10SVZ26",
+      "timestamp": "2026-07-28T09:35:50.957798",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-07-22T08:46:33.713739",
+  "last_updated": "2026-07-28T09:35:50.957802",
   "version": "1.0"
 }
