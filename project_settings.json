@@ -2384,6 +2384,42 @@
       "fio_om": "",
       "added_at": "2026-08-11T10:27:45.962282",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Лукойл",
+      "wave_name": "Август 2026",
+      "project_code": "RU00.177.05.03SVZ25",
+      "portal": "Оптима",
+      "fio_om": "",
+      "added_at": "2026-08-11T10:28:43.370360",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Лукойл",
+      "wave_name": "Август 2026",
+      "project_code": "RU00.177.05.04SVZ25",
+      "portal": "Оптима",
+      "fio_om": "",
+      "added_at": "2026-08-11T10:28:43.370561",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Лукойл франчайзинг ФО",
+      "wave_name": "Август 2026",
+      "project_code": "RU00.175.01.04SVZ24/RU00.175.01.02SVZ24",
+      "portal": "Оптима",
+      "fio_om": "",
+      "added_at": "2026-08-11T10:28:43.370717",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Лукойл",
+      "wave_name": "",
+      "project_code": "",
+      "portal": "Оптима",
+      "fio_om": "",
+      "added_at": "2026-08-11T10:28:43.370972",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -4998,8 +5034,40 @@
       "project_code": "RU00.265.01.05SVZ25",
       "timestamp": "2026-08-11T10:27:45.962332",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Лукойл",
+      "wave_name": "Август 2026",
+      "project_code": "RU00.177.05.03SVZ25",
+      "timestamp": "2026-08-11T10:28:43.370426",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Лукойл",
+      "wave_name": "Август 2026",
+      "project_code": "RU00.177.05.04SVZ25",
+      "timestamp": "2026-08-11T10:28:43.370596",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Лукойл франчайзинг ФО",
+      "wave_name": "Август 2026",
+      "project_code": "RU00.175.01.04SVZ24/RU00.175.01.02SVZ24",
+      "timestamp": "2026-08-11T10:28:43.370791",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Лукойл",
+      "wave_name": "",
+      "project_code": "",
+      "timestamp": "2026-08-11T10:28:43.371042",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-08-11T10:27:45.962339",
+  "last_updated": "2026-08-11T10:28:43.371047",
   "version": "1.0"
 }
