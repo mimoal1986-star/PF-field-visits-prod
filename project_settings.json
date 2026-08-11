@@ -2339,6 +2339,51 @@
       "fio_om": "",
       "added_at": "2026-07-30T10:23:23.364290",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Roseville",
+      "wave_name": "08.2026_Roseville",
+      "project_code": "RU00.366.06.01SVZ25",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-08-11T10:27:45.961406",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ВТБ Лизинг",
+      "wave_name": "2026.07 Б/У техника в лизинг",
+      "project_code": "RU00.389.03.01SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-08-11T10:27:45.961711",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "СтоЛото",
+      "wave_name": "2026.07_СтоЛото СРС (первые)",
+      "project_code": "RU00.175.01.06SVZ24",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-08-11T10:27:45.961941",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Тайный пассажир",
+      "wave_name": "5_Волна_Тайный пассажир",
+      "project_code": "",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-08-11T10:27:45.962124",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Тайный пассажир",
+      "wave_name": "5_Волна_Тайный пассажир",
+      "project_code": "RU00.265.01.05SVZ25",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-08-11T10:27:45.962282",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -4913,8 +4958,48 @@
       "project_code": "RU00.434.01.02SVZ26",
       "timestamp": "2026-07-30T10:23:23.364376",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Roseville",
+      "wave_name": "08.2026_Roseville",
+      "project_code": "RU00.366.06.01SVZ25",
+      "timestamp": "2026-08-11T10:27:45.961515",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ВТБ Лизинг",
+      "wave_name": "2026.07 Б/У техника в лизинг",
+      "project_code": "RU00.389.03.01SVZ26",
+      "timestamp": "2026-08-11T10:27:45.961779",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "СтоЛото",
+      "wave_name": "2026.07_СтоЛото СРС (первые)",
+      "project_code": "RU00.175.01.06SVZ24",
+      "timestamp": "2026-08-11T10:27:45.961999",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Тайный пассажир",
+      "wave_name": "5_Волна_Тайный пассажир",
+      "project_code": "",
+      "timestamp": "2026-08-11T10:27:45.962175",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Тайный пассажир",
+      "wave_name": "5_Волна_Тайный пассажир",
+      "project_code": "RU00.265.01.05SVZ25",
+      "timestamp": "2026-08-11T10:27:45.962332",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-07-30T10:23:23.364382",
+  "last_updated": "2026-08-11T10:27:45.962339",
   "version": "1.0"
 }
