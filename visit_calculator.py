@@ -817,26 +817,26 @@ class VisitCalculator:
                         else:
                             wave_type = wave_name
                         
-                        # 2. Определяем план в зависимости от типа волны
+                        # 2. Флаг для нерезультативных (поиск по вхождению)
+                        is_non_resultative = 'Нерезультативные' in wave_type
+                        
+                        # 3. Определяем план в зависимости от типа волны
                         asm_from_plan = row['ASM']
                         rs_from_plan = row['RS']
                         skip_plan_correction = False
                         
-                        if wave_type == 'Нерезультативные_Пронто_Дилеры':
+                        if is_non_resultative:
+                            # 🔥 План = 0, но факт считаем
                             total_plan = 0
                             skip_plan_correction = True
-                            continue
-                            
+                            # НЕ ПРОПУСКАЕМ — идем к расчету плана на дату
                         elif wave_type == 'Дилеры':
-                            # ИСПРАВЛЕНО: region_code → region_short
                             plan_row = multibrand_dilers_df[multibrand_dilers_df['region_short'] == region]
                             if not plan_row.empty:
                                 total_plan = plan_row.iloc[0]['plan']
                             else:
                                 total_plan = 0
-                            
                         elif wave_type == 'Пронто' or wave_type == 'Пронто М':
-                            # Поиск по короткому коду региона и типу волны
                             if 'wave_type' in multibrand_pronto_df.columns:
                                 plan_row = multibrand_pronto_df[
                                     (multibrand_pronto_df['region_short'] == region) &
@@ -849,14 +849,14 @@ class VisitCalculator:
                                 total_plan = plan_row.iloc[0]['plan']
                             else:
                                 total_plan = 0
-                            
                         else:
                             total_plan = 0
                         
-                        if total_plan <= 0 and not skip_plan_correction:
+                        # 4. Если план = 0 и это НЕ нерезультативные — пропускаем
+                        if total_plan <= 0 and not is_non_resultative:
                             continue
                         
-                        # Рассчитываем план на дату с учетом этапов
+                        # 5. Рассчитываем план на дату с учетом этапов
                         rs_plan_on_date, rs_daily_plan = self.calculate_plan_with_stages(
                             total_plan,
                             duration,
