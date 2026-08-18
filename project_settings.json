@@ -2420,6 +2420,33 @@
       "fio_om": "",
       "added_at": "2026-08-11T10:28:43.370972",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Тайный пассажир",
+      "wave_name": "2026 Тестирование Тайный Пассажир",
+      "project_code": "",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-08-18T08:44:09.098858",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Л'Этуаль",
+      "wave_name": "_2026.08_С",
+      "project_code": "RU00.174.01.01SVZ24",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-08-18T08:44:09.099048",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ГЛАВСТРОЙ",
+      "wave_name": "2026.08_ЖК Баланс",
+      "project_code": "RU00.342.06.01SVZ25",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-08-18T08:44:09.099158",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -5066,8 +5093,32 @@
       "project_code": "",
       "timestamp": "2026-08-11T10:28:43.371042",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Тайный пассажир",
+      "wave_name": "2026 Тестирование Тайный Пассажир",
+      "project_code": "",
+      "timestamp": "2026-08-18T08:44:09.098928",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Л'Этуаль",
+      "wave_name": "_2026.08_С",
+      "project_code": "RU00.174.01.01SVZ24",
+      "timestamp": "2026-08-18T08:44:09.099081",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ГЛАВСТРОЙ",
+      "wave_name": "2026.08_ЖК Баланс",
+      "project_code": "RU00.342.06.01SVZ25",
+      "timestamp": "2026-08-18T08:44:09.099189",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-08-11T10:28:43.371047",
+  "last_updated": "2026-08-18T08:44:09.099192",
   "version": "1.0"
 }
