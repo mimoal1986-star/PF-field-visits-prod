@@ -2332,15 +2332,6 @@
       "added_by": "unknown_user"
     },
     {
-      "project_name": "МАЗ МОСКВИЧ",
-      "wave_name": "2026.08_Звонок",
-      "project_code": "RU00.434.01.02SVZ26",
-      "portal": "CXWAY",
-      "fio_om": "",
-      "added_at": "2026-07-30T10:23:23.364290",
-      "added_by": "unknown_user"
-    },
-    {
       "project_name": "Roseville",
       "wave_name": "08.2026_Roseville",
       "project_code": "RU00.366.06.01SVZ25",
@@ -5012,14 +5003,6 @@
       "wave_name": "Опросы АФЛ 07.2026",
       "project_code": "RU00.265.15.10SVZ26",
       "timestamp": "2026-07-28T09:35:50.957798",
-      "user": "unknown_user"
-    },
-    {
-      "action": "add_to_excluded",
-      "project_name": "МАЗ МОСКВИЧ",
-      "wave_name": "2026.08_Звонок",
-      "project_code": "RU00.434.01.02SVZ26",
-      "timestamp": "2026-07-30T10:23:23.364376",
       "user": "unknown_user"
     },
     {
