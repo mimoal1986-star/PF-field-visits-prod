@@ -2447,6 +2447,33 @@
       "fio_om": "",
       "added_at": "2026-08-20T09:29:38.268979",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ФСК",
+      "wave_name": "08.2026_ФСК",
+      "project_code": "RU00.438.06.01SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-08-20T13:34:21.563981",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ФСК",
+      "wave_name": "08.2026_ФСК",
+      "project_code": "RU00.438.06.02SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-08-20T13:34:21.564312",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Умный Дом Sber",
+      "wave_name": "08.2026_Умный дом",
+      "project_code": "",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-08-20T13:34:21.564521",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -5117,8 +5144,32 @@
       "project_code": "RU00.343.06.02SVZ25",
       "timestamp": "2026-08-20T09:29:38.269119",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ФСК",
+      "wave_name": "08.2026_ФСК",
+      "project_code": "RU00.438.06.01SVZ26",
+      "timestamp": "2026-08-20T13:34:21.564107",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ФСК",
+      "wave_name": "08.2026_ФСК",
+      "project_code": "RU00.438.06.02SVZ26",
+      "timestamp": "2026-08-20T13:34:21.564374",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Умный Дом Sber",
+      "wave_name": "08.2026_Умный дом",
+      "project_code": "",
+      "timestamp": "2026-08-20T13:34:21.564574",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-08-20T09:29:38.269129",
+  "last_updated": "2026-08-20T13:34:21.564581",
   "version": "1.0"
 }
