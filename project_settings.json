@@ -2474,6 +2474,15 @@
       "fio_om": "",
       "added_at": "2026-08-20T13:34:21.564521",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "МВЭД_ВТБ Банк",
+      "wave_name": "МВЭД_08-09.2026",
+      "project_code": "RU00.116.01.02SVZ24",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-08-20T13:35:11.199427",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -5168,8 +5177,16 @@
       "project_code": "",
       "timestamp": "2026-08-20T13:34:21.564574",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "МВЭД_ВТБ Банк",
+      "wave_name": "МВЭД_08-09.2026",
+      "project_code": "RU00.116.01.02SVZ24",
+      "timestamp": "2026-08-20T13:35:11.199525",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-08-20T13:34:21.564581",
+  "last_updated": "2026-08-20T13:35:11.199532",
   "version": "1.0"
 }
