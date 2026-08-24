@@ -2483,6 +2483,42 @@
       "fio_om": "",
       "added_at": "2026-08-20T13:35:11.199427",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ВТБ Банк (АССО)",
+      "wave_name": "Тест",
+      "project_code": "Тест",
+      "portal": "Оптима",
+      "fio_om": "",
+      "added_at": "2026-08-24T08:04:28.857268",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ГЛАВСТРОЙ",
+      "wave_name": "2026.03_Береговой",
+      "project_code": "",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-08-24T08:04:28.857582",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Лукойл",
+      "wave_name": "2026.08_Лукойл",
+      "project_code": "RU00.177.05.04SVZ25",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-08-24T08:04:28.857754",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Лукойл франчайзинг ФО",
+      "wave_name": "2026.08_Лукойл Франчайзинг ФО",
+      "project_code": "RU00.390.02.01SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-08-24T08:04:28.857886",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -5185,8 +5221,40 @@
       "project_code": "RU00.116.01.02SVZ24",
       "timestamp": "2026-08-20T13:35:11.199525",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ВТБ Банк (АССО)",
+      "wave_name": "Тест",
+      "project_code": "Тест",
+      "timestamp": "2026-08-24T08:04:28.857376",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ГЛАВСТРОЙ",
+      "wave_name": "2026.03_Береговой",
+      "project_code": "",
+      "timestamp": "2026-08-24T08:04:28.857644",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Лукойл",
+      "wave_name": "2026.08_Лукойл",
+      "project_code": "RU00.177.05.04SVZ25",
+      "timestamp": "2026-08-24T08:04:28.857796",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Лукойл франчайзинг ФО",
+      "wave_name": "2026.08_Лукойл Франчайзинг ФО",
+      "project_code": "RU00.390.02.01SVZ26",
+      "timestamp": "2026-08-24T08:04:28.857989",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-08-20T13:35:11.199532",
+  "last_updated": "2026-08-24T08:04:28.857998",
   "version": "1.0"
 }
