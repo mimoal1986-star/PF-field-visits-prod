@@ -156,7 +156,8 @@ class VisitCalculator:
                 'ASM': visits_df['АСС'].fillna('Не указано'),
                 'RS': visits_df['ЭМ'].fillna('Не указано'),
                 'ПО': visits_df['ПО'].fillna('не определено'),
-                'Полевой': visits_df['Полевой']
+                'Полевой': visits_df['Полевой'],
+                'Продление': 0 
             })
             # st.write(f"[DETAIL] Создание DataFrame: {time.time() - start:.2f} сек")
             
@@ -237,6 +238,74 @@ class VisitCalculator:
                     
                     hierarchy['Дата старта'] = hierarchy['Проект'].apply(get_start_date)
                     hierarchy['Дата финиша'] = hierarchy['Проект'].apply(get_finish_date)
+
+
+                    # ============================================
+                    # ДОБАВЛЕНИЕ КОЛОНКИ "ПРОДЛЕНИЕ" ИЗ GOOGLE-ТАБЛИЦЫ
+                    # ============================================
+                    prodlenie_mapping = {}
+                    if google_df is not None and not google_df.empty:
+                        code_col = None
+                        wave_col = None
+                        prodlenie_col = 'Продление'
+                        
+                        # Ищем колонки
+                        for col in google_df.columns:
+                            if col in ['Код проекта RU00.000.00.01SVZ24', 'Код проекта']:
+                                code_col = col
+                            if col in ['Название волны на Чекере/ином ПО', 'Волна']:
+                                wave_col = col
+                        
+                        if code_col is not None and wave_col is not None and prodlenie_col in google_df.columns:
+                            for _, row in google_df.iterrows():
+                                code = str(row.get(code_col, '')).strip()
+                                wave = str(row.get(wave_col, '')).strip()
+                                if code and code not in ['nan', 'None', '']:
+                                    prodlenie_value = row.get(prodlenie_col, 0)
+                                    try:
+                                        prodlenie_value = int(prodlenie_value)
+                                    except:
+                                        prodlenie_value = 0
+                                    prodlenie_mapping[(code, wave)] = prodlenie_value
+                            
+                            def get_prodlenie(project_code, wave_name):
+                                code_str = str(project_code)
+                                wave_str = str(wave_name)
+                                
+                                # Если волна пустая — ищем только по коду
+                                if wave_str in ['Не указано', '', 'nan', 'None']:
+                                    for (c, w), val in prodlenie_mapping.items():
+                                        if c == code_str:
+                                            return val
+                                    return 0
+                                
+                                # Прямое совпадение по (код, волна)
+                                if (code_str, wave_str) in prodlenie_mapping:
+                                    return prodlenie_mapping[(code_str, wave_str)]
+                                
+                                # Если есть составной код с '/'
+                                if '/' in code_str:
+                                    parts = code_str.split('/')
+                                    for part in parts:
+                                        part = part.strip()
+                                        if (part, wave_str) in prodlenie_mapping:
+                                            return prodlenie_mapping[(part, wave_str)]
+                                
+                                # Fallback: ищем только по коду (без волны)
+                                for (c, w), val in prodlenie_mapping.items():
+                                    if c == code_str:
+                                        return val
+                                
+                                return 0
+                            
+                            hierarchy['Продление'] = hierarchy.apply(
+                                lambda row: get_prodlenie(row['Проект'], row['Волна']), 
+                                axis=1
+                            )
+                        else:
+                            st.warning("⚠️ Не найдены колонки для маппинга 'Продление' в Google-таблице")
+                    else:
+                        st.warning("⚠️ Google-таблица не загружена, колонка 'Продление' заполнена 0")
                     
                     # Если дат нет, ставим первый и последний день месяца
                     if 'plan_calc_params' in st.session_state:
@@ -379,6 +448,47 @@ class VisitCalculator:
                 hierarchy['Дата финиша_гугл'] = pd.NaT
                 hierarchy['Метод подбора дат'] = 'МП'
                 
+            # ============================================
+            # 3. РАСЧЕТ ДАТ НА УРОВНЕ КЛИЕНТА (только для отображения)
+            # ============================================
+            
+            # Сначала инициализируем колонки-заглушки
+            hierarchy['Клиент_дата_старта'] = hierarchy['Дата старта']
+            hierarchy['Клиент_дата_финиша'] = hierarchy['Дата финиша']
+            hierarchy['Клиент_длительность'] = 0
+            
+            if not hierarchy.empty and 'Клиент' in hierarchy.columns:
+                # 🔥 ИСПРАВЛЕНО: берем min/max из оригинальных дат ГУГЛ
+                # Если есть оригинальные даты — используем их
+                if 'Дата старта_гугл' in hierarchy.columns and 'Дата финиша_гугл' in hierarchy.columns:
+                    client_dates = hierarchy.groupby('Клиент').agg({
+                        'Дата старта_гугл': 'min',
+                        'Дата финиша_гугл': 'max'
+                    }).reset_index()
+                    
+                    start_map = dict(zip(client_dates['Клиент'], client_dates['Дата старта_гугл']))
+                    finish_map = dict(zip(client_dates['Клиент'], client_dates['Дата финиша_гугл']))
+                else:
+                    # Fallback: если нет оригинальных дат — используем очищенные
+                    client_dates = hierarchy.groupby('Клиент').agg({
+                        'Дата старта': 'min',
+                        'Дата финиша': 'max'
+                    }).reset_index()
+                    
+                    start_map = dict(zip(client_dates['Клиент'], client_dates['Дата старта']))
+                    finish_map = dict(zip(client_dates['Клиент'], client_dates['Дата финиша']))
+                
+                # Добавляем колонки с клиентскими датами
+                hierarchy['Клиент_дата_старта'] = hierarchy['Клиент'].map(start_map).fillna(hierarchy['Дата старта'])
+                hierarchy['Клиент_дата_финиша'] = hierarchy['Клиент'].map(finish_map).fillna(hierarchy['Дата финиша'])
+                
+                # Рассчитываем клиентскую длительность
+                hierarchy['Клиент_длительность'] = (
+                    hierarchy['Клиент_дата_финиша'] - hierarchy['Клиент_дата_старта']
+                ).dt.days + 1
+                
+                hierarchy['Клиент_длительность'] = hierarchy['Клиент_длительность'].clip(lower=1)
+                 
             
             # Рассчитываем длительность
             start = time.time()
@@ -390,6 +500,8 @@ class VisitCalculator:
                     hierarchy.loc[mask_valid_dates, 'Дата финиша'] - 
                     hierarchy.loc[mask_valid_dates, 'Дата старта']
                 ).dt.days + 1
+
+            
             # st.write(f"[DETAIL] Расчет длительности: {time.time() - start:.2f} сек")
             
             # Сортируем
@@ -935,7 +1047,11 @@ class VisitCalculator:
                     'Метод подбора дат': row['Метод подбора дат'],
                     'Дней в периоде': days_in_period,
                     'Дневной план RS, шт.': round(rs_daily_plan, 2),
-                    'skip_plan_correction': skip_plan_correction
+                    'skip_plan_correction': skip_plan_correction,
+                    'Клиент_дата_старта': row.get('Клиент_дата_старта', start_date),
+                    'Клиент_дата_финиша': row.get('Клиент_дата_финиша', finish_date),
+                    'Клиент_длительность': row.get('Клиент_длительность', duration),
+                    'Продление': row.get('Продление', 0)
                 })
 
 
@@ -1476,5 +1592,3 @@ class VisitCalculator:
         
 # Глобальный экземпляр
 visit_calculator = VisitCalculator()
-
-
