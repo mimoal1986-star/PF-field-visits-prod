@@ -2633,8 +2633,7 @@ class DataVisualizer:
     def create_asm_summary_tab(self, data):
         """
         Создает сводную таблицу по ASM для вкладки АСМ
-        Структура: ASM Total → клиенты внутри ASM
-        Автоматический фильтр по Продление == 1
+        Структура: Общий итог → ASM Total → клиенты внутри ASM
         """
         if data is None or data.empty:
             st.warning("⚠️ Нет данных для сводной таблицы АСМ")
@@ -2642,132 +2641,193 @@ class DataVisualizer:
         
         st.markdown("---")
         st.subheader("📊 Сводная таблица по АСМ")
-        st.caption("Данные отфильтрованы по Продление = 1")
+        st.caption("📌 Основные метрики — по всем проектам | План/Факт продление — только проекты с Продление = 1")
         
-        # 1. Фильтруем по Продление == 1
+        # 1. Проверяем наличие колонки Продление
         if 'Продление' not in data.columns:
             st.warning("⚠️ Колонка 'Продление' не найдена в данных. Сводная таблица недоступна.")
             return
         
-        filtered_data = data[data['Продление'] == 1].copy()
-        
-        if filtered_data.empty:
-            st.info("ℹ️ Нет данных с Продление = 1")
-            return
-        
         # 2. Переименовываем колонки
         rename_cols = {'ЗОД': 'DSM', 'АСС': 'ASM', 'ЭМ': 'RS'}
-        filtered_data = filtered_data.rename(columns=rename_cols)
+        data = data.rename(columns=rename_cols)
         
-        # 3. Проверяем наличие колонки ASM
-        if 'ASM' not in filtered_data.columns:
+        if 'ASM' not in data.columns:
             st.warning("⚠️ Колонка 'ASM' (АСС) не найдена в данных")
             return
         
-        # 4. Группируем по ASM и Клиент
-        agg_dict = {
-            'План проекта, шт.': 'sum',
-            'Факт проекта, шт.': 'sum',
-            'План на дату, шт.': 'sum',
-            'Прогноз, шт.': 'sum'
-        }
+        # 3. Создаем два датафрейма
+        df_all = data.copy()  # все проекты
+        df_prodlenie = data[data['Продление'] == 1].copy()  # только продление
         
-        existing_agg = {k: v for k, v in agg_dict.items() if k in filtered_data.columns}
+        # 4. Определяем колонки для агрегации (только существующие)
+        agg_cols = ['План проекта, шт.', 'Факт проекта, шт.', 'План на дату, шт.']
+        if 'Прогноз, шт.' in df_all.columns:
+            agg_cols.append('Прогноз, шт.')
         
-        group_cols = ['ASM', 'Клиент']
-        grouped = filtered_data.groupby(group_cols).agg(existing_agg).reset_index()
+        existing_agg = [col for col in agg_cols if col in df_all.columns]
         
-        # 5. Фильтруем нулевые значения
-        grouped = grouped[
-            (grouped['План проекта, шт.'] != 0) | 
-            (grouped['Факт проекта, шт.'] != 0) |
-            (grouped['План на дату, шт.'] != 0)
-        ].copy()
+        if not existing_agg:
+            st.warning("⚠️ Нет данных для агрегации")
+            return
         
-        if grouped.empty:
+        # 5. Агрегация для основных колонок (из df_all)
+        grouped_all = df_all.groupby(['ASM', 'Клиент'])[existing_agg].sum().reset_index()
+        
+        # 6. Агрегация для продления (из df_prodlenie)
+        prodlenie_cols = ['План проекта, шт.', 'Факт проекта, шт.']
+        existing_prodlenie = [col for col in prodlenie_cols if col in df_prodlenie.columns]
+        
+        if df_prodlenie.empty or not existing_prodlenie:
+            # Если нет данных с Продление=1, заполняем нулями
+            grouped_prodlenie = grouped_all[['ASM', 'Клиент']].copy()
+            grouped_prodlenie['План продление'] = 0
+            grouped_prodlenie['Факт продление'] = 0
+        else:
+            grouped_prodlenie = df_prodlenie.groupby(['ASM', 'Клиент'])[existing_prodlenie].sum().reset_index()
+            grouped_prodlenie = grouped_prodlenie.rename(columns={
+                'План проекта, шт.': 'План продление',
+                'Факт проекта, шт.': 'Факт продление'
+            })
+        
+        # 7. Объединяем два датафрейма
+        if grouped_all.empty and grouped_prodlenie.empty:
+            st.info("ℹ️ Нет данных для отображения")
+            return
+        
+        merged = pd.merge(grouped_all, grouped_prodlenie, on=['ASM', 'Клиент'], how='outer')
+        
+        # Проверяем, что колонка ASM существует
+        if 'ASM' not in merged.columns:
+            st.warning("⚠️ Колонка 'ASM' отсутствует после объединения")
+            return
+        
+        merged['План продление'] = merged['План продление'].fillna(0)
+        merged['Факт продление'] = merged['Факт продление'].fillna(0)
+        
+        # Заполняем пропуски в основных колонках
+        for col in existing_agg:
+            if col in merged.columns:
+                merged[col] = merged[col].fillna(0)
+        
+        # 8. Фильтруем нулевые значения
+        numeric_cols = existing_agg + ['План продление', 'Факт продление']
+        existing_numeric = [col for col in numeric_cols if col in merged.columns]
+        
+        if existing_numeric:
+            mask = merged[existing_numeric].sum(axis=1) != 0
+            merged = merged[mask].copy()
+        
+        if merged.empty:
             st.info("ℹ️ Нет данных для отображения после фильтрации")
             return
         
-        # 6. Рассчитываем метрики
-        grouped['Отклонение'] = (grouped['Факт проекта, шт.'] - grouped['План на дату, шт.']).round(1)
+        # 9. Рассчитываем метрики
+        merged['Отклонение'] = 0.0
+        if 'Факт проекта, шт.' in merged.columns and 'План на дату, шт.' in merged.columns:
+            merged['Отклонение'] = (merged['Факт проекта, шт.'] - merged['План на дату, шт.']).round(1)
         
-        mask_plan = grouped['План проекта, шт.'] > 0
-        grouped['Прогноз ВП, %'] = 0.0
-        grouped.loc[mask_plan, 'Прогноз ВП, %'] = (
-            grouped.loc[mask_plan, 'Прогноз, шт.'] / 
-            grouped.loc[mask_plan, 'План проекта, шт.'] * 100
-        ).round(1)
+        merged['Прогноз ВП, %'] = 0.0
+        if 'Прогноз, шт.' in merged.columns and 'План проекта, шт.' in merged.columns:
+            mask_plan = merged['План проекта, шт.'] > 0
+            merged.loc[mask_plan, 'Прогноз ВП, %'] = (
+                merged.loc[mask_plan, 'Прогноз, шт.'] / 
+                merged.loc[mask_plan, 'План проекта, шт.'] * 100
+            ).round(1)
         
-        grouped['Факт ВП, %'] = 0.0
-        grouped.loc[mask_plan, 'Факт ВП, %'] = (
-            grouped.loc[mask_plan, 'Факт проекта, шт.'] / 
-            grouped.loc[mask_plan, 'План проекта, шт.'] * 100
-        ).round(1)
+        merged['Факт ВП, %'] = 0.0
+        if 'Факт проекта, шт.' in merged.columns and 'План проекта, шт.' in merged.columns:
+            mask_plan = merged['План проекта, шт.'] > 0
+            merged.loc[mask_plan, 'Факт ВП, %'] = (
+                merged.loc[mask_plan, 'Факт проекта, шт.'] / 
+                merged.loc[mask_plan, 'План проекта, шт.'] * 100
+            ).round(1)
         
-        grouped['План продление'] = grouped['План проекта, шт.']
-        grouped['Факт продление'] = grouped['Факт проекта, шт.']
-        
-        # ============================================
-        # КНОПКА СВЕРНУТЬ/РАЗВЕРНУТЬ КЛИЕНТОВ
-        # ============================================
-        col_btn = st.columns([1])[0]
-        with col_btn:
-            if 'asm_show_clients' not in st.session_state:
-                st.session_state.asm_show_clients = True
-            
-            if st.session_state.asm_show_clients:
-                if st.button("📋 Свернуть клиентов", use_container_width=True):
-                    st.session_state.asm_show_clients = False
-                    st.rerun()
-            else:
-                if st.button("📋 Развернуть клиентов", use_container_width=True):
-                    st.session_state.asm_show_clients = True
-                    st.rerun()
-        # ============================================
-        
-        # 7. Формируем итоговую таблицу
+        # 10. Формируем итоговую таблицу
         result_rows = []
-        asm_list = sorted(grouped['ASM'].unique())
         
-        for asm in asm_list:
-            asm_data = grouped[grouped['ASM'] == asm]
+        # Получаем список ASM (если merged не пустой)
+        asm_list = sorted(merged['ASM'].unique()) if not merged.empty else []
+        
+        # Функция для создания строки итога
+        def create_summary_row(label, data_df):
+            # Проверка: если data_df пустой, возвращаем строку с нулями
+            if data_df.empty:
+                return {
+                    'ASM': label,
+                    'Клиент': '',
+                    'План проекта, шт.': 0,
+                    'Факт проекта, шт.': 0,
+                    'План на сегодня': 0,
+                    'Отклонение': 0.0,
+                    'Прогноз ВП, %': 0.0,
+                    'Факт ВП, %': 0.0,
+                    'План продление': 0,
+                    'Факт продление': 0
+                }
             
-            # Total строка
-            total_row = {
-                'ASM': asm,
-                'Клиент': '⭐ Total',
-                'План проекта, шт.': asm_data['План проекта, шт.'].sum(),
-                'Факт проекта, шт.': asm_data['Факт проекта, шт.'].sum(),
-                'План на сегодня': asm_data['План на дату, шт.'].sum(),
-                'Отклонение': (asm_data['Факт проекта, шт.'].sum() - asm_data['План на дату, шт.'].sum()).round(1),
+            row = {
+                'ASM': label,
+                'Клиент': '',
+                'План проекта, шт.': data_df['План проекта, шт.'].sum() if 'План проекта, шт.' in data_df.columns else 0,
+                'Факт проекта, шт.': data_df['Факт проекта, шт.'].sum() if 'Факт проекта, шт.' in data_df.columns else 0,
+                'План на сегодня': data_df['План на дату, шт.'].sum() if 'План на дату, шт.' in data_df.columns else 0,
+                'Отклонение': 0.0,
                 'Прогноз ВП, %': 0.0,
                 'Факт ВП, %': 0.0,
-                'План продление': asm_data['План проекта, шт.'].sum(),
-                'Факт продление': asm_data['Факт проекта, шт.'].sum()
+                'План продление': data_df['План продление'].sum() if 'План продление' in data_df.columns else 0,
+                'Факт продление': data_df['Факт продление'].sum() if 'Факт продление' in data_df.columns else 0
             }
             
-            total_plan = total_row['План проекта, шт.']
-            if total_plan > 0:
-                total_row['Прогноз ВП, %'] = (asm_data['Прогноз, шт.'].sum() / total_plan * 100).round(1)
-                total_row['Факт ВП, %'] = (total_row['Факт проекта, шт.'] / total_plan * 100).round(1)
+            row['Отклонение'] = (row['Факт проекта, шт.'] - row['План на сегодня']).round(1)
             
-            result_rows.append(total_row)
+            plan = row['План проекта, шт.']
+            if plan > 0:
+                if 'Прогноз, шт.' in data_df.columns:
+                    row['Прогноз ВП, %'] = (data_df['Прогноз, шт.'].sum() / plan * 100).round(1)
+                row['Факт ВП, %'] = (row['Факт проекта, шт.'] / plan * 100).round(1)
             
-            # Клиенты (если развернуто)
-            if st.session_state.asm_show_clients:
+            return row
+        
+        # === 10.1. СЧИТАЕМ ОБЩИЙ ИТОГ (первая строка) ===
+        if asm_list:
+            all_data = merged[merged['ASM'].isin(asm_list)]
+        else:
+            all_data = merged
+        
+        # Добавляем Общий итог
+        result_rows.append(create_summary_row('▪️ Общий итог', all_data))
+        
+        # === 10.2. СТРОКИ ПО ASM ===
+        for asm in asm_list:
+            asm_data = merged[merged['ASM'] == asm]
+            
+            if asm_data.empty:
+                continue
+            
+            # Добавляем строку ASM Total
+            result_rows.append(create_summary_row(f'▫️ {asm}', asm_data))
+            
+            # Клиенты внутри ASM (если развернуто)
+            if st.session_state.get('asm_show_clients', True):
                 client_data = asm_data.sort_values('Клиент')
                 for _, row in client_data.iterrows():
+                    # Пропускаем клиентов с пустым именем
+                    client_name = row.get('Клиент', '')
+                    if pd.isna(client_name) or str(client_name).strip() == '':
+                        client_name = '(без названия)'
+                    
                     result_rows.append({
-                        'ASM': row['ASM'],
-                        'Клиент': row['Клиент'],
-                        'План проекта, шт.': row['План проекта, шт.'],
-                        'Факт проекта, шт.': row['Факт проекта, шт.'],
-                        'План на сегодня': row['План на дату, шт.'],
-                        'Отклонение': row['Отклонение'],
-                        'Прогноз ВП, %': row['Прогноз ВП, %'],
-                        'Факт ВП, %': row['Факт ВП, %'],
-                        'План продление': row['План продление'],
-                        'Факт продление': row['Факт продление']
+                        'ASM': '',
+                        'Клиент': client_name,
+                        'План проекта, шт.': row.get('План проекта, шт.', 0),
+                        'Факт проекта, шт.': row.get('Факт проекта, шт.', 0),
+                        'План на сегодня': row.get('План на дату, шт.', 0),
+                        'Отклонение': row.get('Отклонение', 0),
+                        'Прогноз ВП, %': row.get('Прогноз ВП, %', 0),
+                        'Факт ВП, %': row.get('Факт ВП, %', 0),
+                        'План продление': row.get('План продление', 0),
+                        'Факт продление': row.get('Факт продление', 0)
                     })
         
         if not result_rows:
@@ -2776,14 +2836,46 @@ class DataVisualizer:
         
         result_df = pd.DataFrame(result_rows)
         
-        # 8. Отображаем таблицу
+        # ============================================
+        # 11. ЧЕК-БОКСЫ ДЛЯ УПРАВЛЕНИЯ ОТОБРАЖЕНИЕМ
+        # ============================================
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            # Чек-бокс для показа только продления
+            show_only_prodlenie = st.checkbox(
+                "📋 Только продление",
+                value=st.session_state.get('asm_show_only_prodlenie', False),
+                key="asm_show_only_prodlenie",
+                help="Показывать только строки, где План продление > 0"
+            )
+        
+        with col2:
+            # Чек-бокс для развертывания клиентов (вместо кнопки)
+            show_clients = st.checkbox(
+                "📋 Развернуть клиентов",
+                value=st.session_state.get('asm_show_clients', True),
+                key="asm_show_clients",
+                help="Показывать клиентов внутри ASM"
+            )
+        
+        # === ПРИМЕНЯЕМ ФИЛЬТР ПО ПРОДЛЕНИЮ ===
+        if show_only_prodlenie:
+            # Оставляем только строки, где План продление > 0
+            result_df = result_df[result_df['План продление'] > 0].copy()
+            
+            if result_df.empty:
+                st.info("ℹ️ Нет данных с План продление > 0")
+                return
+        
+        # 12. Отображаем таблицу
         st.dataframe(
             result_df,
             use_container_width=True,
             hide_index=True,
             column_config={
-                'ASM': 'ASM',
-                'Клиент': 'Клиент',
+                'ASM': st.column_config.TextColumn('ASM'),
+                'Клиент': st.column_config.TextColumn('Клиент'),
                 'План проекта, шт.': st.column_config.NumberColumn('План проекта, шт.', format="%.0f"),
                 'Факт проекта, шт.': st.column_config.NumberColumn('Факт проекта, шт.', format="%.0f"),
                 'План на сегодня': st.column_config.NumberColumn('План на сегодня', format="%.0f"),
@@ -2795,7 +2887,7 @@ class DataVisualizer:
             }
         )
         
-        # 9. Кнопка скачивания
+        # 13. Кнопка скачивания
         output = BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             result_df.to_excel(writer, sheet_name='Сводная_АСМ', index=False)
