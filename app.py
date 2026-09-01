@@ -175,6 +175,43 @@ def process_all_data(settings_manager=None, force_recalc=False):
         st.session_state.cleaned_data['сервизория'] = google_with_field
         st.session_state.debug_times.append(f"[DEBUG] Очистка: {time.time() - start:.2f} сек")
         start = time.time()
+
+        # ============================================
+        # ПАРСИНГ КОЛОНКИ "ПРОДЛЕНИЕ"
+        # ============================================
+        # Извлекаем значение колонки "вводные запрошены / вводные получены, готовится старт / стартовал"
+        # Если значение после приведения к нижнему регистру и сжатия пробелов == "продление" → 1, иначе 0
+        
+        google_df = st.session_state.cleaned_data['сервизория']
+        
+        # Ищем колонку с названием "вводные запрошены / вводные получены, готовится старт / стартовал"
+        status_col = None
+        for col in google_df.columns:
+            if col == 'вводные запрошены / вводные получены, готовится старт / стартовал':
+                status_col = col
+                break
+        
+        if status_col is not None:
+            # Функция для парсинга значения
+            def parse_prodlenie(value):
+                if pd.isna(value):
+                    return 0
+                # Приводим к строке, нижнему регистру, сжимаем пробелы
+                val_str = str(value).strip().lower()
+                # Сжимаем множественные пробелы в один
+                val_str = ' '.join(val_str.split())
+                # Сравниваем с "продление"
+                return 1 if val_str == 'продление' else 0
+            
+            google_df['Продление'] = google_df[status_col].apply(parse_prodlenie)
+        else:
+            # Если колонка не найдена — создаем колонку с нулями
+            st.warning("⚠️ Колонка 'вводные запрошены / вводные получены, готовится старт / стартовал' не найдена в Google-таблице. Колонка 'Продление' заполнена 0.")
+            google_df['Продление'] = 0
+        
+        # Сохраняем обратно
+        st.session_state.cleaned_data['сервизория'] = google_df
+        # ============================================
         
 
         # ОБРАБОТКА ПОРТАЛА (CHECKER) - ЕСЛИ ЗАГРУЖЕН
@@ -768,6 +805,106 @@ def process_all_data(settings_manager=None, force_recalc=False):
                 
                 st.session_state.visit_report['calculated_data'] = final_result
                 
+                # # ============================================
+                # # 🔍 ОТЛАДОЧНАЯ ВЫГРУЗКА В EXCEL (светофор)
+                # # ============================================
+                # TARGET_CLIENT = "KARCHER"
+                
+                # if not base_data.empty and 'Клиент' in base_data.columns:
+                #     client_data_base = base_data[base_data['Клиент'] == TARGET_CLIENT].copy()
+                    
+                #     if not client_data_base.empty:
+                #         # Эталон: правильные min/max по клиенту
+                #         correct_min_start = client_data_base['Дата старта'].min()
+                #         correct_max_finish = client_data_base['Дата финиша'].max()
+                        
+                #         # Функция проверки статуса
+                #         def check_client_dates(df, level_name):
+                #             if df is None or df.empty:
+                #                 return {'level': level_name, 'status': 'НЕТ ДАННЫХ', 'start': '', 'finish': ''}
+                            
+                #             client_rows = df[df['Клиент'] == TARGET_CLIENT]
+                #             if client_rows.empty:
+                #                 return {'level': level_name, 'status': 'КЛИЕНТ НЕ НАЙДЕН', 'start': '', 'finish': ''}
+                            
+                #             has_start = 'Клиент_дата_старта' in client_rows.columns
+                #             has_finish = 'Клиент_дата_финиша' in client_rows.columns
+                            
+                #             if not has_start or not has_finish:
+                #                 return {'level': level_name, 'status': 'НЕТ КОЛОНОК Клиент_дата_*', 'start': '', 'finish': ''}
+                            
+                #             start_values = client_rows['Клиент_дата_старта'].unique()
+                #             finish_values = client_rows['Клиент_дата_финиша'].unique()
+                            
+                #             start_ok = len(start_values) == 1 and start_values[0] == correct_min_start
+                #             finish_ok = len(finish_values) == 1 and finish_values[0] == correct_max_finish
+                            
+                #             if start_ok and finish_ok:
+                #                 return {'level': level_name, 'status': '✅ min/max', 'start': str(start_values[0]), 'finish': str(finish_values[0])}
+                #             elif start_ok and not finish_ok:
+                #                 return {'level': level_name, 'status': '⚠️ старт OK, финиш НЕ max', 'start': str(start_values[0]), 'finish': str(finish_values[0])}
+                #             elif not start_ok and finish_ok:
+                #                 return {'level': level_name, 'status': '⚠️ старт НЕ min, финиш OK', 'start': str(start_values[0]), 'finish': str(finish_values[0])}
+                #             else:
+                #                 return {'level': level_name, 'status': '❌ старт НЕ min, финиш НЕ max', 'start': str(start_values[0]), 'finish': str(finish_values[0])}
+                        
+                #         # Собираем данные со всех уровней
+                #         debug_rows = []
+                        
+                #         # 1. base_data
+                #         debug_rows.append(check_client_dates(base_data, 'base_data (иерархия)'))
+                        
+                #         # 2. plan_result
+                #         if 'plan_result' in locals() and plan_result is not None:
+                #             debug_rows.append(check_client_dates(plan_result, 'plan_result'))
+                #         else:
+                #             debug_rows.append({'level': 'plan_result', 'status': 'НЕТ ДАННЫХ', 'start': '', 'finish': ''})
+                        
+                #         # 3. fact_result
+                #         if 'fact_result' in locals() and fact_result is not None:
+                #             debug_rows.append(check_client_dates(fact_result, 'fact_result'))
+                #         else:
+                #             debug_rows.append({'level': 'fact_result', 'status': 'НЕТ ДАННЫХ', 'start': '', 'finish': ''})
+                        
+                #         # 4. final_result
+                #         if 'final_result' in locals() and final_result is not None:
+                #             debug_rows.append(check_client_dates(final_result, 'final_result'))
+                #         else:
+                #             debug_rows.append({'level': 'final_result', 'status': 'НЕТ ДАННЫХ', 'start': '', 'finish': ''})
+                        
+                #         # Создаем DataFrame с результатами
+                #         status_df = pd.DataFrame(debug_rows)
+                        
+                #         # Добавляем строку с эталоном
+                #         etalon_row = pd.DataFrame([{
+                #             'level': 'ЭТАЛОН (min/max по волнам)',
+                #             'status': '✅ ПРАВИЛЬНЫЕ ДАТЫ',
+                #             'start': str(correct_min_start),
+                #             'finish': str(correct_max_finish)
+                #         }])
+                #         status_df = pd.concat([etalon_row, status_df], ignore_index=True)
+                        
+                #         # Детальные данные по волнам
+                #         wave_details = client_data_base[['Клиент', 'Волна', 'Дата старта', 'Дата финиша', 
+                #                                          'Дата старта_гугл', 'Дата финиша_гугл',
+                #                                          'Клиент_дата_старта', 'Клиент_дата_финиша', 'Клиент_длительность']].copy()
+                        
+                #         # Сохраняем в Excel
+                #         output = BytesIO()
+                #         with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                #             status_df.to_excel(writer, sheet_name='СТАТУСЫ', index=False)
+                #             wave_details.to_excel(writer, sheet_name='ВОЛНЫ', index=False)
+                        
+                #         st.download_button(
+                #             label=f"📥 Скачать отладку для {TARGET_CLIENT}",
+                #             data=output.getvalue(),
+                #             file_name=f"karcher_debug_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
+                #             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                #             type="secondary",
+                #             key="download_karcher_debug"
+                #         )
+                # # ============================================
+                
                 st.session_state.debug_times.append(f"[DEBUG] Метрики: {time.time() - start:.2f} сек")
                 
         st.session_state.debug_times.append(f"[DEBUG] ВСЕГО: {time.time() - start_total:.2f} сек")
@@ -1060,7 +1197,7 @@ with tab2:
         st.info("📌 Сначала выполните расчет на вкладке 'Загрузка данных'")
     
     else:
-        tab_projects, tab_regions, tab_dsm, tab_dynamics = st.tabs(["📊 ПФ проекты", "🗺️ Регионы", "👥 DSM", "📈 Динамика"])
+        tab_projects, tab_regions, tab_dsm, tab_dynamics = st.tabs(["📊 ПФ проекты", "🗺️ Регионы", "👥 DSM", "👤 АСМ"])
         
         # Проверяем, есть ли данные для отчета
         if 'calculated_data' in st.session_state.visit_report and st.session_state.visit_report['calculated_data'] is not None:
@@ -1095,6 +1232,13 @@ with tab2:
                         visits_for_dynamics,
                         st.session_state.plan_calc_params
                     )
+
+                    # ============================================
+                    # Сводная таблица по АСМ
+                    # ============================================
+                    dataviz.create_asm_summary_tab(calculated_data)
+                    # ============================================
+                
                 else:
                     st.warning("⚠️ Нет данных для динамики")
         else:
