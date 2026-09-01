@@ -504,6 +504,16 @@ class DataVisualizer:
             display_data = st.session_state.planfact_filtered_data
         else:
             display_data = base_data['raw_data']
+
+        # ============================================
+        # ФИЛЬТР ПО КОЛОНКЕ "ПРОДЛЕНИЕ"
+        # ============================================
+        if st.session_state.get('planfact_include_prodlenie', False):
+            if 'Продление' in display_data.columns:
+                display_data = display_data[display_data['Продление'] == 1]
+            else:
+                st.warning("⚠️ Колонка 'Продление' не найдена в данных")
+        # ============================================
         
         # ============================================
         # 4. РАЗВЕРТКА И ОТОБРАЖЕНИЕ
@@ -578,12 +588,25 @@ class DataVisualizer:
             'Оплата факт/план средн., %': 'first',
             'Оплата средн. в динамике, руб.': 'first',
             'Оплата средн. прогноз, руб.': 'first',
+            'Клиент_дата_старта': 'first',
+            'Клиент_дата_финиша': 'first',
+            'Клиент_длительность': 'first',
+            'Продление': 'first',
         }
         
         existing_agg = {k: v for k, v in agg_columns.items() if k in display_data.columns}
 
         # ВСЕГДА группируем (даже если group_cols == ['Клиент'])
         project_data = display_data.groupby(group_cols).agg(existing_agg).reset_index()
+
+        # ============================================
+        # 4.5. ПОДМЕНА ДАТ НА УРОВНЕ КЛИЕНТА (только для выгрузки)
+        # ============================================
+        if group_cols == ['Клиент']:
+            if 'Клиент_дата_старта' in project_data.columns:
+                project_data['Дата старта'] = project_data['Клиент_дата_старта']
+                project_data['Дата финиша'] = project_data['Клиент_дата_финиша']
+                project_data['Длительность'] = project_data['Клиент_длительность']
 
         # === ПЕРЕСЧЕТ ОПЛАТА ПЛАН СРЕДН. ПОСЛЕ АГРЕГАЦИИ ===
         if 'Оплата план' in project_data.columns and 'План проекта, шт.' in project_data.columns:
@@ -753,9 +776,11 @@ class DataVisualizer:
         # KPI
         st.markdown("### 📊 Ключевые показатели")
         
-        col_kpi1, col_kpi2, col_kpi3, col_checkbox = st.columns([1, 1, 1, 0.5])
-        with col_checkbox:
+        col_kpi1, col_kpi2, col_kpi3, col_checkbox1, col_checkbox2 = st.columns([1, 1, 1, 0.35, 0.35])
+        with col_checkbox1:
             include_prodata = st.checkbox("📊 Продата", key="planfact_include_prodata")
+        with col_checkbox2:
+            include_prodlenie = st.checkbox("🔄 Продление", key="planfact_include_prodlenie")
         
         prodata_df = st.session_state.cleaned_data.get('prodata_processed', None)
         
@@ -792,7 +817,18 @@ class DataVisualizer:
         
         # Проценты
         pf_percent = (fact_total / plan_total * 100) if plan_total > 0 else 0
-        forecast_percent = (fact_date_total / plan_date_total * 100) if plan_date_total > 0 else 0
+        
+        # Расчет прогноза ВП по всем проектам
+        if 'Прогноз, шт.' in project_data.columns:
+            forecast_total = project_data['Прогноз, шт.'].sum()
+        else:
+            forecast_total = 0
+        
+        if include_prodata and prodata_df is not None and not prodata_df.empty:
+            if 'Прогноз, шт.' in prodata_df.columns:
+                forecast_total += prodata_df['Прогноз, шт.'].sum()
+        
+        forecast_percent = (forecast_total / plan_total * 100) if plan_total > 0 else 0
         
         # РЯД 1: План проекта, Факт проекта, Факт ВП, %
         col1, col2, col3 = st.columns(3)
@@ -1163,6 +1199,16 @@ class DataVisualizer:
             display_data = st.session_state.region_filtered_data
         else:
             display_data = base_data['raw_data']
+
+        # ============================================
+        # ФИЛЬТР ПО КОЛОНКЕ "ПРОДЛЕНИЕ"
+        # ============================================
+        if st.session_state.get('region_include_prodlenie', False):
+            if 'Продление' in display_data.columns:
+                display_data = display_data[display_data['Продление'] == 1]
+            else:
+                st.warning("⚠️ Колонка 'Продление' не найдена в данных")
+        # ============================================
         
         # ============================================
         # 4. РАЗВЕРТКА И ОТОБРАЖЕНИЕ
@@ -1229,19 +1275,31 @@ class DataVisualizer:
             'Оплата_поручено': 'sum',
             'Факт проекта_поручено, шт.': 'sum',
             'Факт проекта_не_поручено, шт.': 'sum',
-            # НОВЫЕ КОЛОНКИ
             'Оплата план средн., руб.': 'first',
             'Оплата факт средн., руб.': 'first',
             'Оплата план-факт средн., руб.': 'first',
             'Оплата факт/план средн., %': 'first',
             'Оплата средн. в динамике, руб.': 'first',
             'Оплата средн. прогноз, руб.': 'first',
+            'Клиент_дата_старта': 'first',
+            'Клиент_дата_финиша': 'first',
+            'Клиент_длительность': 'first',
+            'Продление': 'first',
         }
         
         existing_agg = {k: v for k, v in agg_columns.items() if k in display_data.columns}
         
         # ВСЕГДА группируем
         region_data = display_data.groupby(group_cols).agg(existing_agg).reset_index()
+
+        # ============================================
+        # 4.5. ПОДМЕНА ДАТ НА УРОВНЕ КЛИЕНТА (только для выгрузки)
+        # ============================================
+        if group_cols == ['Регион']:
+            if 'Клиент_дата_старта' in region_data.columns:
+                region_data['Дата старта'] = region_data['Клиент_дата_старта']
+                region_data['Дата финиша'] = region_data['Клиент_дата_финиша']
+                region_data['Длительность'] = region_data['Клиент_длительность']
         
         # === ПЕРЕСЧЕТ ОПЛАТА ПЛАН СРЕДН. ПОСЛЕ АГРЕГАЦИИ ===
         if 'Оплата план' in region_data.columns and 'План проекта, шт.' in region_data.columns:
@@ -1431,9 +1489,11 @@ class DataVisualizer:
         # KPI
         st.markdown("### 📊 Ключевые показатели")
         
-        col_kpi1, col_kpi2, col_kpi3, col_checkbox = st.columns([1, 1, 1, 0.5])
-        with col_checkbox:
+        col_kpi1, col_kpi2, col_kpi3, col_checkbox1, col_checkbox2 = st.columns([1, 1, 1, 0.35, 0.35])
+        with col_checkbox1:
             include_prodata = st.checkbox("📊 Продата", key="region_include_prodata")
+        with col_checkbox2:
+            include_prodlenie = st.checkbox("🔄 Продление", key="region_include_prodlenie")
         
         prodata_df = st.session_state.cleaned_data.get('prodata_processed', None)
         
@@ -1470,7 +1530,18 @@ class DataVisualizer:
         
         # Проценты
         pf_percent = (fact_total / plan_total * 100) if plan_total > 0 else 0
-        forecast_percent = (fact_date_total / plan_date_total * 100) if plan_date_total > 0 else 0
+        
+        # Расчет прогноза ВП по всем проектам
+        if 'Прогноз, шт.' in region_data.columns:
+            forecast_total = region_data['Прогноз, шт.'].sum()
+        else:
+            forecast_total = 0
+        
+        if include_prodata and prodata_df is not None and not prodata_df.empty:
+            if 'Прогноз, шт.' in prodata_df.columns:
+                forecast_total += prodata_df['Прогноз, шт.'].sum()
+        
+        forecast_percent = (forecast_total / plan_total * 100) if plan_total > 0 else 0
         
         # РЯД 1: План проекта, Факт проекта, Факт ВП, %
         col1, col2, col3 = st.columns(3)
@@ -1771,6 +1842,16 @@ class DataVisualizer:
             display_data = st.session_state.dsm_filtered_data
         else:
             display_data = base_data['raw_data']
+
+        # ============================================
+        # ФИЛЬТР ПО КОЛОНКЕ "ПРОДЛЕНИЕ"
+        # ============================================
+        if st.session_state.get('dsm_include_prodlenie', False):
+            if 'Продление' in display_data.columns:
+                display_data = display_data[display_data['Продление'] == 1]
+            else:
+                st.warning("⚠️ Колонка 'Продление' не найдена в данных")
+        # ============================================
         
         # ============================================
         # 4. РАЗВЕРТКА И ОТОБРАЖЕНИЕ
@@ -1844,12 +1925,25 @@ class DataVisualizer:
             'Оплата факт/план средн., %': 'first',
             'Оплата средн. в динамике, руб.': 'first',
             'Оплата средн. прогноз, руб.': 'first',
+            'Клиент_дата_старта': 'first',
+            'Клиент_дата_финиша': 'first',
+            'Клиент_длительность': 'first',
+            'Продление': 'first',
         }
         
         existing_agg = {k: v for k, v in agg_columns.items() if k in display_data.columns}
 
         # ВСЕГДА группируем
         dsm_data = display_data.groupby(group_cols).agg(existing_agg).reset_index()
+
+        # ============================================
+        # 4.5. ПОДМЕНА ДАТ НА УРОВНЕ КЛИЕНТА (только для выгрузки)
+        # ============================================
+        if group_cols == ['DSM']:
+            if 'Клиент_дата_старта' in dsm_data.columns:
+                dsm_data['Дата старта'] = dsm_data['Клиент_дата_старта']
+                dsm_data['Дата финиша'] = dsm_data['Клиент_дата_финиша']
+                dsm_data['Длительность'] = dsm_data['Клиент_длительность']
         
         # === ПЕРЕСЧЕТ ОПЛАТА ПЛАН СРЕДН. ПОСЛЕ АГРЕГАЦИИ ===
         if 'Оплата план' in dsm_data.columns and 'План проекта, шт.' in dsm_data.columns:
@@ -2041,9 +2135,11 @@ class DataVisualizer:
         # KPI
         st.markdown("### 📊 Ключевые показатели")
         
-        col_kpi1, col_kpi2, col_kpi3, col_checkbox = st.columns([1, 1, 1, 0.5])
-        with col_checkbox:
+        col_kpi1, col_kpi2, col_kpi3, col_checkbox1, col_checkbox2 = st.columns([1, 1, 1, 0.35, 0.35])
+        with col_checkbox1:
             include_prodata = st.checkbox("📊 Продата", key="dsm_include_prodata")
+        with col_checkbox2:
+            include_prodlenie = st.checkbox("🔄 Продление", key="dsm_include_prodlenie")
         
         prodata_df = st.session_state.cleaned_data.get('prodata_processed', None)
         
@@ -2080,7 +2176,17 @@ class DataVisualizer:
         
         # Проценты
         pf_percent = (fact_total / plan_total * 100) if plan_total > 0 else 0
-        forecast_percent = (fact_date_total / plan_date_total * 100) if plan_date_total > 0 else 0
+        # Расчет прогноза ВП по всем проектам
+        if 'Прогноз, шт.' in dsm_data.columns:
+            forecast_total = dsm_data['Прогноз, шт.'].sum()
+        else:
+            forecast_total = 0
+        
+        if include_prodata and prodata_df is not None and not prodata_df.empty:
+            if 'Прогноз, шт.' in prodata_df.columns:
+                forecast_total += prodata_df['Прогноз, шт.'].sum()
+        
+        forecast_percent = (forecast_total / plan_total * 100) if plan_total > 0 else 0
         
         # РЯД 1: План проекта, Факт проекта, Факт ВП, %
         col1, col2, col3 = st.columns(3)
@@ -2523,6 +2629,186 @@ class DataVisualizer:
                             df.loc[group.index, 'Фокус'] = 'Да'
         
         return df
+
+    def create_asm_summary_tab(self, data):
+        """
+        Создает сводную таблицу по ASM для вкладки АСМ
+        Структура: ASM Total → клиенты внутри ASM
+        Автоматический фильтр по Продление == 1
+        """
+        if data is None or data.empty:
+            st.warning("⚠️ Нет данных для сводной таблицы АСМ")
+            return
+        
+        st.markdown("---")
+        st.subheader("📊 Сводная таблица по АСМ")
+        st.caption("Данные отфильтрованы по Продление = 1")
+        
+        # 1. Фильтруем по Продление == 1
+        if 'Продление' not in data.columns:
+            st.warning("⚠️ Колонка 'Продление' не найдена в данных. Сводная таблица недоступна.")
+            return
+        
+        filtered_data = data[data['Продление'] == 1].copy()
+        
+        if filtered_data.empty:
+            st.info("ℹ️ Нет данных с Продление = 1")
+            return
+        
+        # 2. Переименовываем колонки
+        rename_cols = {'ЗОД': 'DSM', 'АСС': 'ASM', 'ЭМ': 'RS'}
+        filtered_data = filtered_data.rename(columns=rename_cols)
+        
+        # 3. Проверяем наличие колонки ASM
+        if 'ASM' not in filtered_data.columns:
+            st.warning("⚠️ Колонка 'ASM' (АСС) не найдена в данных")
+            return
+        
+        # 4. Группируем по ASM и Клиент
+        agg_dict = {
+            'План проекта, шт.': 'sum',
+            'Факт проекта, шт.': 'sum',
+            'План на дату, шт.': 'sum',
+            'Прогноз, шт.': 'sum'
+        }
+        
+        existing_agg = {k: v for k, v in agg_dict.items() if k in filtered_data.columns}
+        
+        group_cols = ['ASM', 'Клиент']
+        grouped = filtered_data.groupby(group_cols).agg(existing_agg).reset_index()
+        
+        # 5. Фильтруем нулевые значения
+        grouped = grouped[
+            (grouped['План проекта, шт.'] != 0) | 
+            (grouped['Факт проекта, шт.'] != 0) |
+            (grouped['План на дату, шт.'] != 0)
+        ].copy()
+        
+        if grouped.empty:
+            st.info("ℹ️ Нет данных для отображения после фильтрации")
+            return
+        
+        # 6. Рассчитываем метрики
+        grouped['Отклонение'] = (grouped['Факт проекта, шт.'] - grouped['План на дату, шт.']).round(1)
+        
+        mask_plan = grouped['План проекта, шт.'] > 0
+        grouped['Прогноз ВП, %'] = 0.0
+        grouped.loc[mask_plan, 'Прогноз ВП, %'] = (
+            grouped.loc[mask_plan, 'Прогноз, шт.'] / 
+            grouped.loc[mask_plan, 'План проекта, шт.'] * 100
+        ).round(1)
+        
+        grouped['Факт ВП, %'] = 0.0
+        grouped.loc[mask_plan, 'Факт ВП, %'] = (
+            grouped.loc[mask_plan, 'Факт проекта, шт.'] / 
+            grouped.loc[mask_plan, 'План проекта, шт.'] * 100
+        ).round(1)
+        
+        grouped['План продление'] = grouped['План проекта, шт.']
+        grouped['Факт продление'] = grouped['Факт проекта, шт.']
+        
+        # ============================================
+        # КНОПКА СВЕРНУТЬ/РАЗВЕРНУТЬ КЛИЕНТОВ
+        # ============================================
+        col_btn = st.columns([1])[0]
+        with col_btn:
+            if 'asm_show_clients' not in st.session_state:
+                st.session_state.asm_show_clients = True
+            
+            if st.session_state.asm_show_clients:
+                if st.button("📋 Свернуть клиентов", use_container_width=True):
+                    st.session_state.asm_show_clients = False
+                    st.rerun()
+            else:
+                if st.button("📋 Развернуть клиентов", use_container_width=True):
+                    st.session_state.asm_show_clients = True
+                    st.rerun()
+        # ============================================
+        
+        # 7. Формируем итоговую таблицу
+        result_rows = []
+        asm_list = sorted(grouped['ASM'].unique())
+        
+        for asm in asm_list:
+            asm_data = grouped[grouped['ASM'] == asm]
+            
+            # Total строка
+            total_row = {
+                'ASM': asm,
+                'Клиент': '⭐ Total',
+                'План проекта, шт.': asm_data['План проекта, шт.'].sum(),
+                'Факт проекта, шт.': asm_data['Факт проекта, шт.'].sum(),
+                'План на сегодня': asm_data['План на дату, шт.'].sum(),
+                'Отклонение': (asm_data['Факт проекта, шт.'].sum() - asm_data['План на дату, шт.'].sum()).round(1),
+                'Прогноз ВП, %': 0.0,
+                'Факт ВП, %': 0.0,
+                'План продление': asm_data['План проекта, шт.'].sum(),
+                'Факт продление': asm_data['Факт проекта, шт.'].sum()
+            }
+            
+            total_plan = total_row['План проекта, шт.']
+            if total_plan > 0:
+                total_row['Прогноз ВП, %'] = (asm_data['Прогноз, шт.'].sum() / total_plan * 100).round(1)
+                total_row['Факт ВП, %'] = (total_row['Факт проекта, шт.'] / total_plan * 100).round(1)
+            
+            result_rows.append(total_row)
+            
+            # Клиенты (если развернуто)
+            if st.session_state.asm_show_clients:
+                client_data = asm_data.sort_values('Клиент')
+                for _, row in client_data.iterrows():
+                    result_rows.append({
+                        'ASM': row['ASM'],
+                        'Клиент': row['Клиент'],
+                        'План проекта, шт.': row['План проекта, шт.'],
+                        'Факт проекта, шт.': row['Факт проекта, шт.'],
+                        'План на сегодня': row['План на дату, шт.'],
+                        'Отклонение': row['Отклонение'],
+                        'Прогноз ВП, %': row['Прогноз ВП, %'],
+                        'Факт ВП, %': row['Факт ВП, %'],
+                        'План продление': row['План продление'],
+                        'Факт продление': row['Факт продление']
+                    })
+        
+        if not result_rows:
+            st.info("ℹ️ Нет данных для отображения")
+            return
+        
+        result_df = pd.DataFrame(result_rows)
+        
+        # 8. Отображаем таблицу
+        st.dataframe(
+            result_df,
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                'ASM': 'ASM',
+                'Клиент': 'Клиент',
+                'План проекта, шт.': st.column_config.NumberColumn('План проекта, шт.', format="%.0f"),
+                'Факт проекта, шт.': st.column_config.NumberColumn('Факт проекта, шт.', format="%.0f"),
+                'План на сегодня': st.column_config.NumberColumn('План на сегодня', format="%.0f"),
+                'Отклонение': st.column_config.NumberColumn('Отклонение', format="%.1f"),
+                'Прогноз ВП, %': st.column_config.NumberColumn('Прогноз ВП, %', format="%.1f%%"),
+                'Факт ВП, %': st.column_config.NumberColumn('Факт ВП, %', format="%.1f%%"),
+                'План продление': st.column_config.NumberColumn('План продление', format="%.0f"),
+                'Факт продление': st.column_config.NumberColumn('Факт продление', format="%.0f"),
+            }
+        )
+        
+        # 9. Кнопка скачивания
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            result_df.to_excel(writer, sheet_name='Сводная_АСМ', index=False)
+        
+        st.download_button(
+            label="⬇️ Скачать сводную таблицу АСМ",
+            data=output.getvalue(),
+            file_name=f"сводная_АСМ_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            type="secondary",
+            use_container_width=True,
+            key="download_asm_summary"
+        )
     
 # Глобальный экземпляр
 dataviz = DataVisualizer()
