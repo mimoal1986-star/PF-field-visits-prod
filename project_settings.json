@@ -2537,6 +2537,78 @@
       "fio_om": "",
       "added_at": "2026-08-28T07:03:42.417064",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Sminex",
+      "wave_name": "Sminex_09.2026",
+      "project_code": "RU00.398.06.01SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-09-07T10:52:27.517789",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Roseville",
+      "wave_name": "09.2026_Roseville",
+      "project_code": "RU00.366.06.01SVZ25",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-09-07T10:52:27.518021",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ГЛАВСТРОЙ",
+      "wave_name": "2026.09_ЖК Баланс",
+      "project_code": "RU00.342.06.01SVZ25",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-09-07T10:52:27.518224",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ГЛАВСТРОЙ",
+      "wave_name": "2026.09_Береговой",
+      "project_code": "RU00.343.06.02SVZ25",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-09-07T10:52:27.518468",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Лукойл франчайзинг ФО",
+      "wave_name": "",
+      "project_code": "RU00.175.01.04SVZ24/RU00.175.01.02SVZ24",
+      "portal": "Оптима",
+      "fio_om": "",
+      "added_at": "2026-09-07T10:52:27.518649",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "МегаФон",
+      "wave_name": "Результативные визиты",
+      "project_code": "Мультикод_186",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-09-07T10:52:27.518850",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "МегаФон",
+      "wave_name": "Холостые визиты",
+      "project_code": "Мультикод_186",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-09-07T10:52:27.519026",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ВТБ Банк Аудит (ПРАЙМ)",
+      "wave_name": "Тест",
+      "project_code": "Тест",
+      "portal": "Оптима",
+      "fio_om": "",
+      "added_at": "2026-09-07T10:52:27.519219",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -5295,8 +5367,72 @@
       "project_code": "Мультикод_.306",
       "timestamp": "2026-08-28T07:03:42.417118",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Sminex",
+      "wave_name": "Sminex_09.2026",
+      "project_code": "RU00.398.06.01SVZ26",
+      "timestamp": "2026-09-07T10:52:27.517883",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Roseville",
+      "wave_name": "09.2026_Roseville",
+      "project_code": "RU00.366.06.01SVZ25",
+      "timestamp": "2026-09-07T10:52:27.518086",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ГЛАВСТРОЙ",
+      "wave_name": "2026.09_ЖК Баланс",
+      "project_code": "RU00.342.06.01SVZ25",
+      "timestamp": "2026-09-07T10:52:27.518315",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ГЛАВСТРОЙ",
+      "wave_name": "2026.09_Береговой",
+      "project_code": "RU00.343.06.02SVZ25",
+      "timestamp": "2026-09-07T10:52:27.518524",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Лукойл франчайзинг ФО",
+      "wave_name": "",
+      "project_code": "RU00.175.01.04SVZ24/RU00.175.01.02SVZ24",
+      "timestamp": "2026-09-07T10:52:27.518730",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "МегаФон",
+      "wave_name": "Результативные визиты",
+      "project_code": "Мультикод_186",
+      "timestamp": "2026-09-07T10:52:27.518902",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "МегаФон",
+      "wave_name": "Холостые визиты",
+      "project_code": "Мультикод_186",
+      "timestamp": "2026-09-07T10:52:27.519088",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ВТБ Банк Аудит (ПРАЙМ)",
+      "wave_name": "Тест",
+      "project_code": "Тест",
+      "timestamp": "2026-09-07T10:52:27.519300",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-08-28T07:03:42.417125",
+  "last_updated": "2026-09-07T10:52:27.519308",
   "version": "1.0"
 }
