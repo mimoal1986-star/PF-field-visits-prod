@@ -2609,6 +2609,105 @@
       "fio_om": "",
       "added_at": "2026-09-07T10:52:27.519219",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Avito",
+      "wave_name": "2026.08.",
+      "project_code": "RU00.086.02.04SVZ26",
+      "portal": "Оптима",
+      "fio_om": "",
+      "added_at": "2026-09-10T08:58:03.058914",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Avito",
+      "wave_name": "2026.06-07.",
+      "project_code": "RU00.086.02.04SVZ26",
+      "portal": "Оптима",
+      "fio_om": "",
+      "added_at": "2026-09-10T08:58:03.059212",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Avito",
+      "wave_name": "2026.08_Avito",
+      "project_code": "RU00.086.02.04SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-09-10T08:58:03.059423",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Herbalife",
+      "wave_name": "09.2026_закупки_Авито",
+      "project_code": "RU00.025.01.02SVZ24",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-09-10T08:58:03.059603",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Johnson & Johnson",
+      "wave_name": "2026.08_Наблюдение в аптеках",
+      "project_code": "RU00.370.02.01SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-09-10T08:58:03.059792",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "SUBJOY",
+      "wave_name": "2026.08_SUBJOY_Тайный гость",
+      "project_code": "RU00.250.01.01SPK24",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-09-10T08:58:03.059973",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Абсолют Банк",
+      "wave_name": "2026.08_Визиты Абсолют банк",
+      "project_code": "RU00.080.01.04SVZ24",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-09-10T08:58:03.060164",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Виатрис",
+      "wave_name": "08.2026 (07 волна)",
+      "project_code": "RU00.393.02.01SVZ25",
+      "portal": "Оптима",
+      "fio_om": "",
+      "added_at": "2026-09-10T08:58:03.060370",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Мониторинг Лента",
+      "wave_name": "2026.08_Мониторинг Лента",
+      "project_code": "Мультикод",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-09-10T08:58:03.060554",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ОхотАктив",
+      "wave_name": "2026.08_ОхотАктив",
+      "project_code": "RU00.337.02.01SVZ25",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-09-10T08:58:03.060745",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Яндекс Электро",
+      "wave_name": "2026.09_Яндекс Электро",
+      "project_code": "",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-09-10T08:58:03.060951",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -5431,8 +5530,96 @@
       "project_code": "Тест",
       "timestamp": "2026-09-07T10:52:27.519300",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Avito",
+      "wave_name": "2026.08.",
+      "project_code": "RU00.086.02.04SVZ26",
+      "timestamp": "2026-09-10T08:58:03.059048",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Avito",
+      "wave_name": "2026.06-07.",
+      "project_code": "RU00.086.02.04SVZ26",
+      "timestamp": "2026-09-10T08:58:03.059274",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Avito",
+      "wave_name": "2026.08_Avito",
+      "project_code": "RU00.086.02.04SVZ26",
+      "timestamp": "2026-09-10T08:58:03.059480",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Herbalife",
+      "wave_name": "09.2026_закупки_Авито",
+      "project_code": "RU00.025.01.02SVZ24",
+      "timestamp": "2026-09-10T08:58:03.059658",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Johnson & Johnson",
+      "wave_name": "2026.08_Наблюдение в аптеках",
+      "project_code": "RU00.370.02.01SVZ26",
+      "timestamp": "2026-09-10T08:58:03.059847",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "SUBJOY",
+      "wave_name": "2026.08_SUBJOY_Тайный гость",
+      "project_code": "RU00.250.01.01SPK24",
+      "timestamp": "2026-09-10T08:58:03.060029",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Абсолют Банк",
+      "wave_name": "2026.08_Визиты Абсолют банк",
+      "project_code": "RU00.080.01.04SVZ24",
+      "timestamp": "2026-09-10T08:58:03.060221",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Виатрис",
+      "wave_name": "08.2026 (07 волна)",
+      "project_code": "RU00.393.02.01SVZ25",
+      "timestamp": "2026-09-10T08:58:03.060427",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Мониторинг Лента",
+      "wave_name": "2026.08_Мониторинг Лента",
+      "project_code": "Мультикод",
+      "timestamp": "2026-09-10T08:58:03.060612",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ОхотАктив",
+      "wave_name": "2026.08_ОхотАктив",
+      "project_code": "RU00.337.02.01SVZ25",
+      "timestamp": "2026-09-10T08:58:03.060826",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Яндекс Электро",
+      "wave_name": "2026.09_Яндекс Электро",
+      "project_code": "",
+      "timestamp": "2026-09-10T08:58:03.061007",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-09-07T10:52:27.519308",
+  "last_updated": "2026-09-10T08:58:03.061015",
   "version": "1.0"
 }
