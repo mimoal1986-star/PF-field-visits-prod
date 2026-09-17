@@ -2708,6 +2708,42 @@
       "fio_om": "",
       "added_at": "2026-09-10T08:58:03.060951",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ИП Катков",
+      "wave_name": "2026.09 Мониторинг ИП Катков",
+      "project_code": "RU00.147.02.01SPK24",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-09-17T07:31:53.908784",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Мониторинг Лента",
+      "wave_name": "2026.09 Мониторинг Лента",
+      "project_code": "Мультикод",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-09-17T07:31:53.908981",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Herbalife",
+      "wave_name": "07.2026_закупки_Авито",
+      "project_code": "RU00.025.01.02SVZ24",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-09-17T07:31:53.909088",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Herbalife",
+      "wave_name": "08.2026_закупки_Wildberries",
+      "project_code": "RU00.025.01.02SVZ24",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-09-17T07:31:53.909243",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -5618,8 +5654,40 @@
       "project_code": "",
       "timestamp": "2026-09-10T08:58:03.061007",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ИП Катков",
+      "wave_name": "2026.09 Мониторинг ИП Катков",
+      "project_code": "RU00.147.02.01SPK24",
+      "timestamp": "2026-09-17T07:31:53.908884",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Мониторинг Лента",
+      "wave_name": "2026.09 Мониторинг Лента",
+      "project_code": "Мультикод",
+      "timestamp": "2026-09-17T07:31:53.909016",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Herbalife",
+      "wave_name": "07.2026_закупки_Авито",
+      "project_code": "RU00.025.01.02SVZ24",
+      "timestamp": "2026-09-17T07:31:53.909120",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Herbalife",
+      "wave_name": "08.2026_закупки_Wildberries",
+      "project_code": "RU00.025.01.02SVZ24",
+      "timestamp": "2026-09-17T07:31:53.909279",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-09-10T08:58:03.061015",
+  "last_updated": "2026-09-17T07:31:53.909283",
   "version": "1.0"
 }
