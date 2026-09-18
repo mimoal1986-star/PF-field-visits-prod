@@ -410,7 +410,7 @@ def process_all_data(settings_manager=None, force_recalc=False):
             bdr_processed = data_cleaner.clean_bdr(bdr_raw)
             if bdr_processed is not None and not bdr_processed.empty:
                 st.session_state.cleaned_data['bdr_processed'] = bdr_processed
-        
+                
         # Обработка CXWAY (если есть)
         cxway_processed = None
         cxway_raw = st.session_state.uploaded_files.get('cxway')
@@ -1004,8 +1004,9 @@ with tab1:
             st.write(msg)
         st.success("✅ Расчет завершен!")
         st.session_state.show_messages = False
-        
+    
     st.title("📤 Загрузка исходных данных")
+    
     st.markdown("""
     **Обязательные файлы:**
     - 📅 **Проекты Сервизория** — всегда обязателен
@@ -1646,7 +1647,8 @@ with tab3:
             st.dataframe(history_display, width='stretch')
         else:
             st.info("История изменений пуста")
-        
+
+            
     # ============================================
     # ПРОБЛЕМНЫЕ ПРОЕКТЫ
     # ============================================
