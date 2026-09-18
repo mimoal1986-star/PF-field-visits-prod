@@ -905,16 +905,51 @@ class DataCleaner:
     
     def clean_cxway(self, df, hierarchy_df, google_df):
         """Очистка файла CXWAY и приведение к структуре полевых проектов"""
+        
         if df is None or df.empty:
             return pd.DataFrame()
         
         # self._log_samples(df, "1. Исходные данные")
         df_clean = df.copy()
-        
+
+        #  Удаление исторических строк
+        # Если есть колонка 'Is Historical' — удаляем строки со значением "истина" (в любом регистре), "1", "1.0" или "true"
+        if 'Is Historical' in df_clean.columns:
+            # Универсальная нормализация значений:
+            # 1. Приводим к строке
+            # 2. Убираем невидимые символы (\xa0 — неразрывный пробел, \u200b — zero-width space)
+            # 3. Убираем пробелы по краям (strip)
+            # 4. Приводим к нижнему регистру
+            is_historical_normalized = (
+                df_clean['Is Historical']
+                .astype(str)
+                .str.replace('\xa0', ' ')
+                .str.replace('\u200b', '')
+                .str.strip()
+                .str.lower()
+            )
+            
+            # Удаляем строки, где значение = 'истина', '1', '1.0' или 'true'
+            # 'true' покрывает случай логического типа ячейки в Excel (после dtype=str → 'True' → 'true')
+            # '1.0' покрывает случай числового формата с плавающей точкой
+            historical_mask = is_historical_normalized.isin(['истина', '1', '1.0', 'true'])
+            
+            if historical_mask.any():
+                df_clean = df_clean[~historical_mask]
+            
+            # Если после удаления не осталось строк — возвращаем пустой DataFrame
+            if df_clean.empty:
+                return pd.DataFrame()
+
         # Удалить строки где Status == "Удалено"
         status_col = self._find_column(df_clean, ['Status', 'Статус', 'status'])
+        
         if status_col:
             df_clean = df_clean[df_clean[status_col].astype(str).str.strip() != 'Удалено']
+            
+            # Если после удаления не осталось строк — возвращаем пустой DataFrame
+            if df_clean.empty:
+                return pd.DataFrame()
        
         # self._log_samples(df_clean, "2. После удаления статуса")
         
@@ -931,6 +966,10 @@ class DataCleaner:
             df_clean[date_col] = pd.to_datetime(df_clean[date_col], errors='coerce', dayfirst=True)
             mask = pd.isna(df_clean[date_col]) | (df_clean[date_col] >= first_day)
             df_clean = df_clean[mask]
+            
+            # Если после фильтра не осталось строк — возвращаем пустой DataFrame
+            if df_clean.empty:
+                return pd.DataFrame()
         
         # self._log_samples(df_clean, "3. После фильтра дат")
         
