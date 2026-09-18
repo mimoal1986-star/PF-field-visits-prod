@@ -2744,6 +2744,15 @@
       "fio_om": "",
       "added_at": "2026-09-17T07:31:53.909243",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Лукойл",
+      "wave_name": "2026 Январь",
+      "project_code": "RU00.177.05.04SVZ25",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-09-18T08:55:31.214297",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -5686,8 +5695,16 @@
       "project_code": "RU00.025.01.02SVZ24",
       "timestamp": "2026-09-17T07:31:53.909279",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Лукойл",
+      "wave_name": "2026 Январь",
+      "project_code": "RU00.177.05.04SVZ25",
+      "timestamp": "2026-09-18T08:55:31.214364",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-09-17T07:31:53.909283",
+  "last_updated": "2026-09-18T08:55:31.214369",
   "version": "1.0"
 }
