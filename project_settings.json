@@ -2753,6 +2753,24 @@
       "fio_om": "",
       "added_at": "2026-09-18T08:55:31.214297",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ВТБ Банк (АССО)",
+      "wave_name": "ВТБ (УТО) 2 волна",
+      "project_code": "RU00.238.01.02SVZ24",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-09-21T11:18:27.708745",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ВТБ Банк (АССО)",
+      "wave_name": "ВТБ (АССО) 2 волна",
+      "project_code": "RU00.238.01.02SVZ24",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-09-21T11:18:27.708970",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -5703,8 +5721,24 @@
       "project_code": "RU00.177.05.04SVZ25",
       "timestamp": "2026-09-18T08:55:31.214364",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ВТБ Банк (АССО)",
+      "wave_name": "ВТБ (УТО) 2 волна",
+      "project_code": "RU00.238.01.02SVZ24",
+      "timestamp": "2026-09-21T11:18:27.708846",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ВТБ Банк (АССО)",
+      "wave_name": "ВТБ (АССО) 2 волна",
+      "project_code": "RU00.238.01.02SVZ24",
+      "timestamp": "2026-09-21T11:18:27.709024",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-09-18T08:55:31.214369",
+  "last_updated": "2026-09-21T11:18:27.709031",
   "version": "1.0"
 }
