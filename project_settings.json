@@ -2798,6 +2798,15 @@
       "fio_om": "",
       "added_at": "2026-09-24T09:13:36.382201",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Johnson & Johnson",
+      "wave_name": "2026.09_Наблюдение в аптеках",
+      "project_code": "RU00.370.02.01SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-09-24T09:25:37.133868",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -5788,8 +5797,16 @@
       "project_code": "Мультикод.265",
       "timestamp": "2026-09-24T09:13:36.382237",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Johnson & Johnson",
+      "wave_name": "2026.09_Наблюдение в аптеках",
+      "project_code": "RU00.370.02.01SVZ26",
+      "timestamp": "2026-09-24T09:25:37.133962",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-09-24T09:13:36.382240",
+  "last_updated": "2026-09-24T09:25:37.133968",
   "version": "1.0"
 }
