@@ -2771,6 +2771,33 @@
       "fio_om": "",
       "added_at": "2026-09-21T11:18:27.708970",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "М*КОС",
+      "wave_name": "2026_08_М*КОС_Семпл",
+      "project_code": "_Sampe_2026_08_М*КОС_Семпл",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-09-24T09:13:36.381811",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Тайный пассажир",
+      "wave_name": "_Тестирование для визитов",
+      "project_code": "",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-09-24T09:13:36.382075",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Тайный пассажир",
+      "wave_name": "Delit",
+      "project_code": "Мультикод.265",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-09-24T09:13:36.382201",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -5737,8 +5764,32 @@
       "project_code": "RU00.238.01.02SVZ24",
       "timestamp": "2026-09-21T11:18:27.709024",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "М*КОС",
+      "wave_name": "2026_08_М*КОС_Семпл",
+      "project_code": "_Sampe_2026_08_М*КОС_Семпл",
+      "timestamp": "2026-09-24T09:13:36.381965",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Тайный пассажир",
+      "wave_name": "_Тестирование для визитов",
+      "project_code": "",
+      "timestamp": "2026-09-24T09:13:36.382113",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Тайный пассажир",
+      "wave_name": "Delit",
+      "project_code": "Мультикод.265",
+      "timestamp": "2026-09-24T09:13:36.382237",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-09-21T11:18:27.709031",
+  "last_updated": "2026-09-24T09:13:36.382240",
   "version": "1.0"
 }
