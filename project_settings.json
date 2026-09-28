@@ -2807,6 +2807,24 @@
       "fio_om": "",
       "added_at": "2026-09-24T09:25:37.133868",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Л'Этуаль",
+      "wave_name": "_2026.09_С",
+      "project_code": "RU00.174.01.01SVZ24",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-09-28T12:05:32.619290",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Эконика",
+      "wave_name": "Эконика_2026.10_ВИП",
+      "project_code": "Мультикод_.306",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-09-28T12:05:32.619505",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -5805,8 +5823,24 @@
       "project_code": "RU00.370.02.01SVZ26",
       "timestamp": "2026-09-24T09:25:37.133962",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Л'Этуаль",
+      "wave_name": "_2026.09_С",
+      "project_code": "RU00.174.01.01SVZ24",
+      "timestamp": "2026-09-28T12:05:32.619412",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Эконика",
+      "wave_name": "Эконика_2026.10_ВИП",
+      "project_code": "Мультикод_.306",
+      "timestamp": "2026-09-28T12:05:32.619548",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-09-24T09:25:37.133968",
+  "last_updated": "2026-09-28T12:05:32.619552",
   "version": "1.0"
 }
