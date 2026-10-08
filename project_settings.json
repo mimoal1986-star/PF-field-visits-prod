@@ -2825,6 +2825,123 @@
       "fio_om": "",
       "added_at": "2026-09-28T12:05:32.619505",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Лукойл (АЗС)",
+      "wave_name": "Сентябрь 2026",
+      "project_code": "RU00.177.02.0095SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-10-08T15:38:25.001882",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ВТБ Банк (АССО)",
+      "wave_name": "ВТБ (УТО) 2 волна",
+      "project_code": "RU00.463.02.0085SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-10-08T15:38:25.002238",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Beeline_Фотомониторинг",
+      "wave_name": "октябрь",
+      "project_code": "RU00.109.02.0260SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-10-08T15:38:25.002475",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Beeline_Фотомониторинг",
+      "wave_name": "сентябрь",
+      "project_code": "RU00.109.02.0260SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-10-08T15:38:25.002668",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Виатрис",
+      "wave_name": "2026_09_Виатрис",
+      "project_code": "RU00.470.02.1131SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-10-08T15:38:25.002841",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Лукойл франчайзинг (АЗС)",
+      "wave_name": "Сентябрь 2026",
+      "project_code": "RU00.177.02.0095SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-10-08T15:38:25.003052",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Johnson & Johnson",
+      "wave_name": "2026.09_Наблюдение в аптеках",
+      "project_code": "RU00.370.12.0667SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-10-08T15:38:25.003220",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Roseville",
+      "wave_name": "10.2026_Roseville",
+      "project_code": "RU00.366.06.0771SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-10-08T15:38:25.003383",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ГЛАВСТРОЙ",
+      "wave_name": "2026.10 ЖК Баланс",
+      "project_code": "",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-10-08T15:38:25.003547",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ГЛАВСТРОЙ",
+      "wave_name": "2026.10_АО Береговой",
+      "project_code": "",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-10-08T15:38:25.003714",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Медси",
+      "wave_name": "2026.09_Медси_дети",
+      "project_code": "RU00.188.06.01SVZ24",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-10-08T15:38:25.003874",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Медси",
+      "wave_name": "2026.09_Медси_стационары",
+      "project_code": "RU00.188.06.01SVZ24",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-10-08T15:38:25.004070",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Tobylab",
+      "wave_name": "2026.09_покупка полисов",
+      "project_code": "",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-10-08T15:38:25.004235",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -5839,8 +5956,112 @@
       "project_code": "Мультикод_.306",
       "timestamp": "2026-09-28T12:05:32.619548",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Лукойл (АЗС)",
+      "wave_name": "Сентябрь 2026",
+      "project_code": "RU00.177.02.0095SVZ26",
+      "timestamp": "2026-10-08T15:38:25.002041",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ВТБ Банк (АССО)",
+      "wave_name": "ВТБ (УТО) 2 волна",
+      "project_code": "RU00.463.02.0085SVZ26",
+      "timestamp": "2026-10-08T15:38:25.002331",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Beeline_Фотомониторинг",
+      "wave_name": "октябрь",
+      "project_code": "RU00.109.02.0260SVZ26",
+      "timestamp": "2026-10-08T15:38:25.002544",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Beeline_Фотомониторинг",
+      "wave_name": "сентябрь",
+      "project_code": "RU00.109.02.0260SVZ26",
+      "timestamp": "2026-10-08T15:38:25.002728",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Виатрис",
+      "wave_name": "2026_09_Виатрис",
+      "project_code": "RU00.470.02.1131SVZ26",
+      "timestamp": "2026-10-08T15:38:25.002922",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Лукойл франчайзинг (АЗС)",
+      "wave_name": "Сентябрь 2026",
+      "project_code": "RU00.177.02.0095SVZ26",
+      "timestamp": "2026-10-08T15:38:25.003109",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Johnson & Johnson",
+      "wave_name": "2026.09_Наблюдение в аптеках",
+      "project_code": "RU00.370.12.0667SVZ26",
+      "timestamp": "2026-10-08T15:38:25.003276",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Roseville",
+      "wave_name": "10.2026_Roseville",
+      "project_code": "RU00.366.06.0771SVZ26",
+      "timestamp": "2026-10-08T15:38:25.003441",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ГЛАВСТРОЙ",
+      "wave_name": "2026.10 ЖК Баланс",
+      "project_code": "",
+      "timestamp": "2026-10-08T15:38:25.003606",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ГЛАВСТРОЙ",
+      "wave_name": "2026.10_АО Береговой",
+      "project_code": "",
+      "timestamp": "2026-10-08T15:38:25.003771",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Медси",
+      "wave_name": "2026.09_Медси_дети",
+      "project_code": "RU00.188.06.01SVZ24",
+      "timestamp": "2026-10-08T15:38:25.003947",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Медси",
+      "wave_name": "2026.09_Медси_стационары",
+      "project_code": "RU00.188.06.01SVZ24",
+      "timestamp": "2026-10-08T15:38:25.004126",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Tobylab",
+      "wave_name": "2026.09_покупка полисов",
+      "project_code": "",
+      "timestamp": "2026-10-08T15:38:25.004291",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-09-28T12:05:32.619552",
+  "last_updated": "2026-10-08T15:38:25.004297",
   "version": "1.0"
 }
