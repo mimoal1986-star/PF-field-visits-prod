@@ -2942,6 +2942,15 @@
       "fio_om": "",
       "added_at": "2026-10-08T15:38:25.004235",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Avito Почта РФ",
+      "wave_name": "2026.09-10_Avito Почта РФ",
+      "project_code": "RU00.086.02.1341SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-10-15T09:48:21.551714",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -6060,8 +6069,16 @@
       "project_code": "",
       "timestamp": "2026-10-08T15:38:25.004291",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Avito Почта РФ",
+      "wave_name": "2026.09-10_Avito Почта РФ",
+      "project_code": "RU00.086.02.1341SVZ26",
+      "timestamp": "2026-10-15T09:48:21.551897",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-10-08T15:38:25.004297",
+  "last_updated": "2026-10-15T09:48:21.551908",
   "version": "1.0"
 }
