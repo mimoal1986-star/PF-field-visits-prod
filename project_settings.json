@@ -3023,6 +3023,15 @@
       "fio_om": "",
       "added_at": "2026-10-15T09:52:19.327047",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Лукойл",
+      "wave_name": "Август 2026",
+      "project_code": "",
+      "portal": "Оптима",
+      "fio_om": "",
+      "added_at": "2026-10-15T09:58:53.494220",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -6213,8 +6222,16 @@
       "project_code": "",
       "timestamp": "2026-10-15T09:52:19.327085",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Лукойл",
+      "wave_name": "Август 2026",
+      "project_code": "",
+      "timestamp": "2026-10-15T09:58:53.494380",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-10-15T09:52:19.327089",
+  "last_updated": "2026-10-15T09:58:53.494388",
   "version": "1.0"
 }
