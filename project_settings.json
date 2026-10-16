@@ -3032,6 +3032,15 @@
       "fio_om": "",
       "added_at": "2026-10-15T09:58:53.494220",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Мультибренд 2024",
+      "wave_name": "2025.12_Дилеры",
+      "project_code": "Мультикод_.209",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-10-16T08:57:48.441234",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -6230,8 +6239,16 @@
       "project_code": "",
       "timestamp": "2026-10-15T09:58:53.494380",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Мультибренд 2024",
+      "wave_name": "2025.12_Дилеры",
+      "project_code": "Мультикод_.209",
+      "timestamp": "2026-10-16T08:57:48.441319",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-10-15T09:58:53.494388",
+  "last_updated": "2026-10-16T08:57:48.441324",
   "version": "1.0"
 }
