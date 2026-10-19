@@ -3050,6 +3050,24 @@
       "fio_om": "",
       "added_at": "2026-10-19T08:45:35.803832",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ВТБ Банк (АССО)",
+      "wave_name": "2026.09_ВТБ (аудит)",
+      "project_code": "RU00.463.02.0085SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-10-19T09:56:34.374908",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ОхотАктив",
+      "wave_name": "2026.10_ОхотАктив",
+      "project_code": "RU00.337.02.0100SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-10-19T09:56:34.375190",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -6264,8 +6282,24 @@
       "project_code": "RU02.032.03.0383SVZ26",
       "timestamp": "2026-10-19T08:45:35.803928",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ВТБ Банк (АССО)",
+      "wave_name": "2026.09_ВТБ (аудит)",
+      "project_code": "RU00.463.02.0085SVZ26",
+      "timestamp": "2026-10-19T09:56:34.375042",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ОхотАктив",
+      "wave_name": "2026.10_ОхотАктив",
+      "project_code": "RU00.337.02.0100SVZ26",
+      "timestamp": "2026-10-19T09:56:34.375255",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-10-19T08:45:35.803933",
+  "last_updated": "2026-10-19T09:56:34.375293",
   "version": "1.0"
 }
