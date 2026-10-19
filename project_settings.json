@@ -3041,6 +3041,15 @@
       "fio_om": "",
       "added_at": "2026-10-16T08:57:48.441234",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "KARCHER",
+      "wave_name": "2026_10_Karcher_Звонки",
+      "project_code": "RU02.032.03.0383SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-10-19T08:45:35.803832",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -6247,8 +6256,16 @@
       "project_code": "Мультикод_.209",
       "timestamp": "2026-10-16T08:57:48.441319",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "KARCHER",
+      "wave_name": "2026_10_Karcher_Звонки",
+      "project_code": "RU02.032.03.0383SVZ26",
+      "timestamp": "2026-10-19T08:45:35.803928",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-10-16T08:57:48.441324",
+  "last_updated": "2026-10-19T08:45:35.803933",
   "version": "1.0"
 }
