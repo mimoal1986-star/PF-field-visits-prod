@@ -3068,6 +3068,15 @@
       "fio_om": "",
       "added_at": "2026-10-19T09:56:34.375190",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Гротекс",
+      "wave_name": "_Гротекс_Реко_10.2026 (08 волна)_УСТМ",
+      "project_code": "Мультикод_.424",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-10-20T12:54:51.458478",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -6298,8 +6307,16 @@
       "project_code": "RU00.337.02.0100SVZ26",
       "timestamp": "2026-10-19T09:56:34.375255",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Гротекс",
+      "wave_name": "_Гротекс_Реко_10.2026 (08 волна)_УСТМ",
+      "project_code": "Мультикод_.424",
+      "timestamp": "2026-10-20T12:54:51.458567",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-10-19T09:56:34.375293",
+  "last_updated": "2026-10-20T12:54:51.458571",
   "version": "1.0"
 }
