@@ -3122,6 +3122,51 @@
       "fio_om": "",
       "added_at": "2026-10-27T06:57:31.809145",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Перекресток",
+      "wave_name": "2026.10_Перекресток фотоаудит",
+      "project_code": "RU01.418.15.1079SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-11-09T09:07:06.934071",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Перекресток",
+      "wave_name": "2026.10_Перекресток фотоаудит",
+      "project_code": "RU00.418.15.0317SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-11-09T09:07:06.934390",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Avito",
+      "wave_name": "2026.10_СЦ",
+      "project_code": "RU01.086.02.1114SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-11-09T09:07:06.934560",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Avito Почта РФ",
+      "wave_name": "2026.10_Avito Почта РФ",
+      "project_code": "RU00.086.02.1341SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-11-09T09:07:06.934695",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "ОхотАктив",
+      "wave_name": "2026.11_ОхотАктив",
+      "project_code": "RU00.337.02.0100SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-11-09T09:07:06.934810",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -6400,8 +6445,48 @@
       "project_code": "RU00.470.02.1131SVZ26",
       "timestamp": "2026-10-27T06:57:31.809203",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Перекресток",
+      "wave_name": "2026.10_Перекресток фотоаудит",
+      "project_code": "RU01.418.15.1079SVZ26",
+      "timestamp": "2026-11-09T09:07:06.934194",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Перекресток",
+      "wave_name": "2026.10_Перекресток фотоаудит",
+      "project_code": "RU00.418.15.0317SVZ26",
+      "timestamp": "2026-11-09T09:07:06.934454",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Avito",
+      "wave_name": "2026.10_СЦ",
+      "project_code": "RU01.086.02.1114SVZ26",
+      "timestamp": "2026-11-09T09:07:06.934611",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Avito Почта РФ",
+      "wave_name": "2026.10_Avito Почта РФ",
+      "project_code": "RU00.086.02.1341SVZ26",
+      "timestamp": "2026-11-09T09:07:06.934736",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "ОхотАктив",
+      "wave_name": "2026.11_ОхотАктив",
+      "project_code": "RU00.337.02.0100SVZ26",
+      "timestamp": "2026-11-09T09:07:06.934851",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-10-27T06:57:31.809207",
+  "last_updated": "2026-11-09T09:07:06.934854",
   "version": "1.0"
 }
