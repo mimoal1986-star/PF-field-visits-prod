@@ -3167,6 +3167,24 @@
       "fio_om": "",
       "added_at": "2026-11-09T09:07:06.934810",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Яндекс Электро",
+      "wave_name": "2026.11_Яндекс Электро Звонок 1 волна",
+      "project_code": "RU00.441.01.01SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-11-11T08:04:38.229288",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Яндекс Электро",
+      "wave_name": "2026.11_Яндекс Электро Звонок 2 волна",
+      "project_code": "RU00.441.01.01SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-11-11T08:04:38.229633",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -6485,8 +6503,24 @@
       "project_code": "RU00.337.02.0100SVZ26",
       "timestamp": "2026-11-09T09:07:06.934851",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Яндекс Электро",
+      "wave_name": "2026.11_Яндекс Электро Звонок 1 волна",
+      "project_code": "RU00.441.01.01SVZ26",
+      "timestamp": "2026-11-11T08:04:38.229445",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Яндекс Электро",
+      "wave_name": "2026.11_Яндекс Электро Звонок 2 волна",
+      "project_code": "RU00.441.01.01SVZ26",
+      "timestamp": "2026-11-11T08:04:38.229720",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-11-09T09:07:06.934854",
+  "last_updated": "2026-11-11T08:04:38.229729",
   "version": "1.0"
 }
