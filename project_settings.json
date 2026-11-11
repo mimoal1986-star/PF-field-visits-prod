@@ -3248,6 +3248,15 @@
       "fio_om": "",
       "added_at": "2026-11-11T09:08:12.286752",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Тайный пассажир",
+      "wave_name": "6_Волна_Тайный пассажир",
+      "project_code": "RU00.265.01.0761SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-11-11T09:09:56.856406",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -6638,8 +6647,16 @@
       "project_code": "Мультикод_.306",
       "timestamp": "2026-11-11T09:08:12.286904",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Тайный пассажир",
+      "wave_name": "6_Волна_Тайный пассажир",
+      "project_code": "RU00.265.01.0761SVZ26",
+      "timestamp": "2026-11-11T09:09:56.856541",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-11-11T09:08:12.286911",
+  "last_updated": "2026-11-11T09:09:56.856549",
   "version": "1.0"
 }
