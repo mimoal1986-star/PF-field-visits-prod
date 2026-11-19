@@ -3347,6 +3347,15 @@
       "fio_om": "",
       "added_at": "2026-11-19T09:03:06.986939",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Путь ОМ",
+      "wave_name": "",
+      "project_code": "Внутренний опрос",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-11-19T09:11:02.286853",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -6833,8 +6842,16 @@
       "project_code": "RU00.441.01.05SVZ26",
       "timestamp": "2026-11-19T09:03:06.986983",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Путь ОМ",
+      "wave_name": "",
+      "project_code": "Внутренний опрос",
+      "timestamp": "2026-11-19T09:11:02.286995",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-11-19T09:03:06.986987",
+  "last_updated": "2026-11-19T09:11:02.287003",
   "version": "1.0"
 }
