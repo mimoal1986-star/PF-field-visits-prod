@@ -3320,6 +3320,33 @@
       "fio_om": "",
       "added_at": "2026-11-17T08:00:16.266295",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Яндекс Электро",
+      "wave_name": "2026.11_Яндекс Электро Мессенжер 1 волна",
+      "project_code": "RU00.441.01.05SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-11-19T09:03:06.986496",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Яндекс Электро",
+      "wave_name": "2026.11_Яндекс Электро Мессенжер 2 волна",
+      "project_code": "RU00.441.01.05SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-11-19T09:03:06.986796",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Яндекс Электро",
+      "wave_name": "2026.11_Яндекс Электро конкуренты мессенжер",
+      "project_code": "RU00.441.01.05SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-11-19T09:03:06.986939",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -6782,8 +6809,32 @@
       "project_code": "RU00.274.02.0085SVZ26",
       "timestamp": "2026-11-17T08:00:16.266360",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Яндекс Электро",
+      "wave_name": "2026.11_Яндекс Электро Мессенжер 1 волна",
+      "project_code": "RU00.441.01.05SVZ26",
+      "timestamp": "2026-11-19T09:03:06.986616",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Яндекс Электро",
+      "wave_name": "2026.11_Яндекс Электро Мессенжер 2 волна",
+      "project_code": "RU00.441.01.05SVZ26",
+      "timestamp": "2026-11-19T09:03:06.986852",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Яндекс Электро",
+      "wave_name": "2026.11_Яндекс Электро конкуренты мессенжер",
+      "project_code": "RU00.441.01.05SVZ26",
+      "timestamp": "2026-11-19T09:03:06.986983",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-11-17T08:00:16.266367",
+  "last_updated": "2026-11-19T09:03:06.986987",
   "version": "1.0"
 }
