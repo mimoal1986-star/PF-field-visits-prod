@@ -3401,6 +3401,15 @@
       "fio_om": "",
       "added_at": "2026-11-26T08:57:17.978277",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Servizoria_ГК Ринг",
+      "wave_name": "2026.12_Визиты ГК Ринг",
+      "project_code": "RU00.054.01.0258KER26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-11-26T09:01:01.957285",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -6935,8 +6944,16 @@
       "project_code": "RU00.806.01.1049SVZ26",
       "timestamp": "2026-11-26T08:57:17.978321",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Servizoria_ГК Ринг",
+      "wave_name": "2026.12_Визиты ГК Ринг",
+      "project_code": "RU00.054.01.0258KER26",
+      "timestamp": "2026-11-26T09:01:01.957400",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-11-26T08:57:17.978324",
+  "last_updated": "2026-11-26T09:01:01.957405",
   "version": "1.0"
 }
