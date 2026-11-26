@@ -3374,6 +3374,15 @@
       "fio_om": "",
       "added_at": "2026-11-19T11:06:45.423521",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Haleon",
+      "wave_name": "2026.12 (45 волна) Haleon",
+      "project_code": "RU02.024.02.0269SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-11-26T08:38:28.097727",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -6884,8 +6893,16 @@
       "project_code": "RU01.086.02.1114SVZ26",
       "timestamp": "2026-11-19T11:06:45.423572",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Haleon",
+      "wave_name": "2026.12 (45 волна) Haleon",
+      "project_code": "RU02.024.02.0269SVZ26",
+      "timestamp": "2026-11-26T08:38:28.097821",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-11-19T11:06:45.423576",
+  "last_updated": "2026-11-26T08:38:28.097826",
   "version": "1.0"
 }
