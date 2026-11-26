@@ -3383,6 +3383,24 @@
       "fio_om": "",
       "added_at": "2026-11-26T08:38:28.097727",
       "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Haval",
+      "wave_name": "2026.11_Haval фильтры",
+      "project_code": "",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-11-26T08:57:17.978081",
+      "added_by": "unknown_user"
+    },
+    {
+      "project_name": "Умный Дом Sber",
+      "wave_name": "11.2026_Умный дом",
+      "project_code": "RU00.806.01.1049SVZ26",
+      "portal": "CXWAY",
+      "fio_om": "",
+      "added_at": "2026-11-26T08:57:17.978277",
+      "added_by": "unknown_user"
     }
   ],
   "included_projects": [
@@ -6901,8 +6919,24 @@
       "project_code": "RU02.024.02.0269SVZ26",
       "timestamp": "2026-11-26T08:38:28.097821",
       "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Haval",
+      "wave_name": "2026.11_Haval фильтры",
+      "project_code": "",
+      "timestamp": "2026-11-26T08:57:17.978184",
+      "user": "unknown_user"
+    },
+    {
+      "action": "add_to_excluded",
+      "project_name": "Умный Дом Sber",
+      "wave_name": "11.2026_Умный дом",
+      "project_code": "RU00.806.01.1049SVZ26",
+      "timestamp": "2026-11-26T08:57:17.978321",
+      "user": "unknown_user"
     }
   ],
-  "last_updated": "2026-11-26T08:38:28.097826",
+  "last_updated": "2026-11-26T08:57:17.978324",
   "version": "1.0"
 }
